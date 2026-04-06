@@ -14,14 +14,19 @@ class MaintenanceSchedule extends Model
     protected $fillable = [
         'title', 'asset_id', 'type', 'frequency', 'frequency_days',
         'start_date', 'next_due_date', 'last_done_date', 'status', 'notes',
+        'category', 'equipment_name', 'item_pekerjaan',
+        'planned_weeks', 'shutdown_required', 'shutdown_duration_hours', 'checklist_template',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'next_due_date' => 'date',
-            'last_done_date' => 'date',
+            'start_date'       => 'date',
+            'next_due_date'    => 'date',
+            'last_done_date'   => 'date',
+            'planned_weeks'    => 'array',
+            'checklist_template' => 'array',
+            'shutdown_required' => 'boolean',
         ];
     }
 

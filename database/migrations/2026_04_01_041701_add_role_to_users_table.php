@@ -12,16 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'supervisor', 'technician'])->default('technician')->after('email');
+            $table->enum('role', ['admin', 'supervisor', 'technician', 'pm'])->default('technician')->after('email');
             $table->string('phone')->nullable()->after('role');
             $table->string('avatar')->nullable()->after('phone');
+            $table->boolean('is_active')->default(true)->after('avatar');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'phone', 'avatar']);
+            $table->dropColumn(['role', 'phone', 'avatar', 'is_active']);
         });
     }
 };

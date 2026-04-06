@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\ChecksheetSession;
 use App\Models\SparePart;
 use App\Models\WorkOrder;
 use App\Models\MaintenanceSchedule;
@@ -17,6 +18,8 @@ class DashboardController extends Controller
         $overdueWorkOrders = WorkOrder::whereNotIn('status', ['closed'])
             ->where('due_date', '<', now())->count();
         $lowStockCount = SparePart::whereRaw('qty_actual <= qty_minimum')->count();
+        $pendingChecksheets = ChecksheetSession::where('status', 'draft')
+            ->where('year', now()->year)->count();
 
         $recentWorkOrders = WorkOrder::with(['asset', 'assignedTo'])
             ->latest()->take(8)->get();
@@ -44,7 +47,7 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', compact(
-            'totalAssets', 'openWorkOrders', 'overdueWorkOrders', 'lowStockCount',
+            'totalAssets', 'openWorkOrders', 'overdueWorkOrders', 'lowStockCount', 'pendingChecksheets',
             'recentWorkOrders', 'upcomingSchedules', 'lowStockParts', 'chartData'
         ));
     }

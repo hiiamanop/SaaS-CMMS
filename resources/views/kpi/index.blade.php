@@ -77,14 +77,14 @@
         {{-- Monthly Work Orders --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <h2 class="text-sm font-semibold text-gray-900 mb-4">Work Orders by Month</h2>
-            <canvas id="chartMonthlyWo" height="200"></canvas>
+            <div style="height:220px"><canvas id="chartMonthlyWo"></canvas></div>
         </div>
 
         {{-- Priority Distribution --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <h2 class="text-sm font-semibold text-gray-900 mb-4">Work Orders by Priority</h2>
-            <div class="flex items-center justify-center">
-                <canvas id="chartPriority" height="200" style="max-width:280px"></canvas>
+            <div class="flex items-center justify-center" style="height:260px">
+                <canvas id="chartPriority"></canvas>
             </div>
         </div>
     </div>
@@ -94,13 +94,13 @@
         {{-- MTTR Trend --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <h2 class="text-sm font-semibold text-gray-900 mb-4">MTTR Trend (hours)</h2>
-            <canvas id="chartMttr" height="200"></canvas>
+            <div style="height:220px"><canvas id="chartMttr"></canvas></div>
         </div>
 
         {{-- Downtime Trend --}}
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <h2 class="text-sm font-semibold text-gray-900 mb-4">Downtime Trend (hours)</h2>
-            <canvas id="chartDowntime" height="200"></canvas>
+            <div style="height:220px"><canvas id="chartDowntime"></canvas></div>
         </div>
     </div>
 
@@ -130,6 +130,7 @@ new Chart(document.getElementById('chartMonthlyWo'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
         scales: {
             x: { stacked: true, ticks: { font: { size: 11 } } },
@@ -152,6 +153,7 @@ new Chart(document.getElementById('chartPriority'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         cutout: '65%',
         plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
@@ -176,6 +178,7 @@ new Chart(document.getElementById('chartMttr'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
             x: { ticks: { font: { size: 11 } } },
@@ -201,6 +204,7 @@ new Chart(document.getElementById('chartDowntime'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
             x: { ticks: { font: { size: 11 } } },

@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             MaintenanceScheduleSeeder::class,
             WorkOrderSeeder::class,
             MaintenanceRecordSeeder::class,
+            ChecksheetSeeder::class,
             NotificationSeeder::class,
         ]);
     }

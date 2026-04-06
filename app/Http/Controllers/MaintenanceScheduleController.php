@@ -18,7 +18,7 @@ class MaintenanceScheduleController extends Controller
         if ($request->status) $query->where('status', $request->status);
         if ($request->filter === 'overdue') $query->where('next_due_date', '<', now())->where('status', 'active');
 
-        $schedules = $query->orderBy('next_due_date')->paginate(15)->withQueryString();
+        $schedules = $query->orderBy('category')->orderBy('equipment_name')->get();
         $assets = Asset::orderBy('name')->get();
         $overdueCount = MaintenanceSchedule::where('next_due_date', '<', now())->where('status', 'active')->count();
 

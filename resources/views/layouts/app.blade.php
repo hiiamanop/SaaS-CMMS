@@ -32,31 +32,44 @@
 
         <nav class="flex-1 overflow-y-auto py-4 space-y-0.5 px-2">
             @php
+            $user = auth()->user();
             $nav = [
-                ['route'=>'dashboard','label'=>'Dashboard','icon'=>'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10','match'=>'dashboard'],
-                ['route'=>'assets.index','label'=>'Assets','icon'=>'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7','match'=>'assets*'],
-                ['route'=>'spare-parts.index','label'=>'Spare Parts','icon'=>'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6v6l4 2','match'=>'spare-parts*'],
-                ['route'=>'maintenance-schedules.index','label'=>'Schedules','icon'=>'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z','match'=>'maintenance-schedules*'],
-                ['route'=>'work-orders.index','label'=>'Work Orders','icon'=>'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11','match'=>'work-orders*'],
-                ['route'=>'maintenance-records.index','label'=>'Maint. Records','icon'=>'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8','match'=>'maintenance-records*'],
-                ['route'=>'timeline.index','label'=>'Timeline','icon'=>'M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6','match'=>'timeline*'],
-                ['route'=>'kpi.index','label'=>'KPI Dashboard','icon'=>'M18 20V10 M12 20V4 M6 20v-6','match'=>'kpi*'],
+                ['route'=>'dashboard','label'=>'Dashboard','icon'=>'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10','match'=>'dashboard','roles'=>null],
+                ['route'=>'assets.index','label'=>'Assets','icon'=>'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7','match'=>'assets*','roles'=>null],
+                ['route'=>'spare-parts.index','label'=>'Spare Parts','icon'=>'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6v6l4 2','match'=>'spare-parts*','roles'=>null],
+                ['route'=>'maintenance-schedules.index','label'=>'Maint. Schedule','icon'=>'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z','match'=>'maintenance-schedules*','roles'=>null],
+                ['route'=>'work-orders.index','label'=>'Work Orders','icon'=>'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11','match'=>'work-orders*','roles'=>['admin','supervisor','pm']],
+                ['route'=>'maintenance-records.index','label'=>'Maint. Records','icon'=>'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8','match'=>'maintenance-records*','roles'=>null],
+                ['route'=>'checksheet.index','label'=>'Checksheet','icon'=>'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z','match'=>'checksheet*','roles'=>null],
+                ['route'=>'schedule-report.index','label'=>'Schedule Report','icon'=>'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z','match'=>'schedule-report*','roles'=>null],
+                ['route'=>'timeline.index','label'=>'Timeline','icon'=>'M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6','match'=>'timeline*','roles'=>null],
+                ['route'=>'kpi.index','label'=>'KPI Dashboard','icon'=>'M18 20V10 M12 20V4 M6 20v-6','match'=>'kpi*','roles'=>null],
             ];
             @endphp
             @foreach($nav as $item)
+            @if(!$item['roles'] || in_array($user->role, $item['roles']))
             <a href="{{ route($item['route']) }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group
                       {{ request()->routeIs($item['match']) ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="{{ $item['icon'] }}"/></svg>
                 <span x-show="sidebarOpen" class="truncate">{{ $item['label'] }}</span>
             </a>
+            @endif
             @endforeach
-            @if(auth()->user()->isTechnician())
+            @if($user->role === 'technician')
             <a href="{{ route('work-orders.my-jobs') }}"
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                       {{ request()->routeIs('work-orders.my-jobs') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                 <span x-show="sidebarOpen" class="truncate">My Jobs</span>
+            </a>
+            @endif
+            @if($user->role === 'admin')
+            <a href="{{ route('settings.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                      {{ request()->routeIs('settings*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span x-show="sidebarOpen" class="truncate">Settings</span>
             </a>
             @endif
         </nav>
@@ -103,12 +116,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
             <div class="flex-1 flex items-center">
-                @hasSection('breadcrumb')
-                <nav class="flex items-center gap-1.5 text-sm text-gray-500">
-                    <a href="{{ route('dashboard') }}" class="hover:text-gray-800">Home</a>
-                    @yield('breadcrumb')
-                </nav>
-                @endif
+                @yield('breadcrumb')
             </div>
             <div class="flex items-center gap-2">
                 {{-- Notifications --}}

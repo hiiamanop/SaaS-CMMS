@@ -10,6 +10,9 @@ use App\Http\Controllers\MaintenanceRecordController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\KpiController;
+use App\Http\Controllers\ChecksheetController;
+use App\Http\Controllers\ScheduleReportController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -55,6 +58,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('notifications/{notification}/mark-read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
     Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
+
+    // Checksheet
+    Route::get('checksheet', [ChecksheetController::class, 'index'])->name('checksheet.index');
+    Route::get('checksheet/create', [ChecksheetController::class, 'create'])->name('checksheet.create');
+    Route::post('checksheet', [ChecksheetController::class, 'store'])->name('checksheet.store');
+    Route::get('checksheet/{session}/fill', [ChecksheetController::class, 'fill'])->name('checksheet.fill');
+    Route::post('checksheet/{session}/autosave', [ChecksheetController::class, 'autosave'])->name('checksheet.autosave');
+    Route::post('checksheet/{session}/upload-photo/{templateId}', [ChecksheetController::class, 'uploadPhoto'])->name('checksheet.upload-photo');
+    Route::post('checksheet/{session}/submit', [ChecksheetController::class, 'submit'])->name('checksheet.submit');
+    Route::get('checksheet/{session}', [ChecksheetController::class, 'show'])->name('checksheet.show');
+    Route::get('checksheet/{session}/pdf', [ChecksheetController::class, 'exportPdf'])->name('checksheet.pdf');
+
+    // Schedule Report
+    Route::get('schedule-report', [ScheduleReportController::class, 'index'])->name('schedule-report.index');
+    Route::get('schedule-report/pdf/{tab}', [ScheduleReportController::class, 'exportPdf'])->name('schedule-report.pdf');
+
+    // Settings (admin only)
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('settings/users/create', [SettingsController::class, 'createUser'])->name('settings.users.create');
+    Route::post('settings/users', [SettingsController::class, 'storeUser'])->name('settings.users.store');
+    Route::get('settings/users/{user}/edit', [SettingsController::class, 'editUser'])->name('settings.users.edit');
+    Route::put('settings/users/{user}', [SettingsController::class, 'updateUser'])->name('settings.users.update');
+    Route::delete('settings/users/{user}', [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
 });
 
 require __DIR__.'/auth.php';
