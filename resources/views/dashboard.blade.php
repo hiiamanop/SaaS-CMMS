@@ -46,7 +46,7 @@
                 </div>
             </div>
             <p class="text-3xl font-bold text-gray-900">{{ $overdueWorkOrders }}</p>
-            <span class="text-xs text-red-500 mt-1 inline-block">Requires attention</span>
+            <a href="{{ route('work-orders.index', ['filter'=>'overdue']) }}" class="text-xs text-red-600 hover:underline mt-1 inline-block">View overdue →</a>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
@@ -57,16 +57,6 @@
             </div>
             <p class="text-3xl font-bold text-gray-900">{{ $lowStockCount }}</p>
             <a href="{{ route('spare-parts.index', ['filter'=>'low_stock']) }}" class="text-xs text-orange-600 hover:underline mt-1 inline-block">View parts →</a>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-medium text-gray-500">Pending Checksheets</span>
-                <div class="w-9 h-9 bg-teal-50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-                </div>
-            </div>
-            <p class="text-3xl font-bold text-gray-900">{{ $pendingChecksheets ?? 0 }}</p>
-            <a href="{{ route('checksheet.index') }}" class="text-xs text-teal-600 hover:underline mt-1 inline-block">View checksheets →</a>
         </div>
     </div>
 

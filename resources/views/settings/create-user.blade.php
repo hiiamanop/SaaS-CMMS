@@ -34,10 +34,9 @@
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Role <span class="text-red-500">*</span></label>
             <select name="role" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900">
                 <option value="">-- Pilih Role --</option>
-                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="supervisor" {{ old('role') === 'supervisor' ? 'selected' : '' }}>Supervisor (SPV ONM)</option>
-                <option value="technician" {{ old('role') === 'technician' ? 'selected' : '' }}>Teknisi ONM</option>
-                <option value="pm" {{ old('role') === 'pm' ? 'selected' : '' }}>Project Manager (PM)</option>
+                @foreach($roles as $role)
+                <option value="{{ $role->name }}" {{ old('role') === $role->name ? 'selected' : '' }}>{{ $role->label }}</option>
+                @endforeach
             </select>
             @error('role') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>

@@ -69,7 +69,7 @@ class MaintenanceRecordController extends Controller
             'findings' => 'nullable|string',
             'actions_taken' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:0',
-            'downtime_minutes' => 'required|integer|min:0',
+            'shutdown_minutes' => 'required|integer|min:0',
             'notes' => 'nullable|string',
             'parts' => 'nullable|array',
             'parts.*.spare_part_id' => 'required|exists:spare_parts,id',
@@ -95,7 +95,7 @@ class MaintenanceRecordController extends Controller
                 'findings' => $validated['findings'] ?? null,
                 'actions_taken' => $validated['actions_taken'] ?? null,
                 'duration_minutes' => $validated['duration_minutes'],
-                'downtime_minutes' => $validated['downtime_minutes'],
+                'shutdown_minutes' => $validated['shutdown_minutes'],
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -151,7 +151,7 @@ class MaintenanceRecordController extends Controller
             'findings' => 'nullable|string',
             'actions_taken' => 'nullable|string',
             'duration_minutes' => 'required|integer|min:0',
-            'downtime_minutes' => 'required|integer|min:0',
+            'shutdown_minutes' => 'required|integer|min:0',
             'notes' => 'nullable|string',
         ]);
 

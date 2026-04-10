@@ -13,7 +13,14 @@ $annualSchedules = \App\Models\MaintenanceSchedule::with('checklistTemplates')
     $grouped = $templates->groupBy('lokasi_inspeksi');
     $schedSessions = $annualSessions->where('maintenance_schedule_id', $annSchedule->id)->values();
     $annSession = $schedSessions->first();
-    if($templates->isEmpty()) continue;
+@endphp
+@if($templates->isEmpty())
+<div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800 flex items-center gap-2">
+    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    <span><strong>{{ $annSchedule->equipment_name }}</strong> — belum ada template checksheet. <a href="{{ route('maintenance-schedules.show', $annSchedule) }}" class="underline font-medium">Tambahkan template di sini.</a></span>
+</div>
+@php continue; @endphp
+@endif
 @endphp
 <div class="mb-4">
 <div class="px-4 py-2 bg-blue-50 border-b border-blue-100 text-sm font-semibold text-blue-800">

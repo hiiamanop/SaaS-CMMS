@@ -13,7 +13,7 @@ class MaintenanceRecord extends Model
     protected $fillable = [
         'record_number', 'work_order_id', 'asset_id', 'technician_id',
         'type', 'maintenance_date', 'findings', 'actions_taken',
-        'duration_minutes', 'downtime_minutes', 'notes',
+        'duration_minutes', 'shutdown_minutes', 'notes',
     ];
 
     protected function casts(): array
@@ -40,8 +40,8 @@ class MaintenanceRecord extends Model
         return round($this->duration_minutes / 60, 2);
     }
 
-    public function getDowntimeHoursAttribute(): float
+    public function getShutdownHoursAttribute(): float
     {
-        return round($this->downtime_minutes / 60, 2);
+        return round($this->shutdown_minutes / 60, 2);
     }
 }

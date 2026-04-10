@@ -88,6 +88,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/users/{user}/edit', [SettingsController::class, 'editUser'])->name('settings.users.edit');
     Route::put('settings/users/{user}', [SettingsController::class, 'updateUser'])->name('settings.users.update');
     Route::delete('settings/users/{user}', [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
+    Route::post('settings/roles', [SettingsController::class, 'storeRole'])->name('settings.roles.store');
+    Route::put('settings/roles/{role}', [SettingsController::class, 'updateRole'])->name('settings.roles.update');
+    Route::delete('settings/roles/{role}', [SettingsController::class, 'destroyRole'])->name('settings.roles.destroy');
 });
 
 require __DIR__.'/auth.php';

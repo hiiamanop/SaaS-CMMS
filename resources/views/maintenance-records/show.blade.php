@@ -17,14 +17,14 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ $mr->duration_minutes }}</p><p class="text-xs text-gray-500 mt-0.5">Duration (min)</p></div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold {{ $mr->downtime_minutes>0?'text-orange-600':'text-gray-900' }}">{{ $mr->downtime_minutes }}</p><p class="text-xs text-gray-500 mt-0.5">Downtime (min)</p></div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold {{ $mr->shutdown_minutes>0?'text-orange-600':'text-gray-900' }}">{{ $mr->shutdown_minutes }}</p><p class="text-xs text-gray-500 mt-0.5">Shutdown (min)</p></div>
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ $mr->parts->sum('qty_used') }}</p><p class="text-xs text-gray-500 mt-0.5">Parts Used</p></div>
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ $mr->photos->count() }}</p><p class="text-xs text-gray-500 mt-0.5">Photos</p></div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            @foreach([['Asset',$mr->asset->name],['Technician',$mr->technician->name],['Date',$mr->maintenance_date->format('M d, Y')],['Work Order',$mr->workOrder?$mr->workOrder->wo_number:'—'],['Duration',$mr->duration_minutes.' min'],['Downtime',$mr->downtime_minutes.' min']] as [$l,$v])
+            @foreach([['Asset',$mr->asset->name],['Technician',$mr->technician->name],['Date',$mr->maintenance_date->format('M d, Y')],['Work Order',$mr->workOrder?$mr->workOrder->wo_number:'—'],['Duration',$mr->duration_minutes.' min'],['Shutdown',$mr->shutdown_minutes.' min']] as [$l,$v])
             <div><dt class="text-xs font-medium text-gray-500 uppercase">{{ $l }}</dt><dd class="mt-1 text-sm font-medium text-gray-900">{{ $v }}</dd></div>
             @endforeach
         </div>

@@ -46,7 +46,7 @@
                     <th class="px-5 py-3 text-left">Tanggal</th>
                     <th class="px-5 py-3 text-left">Teknisi</th>
                     <th class="px-5 py-3 text-left">Durasi</th>
-                    <th class="px-5 py-3 text-left">Downtime</th>
+                    <th class="px-5 py-3 text-left">Shutdown</th>
                     <th class="px-5 py-3 text-right">Aksi</th>
                 </tr>
             </thead>
@@ -78,8 +78,8 @@
                 <td class="px-5 py-3 text-gray-600">{{ $r->maintenance_date->format('d M Y') }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $r->technician->name }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $r->duration_minutes }} mnt</td>
-                <td class="px-5 py-3 {{ $r->downtime_minutes > 0 ? 'text-orange-600 font-medium' : 'text-gray-400' }}">
-                    {{ $r->downtime_minutes }} mnt
+                <td class="px-5 py-3 {{ $r->shutdown_minutes > 0 ? 'text-orange-600 font-medium' : 'text-gray-400' }}">
+                    {{ $r->shutdown_minutes }} mnt
                 </td>
                 <td class="px-5 py-3 text-right">
                     <div class="flex justify-end gap-1">

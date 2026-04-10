@@ -27,7 +27,7 @@
     <div class="grid grid-cols-3 gap-4">
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ $openWorkOrders }}</p><p class="text-xs text-gray-500 mt-0.5">Open Work Orders</p></div>
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ $totalMaintenance }}</p><p class="text-xs text-gray-500 mt-0.5">Maintenance Records</p></div>
-        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ round($totalDowntime/60,1) }}h</p><p class="text-xs text-gray-500 mt-0.5">Total Downtime</p></div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm text-center"><p class="text-2xl font-bold text-gray-900">{{ round($totalDowntime/60,1) }}h</p><p class="text-xs text-gray-500 mt-0.5">Total Shutdown</p></div>
     </div>
 
     {{-- Tabs --}}

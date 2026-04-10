@@ -47,16 +47,17 @@ class KpiController extends Controller
         $completionRate = $totalWo > 0 ? round(($closedWo / $totalWo) * 100, 1) : 0;
 
         $overdueWo = WorkOrder::whereNotIn('status', ['closed'])->where('due_date', '<', now())->count();
-        $totalDowntime = round($records->sum('downtime_minutes') / 60, 2);
 
-        // Shutdown time: WOs with shutdown_required=true, closed, with start & end times
+        // Shutdown: maintenance record manual entry + WO auto-calculated
         $shutdownWos = $workOrders->filter(fn($wo) =>
             $wo->shutdown_required &&
             $wo->status === 'closed' &&
             $wo->started_at &&
             $wo->completed_at
         );
-        $totalShutdownHours = round($shutdownWos->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at)) / 60, 2);
+        $woShutdownMinutes  = $shutdownWos->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at));
+        $mrShutdownMinutes  = $records->sum('shutdown_minutes');
+        $totalShutdownHours = round(($woShutdownMinutes + $mrShutdownMinutes) / 60, 2);
 
         $monthlyData = [];
         $current = $dateFrom->copy()->startOfMonth();
@@ -90,27 +91,26 @@ class KpiController extends Controller
             'critical' => $workOrders->where('priority', 'critical')->count(),
         ];
 
-        $downtimeTrend = [];
         $shutdownTrend = [];
         $current = $dateFrom->copy()->startOfMonth();
         while ($current <= $dateTo) {
             $monthKey = $current->format('Y-m');
             $monthRecords = $records->filter(fn($r) => $r->maintenance_date->format('Y-m') === $monthKey);
-            $downtimeTrend[] = [
-                'label' => $current->format('M Y'),
-                'value' => round($monthRecords->sum('downtime_minutes') / 60, 2),
-            ];
-            $monthShutdown = $shutdownWos->filter(fn($wo) => $wo->completed_at->format('Y-m') === $monthKey);
+            $monthWoShutdown = $shutdownWos->filter(fn($wo) => $wo->completed_at->format('Y-m') === $monthKey);
             $shutdownTrend[] = [
                 'label' => $current->format('M Y'),
-                'value' => round($monthShutdown->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at)) / 60, 2),
+                'value' => round(
+                    ($monthRecords->sum('shutdown_minutes') +
+                     $monthWoShutdown->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at))) / 60,
+                    2
+                ),
             ];
             $current->addMonth();
         }
 
         return view('kpi.index', compact(
-            'mttr', 'mtbf', 'pmCompliance', 'completionRate', 'overdueWo', 'totalDowntime',
-            'totalShutdownHours', 'monthlyData', 'mttrTrend', 'byPriority', 'downtimeTrend',
+            'mttr', 'mtbf', 'pmCompliance', 'completionRate', 'overdueWo',
+            'totalShutdownHours', 'monthlyData', 'mttrTrend', 'byPriority',
             'shutdownTrend', 'dateFrom', 'dateTo'
         ));
     }

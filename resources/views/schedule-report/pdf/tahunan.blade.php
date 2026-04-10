@@ -16,12 +16,12 @@
 </head>
 <body>
     <div style="text-align:right; font-size:9px; margin-bottom:4px;">FORMULIR</div>
-    <h1>Checksheet Mingguan</h1>
+    <h1>Checksheet Tahunan</h1>
     <div class="meta">{{ $pltsLocation ?: 'Semua Lokasi' }} · Tahun {{ $year }}</div>
     @php
-        $weeklyType = // removed
-        $weeklySessions = // removed
-        $templates = $weeklyType ? \App\Models\// removed
+        $weeklySessions = $sessions->filter(fn($s) => $s->schedule?->frequency === 'annually');
+        $scheduleIds = $weeklySessions->pluck('maintenance_schedule_id')->unique()->toArray();
+        $templates = \App\Models\ChecksheetTemplate::whereIn('maintenance_schedule_id', $scheduleIds)->orderBy('order')->get();
         $grouped = $templates->groupBy('lokasi_inspeksi');
         $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
     @endphp

@@ -16,7 +16,11 @@ class WorkOrderController extends Controller
     {
         $query = WorkOrder::with(['asset', 'assignedTo', 'createdBy']);
 
-        if ($request->status) $query->where('status', $request->status);
+        if ($request->filter === 'overdue') {
+            $query->whereNotIn('status', ['closed'])->where('due_date', '<', now());
+        } elseif ($request->status) {
+            $query->where('status', $request->status);
+        }
         if ($request->priority) $query->where('priority', $request->priority);
         if ($request->asset_id) $query->where('asset_id', $request->asset_id);
         if ($request->assigned_to) $query->where('assigned_to', $request->assigned_to);

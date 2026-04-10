@@ -66,7 +66,7 @@ class AssetController extends Controller
         $asset->load(['workOrders.assignedTo', 'maintenanceSchedules', 'maintenanceRecords.technician']);
         $openWorkOrders = $asset->workOrders()->whereNotIn('status', ['closed'])->count();
         $totalMaintenance = $asset->maintenanceRecords()->count();
-        $totalDowntime = $asset->maintenanceRecords()->sum('downtime_minutes');
+        $totalDowntime = $asset->maintenanceRecords()->sum('shutdown_minutes');
 
         return view('assets.show', compact('asset', 'openWorkOrders', 'totalMaintenance', 'totalDowntime'));
     }
