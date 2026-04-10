@@ -37,24 +37,60 @@
         @else
         <div class="overflow-x-auto">
         <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase">
-                <th class="px-5 py-3 text-left">Record #</th><th class="px-5 py-3 text-left">Asset</th><th class="px-5 py-3 text-left">Type</th><th class="px-5 py-3 text-left">Date</th><th class="px-5 py-3 text-left">Technician</th><th class="px-5 py-3 text-left">Duration</th><th class="px-5 py-3 text-left">Downtime</th><th class="px-5 py-3 text-right">Actions</th>
-            </tr></thead>
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <th class="px-5 py-3 text-left">Record #</th>
+                    <th class="px-5 py-3 text-left">Aset</th>
+                    <th class="px-5 py-3 text-left">Tipe</th>
+                    <th class="px-5 py-3 text-left">Sumber</th>
+                    <th class="px-5 py-3 text-left">Tanggal</th>
+                    <th class="px-5 py-3 text-left">Teknisi</th>
+                    <th class="px-5 py-3 text-left">Durasi</th>
+                    <th class="px-5 py-3 text-left">Downtime</th>
+                    <th class="px-5 py-3 text-right">Aksi</th>
+                </tr>
+            </thead>
             <tbody class="divide-y divide-gray-50">
             @foreach($records as $r)
             <tr class="hover:bg-gray-50">
-                <td class="px-5 py-3"><a href="{{ route('maintenance-records.show',$r) }}" class="font-mono text-xs font-semibold text-blue-600 hover:underline">{{ $r->record_number }}</a></td>
+                <td class="px-5 py-3">
+                    <a href="{{ route('maintenance-records.show',$r) }}" class="font-mono text-xs font-semibold text-blue-600 hover:underline">
+                        {{ $r->record_number }}
+                    </a>
+                </td>
                 <td class="px-5 py-3 text-gray-700">{{ $r->asset->name }}</td>
-                <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $r->type==='preventive'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">{{ ucfirst($r->type) }}</span></td>
-                <td class="px-5 py-3 text-gray-600">{{ $r->maintenance_date->format('M d, Y') }}</td>
+                <td class="px-5 py-3">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $r->type === 'preventive' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' }}">
+                        {{ ucfirst($r->type) }}
+                    </span>
+                </td>
+                <td class="px-5 py-3">
+                    @if($r->workOrder)
+                        <a href="{{ route('work-orders.show', $r->workOrder) }}"
+                           class="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline font-medium">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            {{ $r->workOrder->wo_number }}
+                        </a>
+                    @else
+                        <span class="text-xs text-gray-400">Manual</span>
+                    @endif
+                </td>
+                <td class="px-5 py-3 text-gray-600">{{ $r->maintenance_date->format('d M Y') }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $r->technician->name }}</td>
-                <td class="px-5 py-3 text-gray-600">{{ $r->duration_minutes }} min</td>
-                <td class="px-5 py-3 {{ $r->downtime_minutes>0?'text-orange-600 font-medium':'text-gray-400' }}">{{ $r->downtime_minutes }} min</td>
+                <td class="px-5 py-3 text-gray-600">{{ $r->duration_minutes }} mnt</td>
+                <td class="px-5 py-3 {{ $r->downtime_minutes > 0 ? 'text-orange-600 font-medium' : 'text-gray-400' }}">
+                    {{ $r->downtime_minutes }} mnt
+                </td>
                 <td class="px-5 py-3 text-right">
                     <div class="flex justify-end gap-1">
-                        <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                        <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
                         @if(!auth()->user()->isTechnician())
-                        <button @click="$dispatch('open-delete',{action:'{{ route('maintenance-records.destroy',$r) }}',message:'Delete record {{ addslashes($r->record_number) }}?'})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+                        <button @click="$dispatch('open-delete',{action:'{{ route('maintenance-records.destroy',$r) }}',message:'Hapus record {{ addslashes($r->record_number) }}?'})"
+                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
                         @endif
                     </div>
                 </td>

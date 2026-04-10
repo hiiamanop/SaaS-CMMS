@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ChecksheetTemplate extends Model
 {
     protected $fillable = [
-        'checksheet_type_id', 'lokasi_inspeksi', 'item_inspeksi',
+        'maintenance_schedule_id', 'lokasi_inspeksi', 'item_inspeksi',
         'metode_inspeksi', 'standar_ketentuan', 'order',
     ];
 
-    public function type(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(ChecksheetType::class, 'checksheet_type_id');
+        return $this->belongsTo(MaintenanceSchedule::class, 'maintenance_schedule_id');
     }
 
     public function results(): HasMany

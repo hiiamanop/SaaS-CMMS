@@ -9,7 +9,7 @@
     <div class="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 shadow-sm -mx-4 mb-6">
         <div class="flex items-center justify-between gap-4">
             <div>
-                <p class="font-semibold text-gray-900 text-base">{{ $session->type->name }} — {{ $session->plts_location }}</p>
+                <p class="font-semibold text-gray-900 text-base">{{ $session->schedule->equipment_name }} — {{ $session->plts_location }}</p>
                 <p class="text-sm text-gray-500">{{ $session->period_label }}</p>
             </div>
             <div class="text-right flex-shrink-0">
@@ -25,7 +25,7 @@
 
     {{-- Header info (read-only summary) --}}
     <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-6 text-sm text-gray-700 grid grid-cols-2 gap-3">
-        <div><span class="text-gray-500">Tipe:</span> <span class="font-medium">{{ $session->type->name }}</span></div>
+        <div><span class="text-gray-500">Tipe:</span> <span class="font-medium">{{ $session->schedule->equipment_name }}</span></div>
         <div><span class="text-gray-500">Periode:</span> <span class="font-medium">{{ $session->period_label }}</span></div>
         <div><span class="text-gray-500">Lokasi PLTS:</span> <span class="font-medium">{{ $session->plts_location }}</span></div>
         @if($session->equipment_location)
@@ -44,7 +44,7 @@
     {{-- Inspection Items grouped by lokasi --}}
     @php
         $grouped = $templates->groupBy('lokasi_inspeksi');
-        $isWeekly = $session->type->frequency === 'weekly';
+        $isWeekly = $session->schedule->frequency === 'weekly';
     @endphp
 
     @foreach($grouped as $lokasi => $items)
@@ -123,7 +123,7 @@
     @endforeach
 
     {{-- Abnormal Notes (Semesteran & Tahunan) --}}
-    @if(in_array($session->type->frequency, ['semester', 'yearly']))
+    @if(in_array($session->schedule->frequency, ['semester', 'yearly']))
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <h3 class="text-base font-bold text-gray-900 mb-3">Catatan Abnormal</h3>
         <div id="abnormal-rows" class="space-y-3">

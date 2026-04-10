@@ -26,13 +26,13 @@
         <div class="header-top">
             <div>
                 <strong>PREVENTIVE MAINTENANCE</strong><br>
-                <span style="font-size:12px; font-weight:bold;">CHECKSHEET {{ strtoupper($session->type->name) }}</span>
+                <span style="font-size:12px; font-weight:bold;">CHECKSHEET {{ strtoupper($session->schedule->equipment_name) }}</span>
             </div>
             <div style="text-align:right; font-size:10px;">FORMULIR</div>
         </div>
         <table class="header-meta" style="margin:0; border:none;">
             <tr>
-                <td>No. Dokumen: CS-{{ strtoupper(substr($session->type->frequency, 0, 3)) }}-001</td>
+                <td>No. Dokumen: CS-{{ strtoupper(substr($session->schedule->frequency, 0, 3)) }}-001</td>
                 <td>No. Revisi: 00</td>
                 <td>Tanggal Berlaku: {{ now()->format('d/m/Y') }}</td>
                 <td>Halaman: 1/1</td>

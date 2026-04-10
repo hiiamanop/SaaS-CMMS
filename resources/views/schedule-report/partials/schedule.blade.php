@@ -2,35 +2,6 @@
 $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 $grouped = $schedules->groupBy('category');
 $now = \Carbon\Carbon::now();
-
-/*
- * Lebar kolom frozen (harus konsisten antara thead & tbody):
- * No          : 36px  → left: 0
- * Nama Alat   : 140px → left: 36px
- * Item Pekerjaan: 160px → left: 176px
- * Renc./Real. : 68px  → left: 336px
- * Shutdown    : 60px  → left: 404px
- * ─────────────────────────────────
- * Total frozen : 464px
- * Kolom bulan berikutnya mulai di left: 464px
- */
-$colW = [
-    'no'      => 36,
-    'nama'    => 140,
-    'item'    => 160,
-    'renc'    => 68,
-    'shut'    => 60,
-];
-$left = [
-    'no'   => 0,
-    'nama' => 36,
-    'item' => 176,
-    'renc' => 336,
-    'shut' => 404,
-];
-// CSS untuk setiap kolom frozen
-$stickyBase  = 'position:sticky; z-index:10; background:inherit;';
-$frozenBorder = 'box-shadow: 2px 0 0 0 #d1d5db;'; // shadow kanan pada kolom terakhir frozen
 @endphp
 
 {{-- Penjelasan tabel --}}
@@ -44,114 +15,69 @@ $frozenBorder = 'box-shadow: 2px 0 0 0 #d1d5db;'; // shadow kanan pada kolom ter
         <span class="text-green-600 font-bold">✓</span> selesai tepat waktu,
         <span class="text-orange-500 font-bold">✓</span> selesai terlambat,
         <span class="text-red-600 font-bold">✗</span> terlewat/belum dikerjakan).
-        Kolom <em>No, Nama Alat, Item Pekerjaan, Renc./Real., Shutdown</em> di-<strong>freeze</strong> sehingga tetap terlihat saat scroll ke kanan.
     </p>
 </div>
 
-<div class="bg-white rounded-lg border border-gray-200 overflow-x-auto" style="max-width:100%;">
-    <table class="text-xs border-collapse" style="min-width:1400px; table-layout:fixed;">
-        <colgroup>
-            <col style="width:{{ $colW['no'] }}px">
-            <col style="width:{{ $colW['nama'] }}px">
-            <col style="width:{{ $colW['item'] }}px">
-            <col style="width:{{ $colW['renc'] }}px">
-            <col style="width:{{ $colW['shut'] }}px">
-            @foreach(range(1,48) as $c)<col style="width:28px">@endforeach
-            <col style="width:90px">
-            <col style="width:90px">
-        </colgroup>
+<div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+    <table class="text-xs border-collapse" style="min-width:1400px;">
         <thead>
-            {{-- Baris 1: header kolom frozen + header bulan --}}
-            <tr class="bg-gray-100 border-b border-gray-300">
-                <th rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['no'] }}px; width:{{ $colW['no'] }}px;"
-                    class="border border-gray-300 px-1 py-2 text-center bg-gray-100">No</th>
-
-                <th rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['nama'] }}px; width:{{ $colW['nama'] }}px;"
-                    class="border border-gray-300 px-2 py-2 text-left bg-gray-100">Nama Alat/Mesin</th>
-
-                <th rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['item'] }}px; width:{{ $colW['item'] }}px;"
-                    class="border border-gray-300 px-2 py-2 text-left bg-gray-100">Item Pekerjaan</th>
-
-                <th rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['renc'] }}px; width:{{ $colW['renc'] }}px;"
-                    class="border border-gray-300 px-1 py-2 text-center bg-gray-100">Renc./<br>Real.</th>
-
-                <th rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['shut'] }}px; width:{{ $colW['shut'] }}px; {{ $frozenBorder }}"
-                    class="border border-gray-300 px-1 py-2 text-center bg-gray-100">Shut<br>down</th>
-
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:36px">No</th>
+                <th class="border border-gray-300 px-2 py-2 text-left" style="min-width:140px">Nama Alat/Mesin</th>
+                <th class="border border-gray-300 px-2 py-2 text-left" style="min-width:160px">Item Pekerjaan</th>
+                <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:68px">Renc./<br>Real.</th>
+                <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:60px">Shut<br>down</th>
                 @foreach($months as $m)
-                <th class="border border-gray-300 px-1 py-1 text-center font-bold" colspan="4">{{ $m }}</th>
+                    <th class="border border-gray-300 px-1 py-1 text-center font-bold" colspan="4">{{ $m }}</th>
                 @endforeach
-
-                <th class="border border-gray-300 px-2 py-2 text-center" rowspan="2">Total Durasi<br>Shutdown</th>
-                <th class="border border-gray-300 px-2 py-2 text-center" rowspan="2">Tanggal<br>Shutdown</th>
+                <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:90px">Total Durasi<br>Shutdown</th>
+                <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:90px">Tanggal<br>Shutdown</th>
             </tr>
-            {{-- Baris 2: sub-header W1–W4 per bulan --}}
             <tr class="bg-gray-50">
+                <th class="border border-gray-300 px-1 py-1" colspan="5"></th>
                 @foreach($months as $m)
                     @foreach(['W1','W2','W3','W4'] as $w)
                     <th class="border border-gray-300 px-0.5 py-1 text-center text-gray-500">{{ $w }}</th>
                     @endforeach
                 @endforeach
+                <th class="border border-gray-300 px-1 py-1" colspan="2"></th>
             </tr>
         </thead>
         <tbody>
             @php $no = 1; @endphp
             @foreach($grouped as $cat => $items)
             {{-- Baris section header kategori --}}
-            <tr style="background:#fefce8;">
-                <td colspan="5"
-                    style="{{ $stickyBase }} left:0; background:#fefce8; {{ $frozenBorder }}"
-                    class="border border-gray-300 px-2 py-1.5 font-bold">
+            <tr class="bg-gray-100">
+                <td class="border border-gray-300 px-2 py-1.5 font-bold" colspan="{{ 5 + 48 + 2 }}">
                     {{ chr(64 + $no++) }}. {{ strtoupper($cat) }}
                 </td>
-                @foreach(range(1,48) as $c)
-                <td class="border border-gray-300 bg-yellow-50/60"></td>
-                @endforeach
-                <td class="border border-gray-300 bg-yellow-50/60"></td>
-                <td class="border border-gray-300 bg-yellow-50/60"></td>
             </tr>
 
             @php $itemNo = 1; @endphp
             @foreach($items as $sched)
+            @php
+                // Hitung akumulasi shutdown dari sesi yang sudah disubmit
+                $submittedSessions  = ($sessions ?? collect())
+                    ->where('maintenance_schedule_id', $sched->id)
+                    ->where('status', 'submitted');
+                $submittedCount     = $submittedSessions->count();
+                $actualShutdownHours = $sched->shutdown_required
+                    ? $submittedCount * ($sched->shutdown_duration_hours ?? 0)
+                    : 0;
+                $lastShutdownDate   = $submittedSessions->sortByDesc('submitted_at')->first()?->submitted_at;
+            @endphp
             @foreach(['Renc.', 'Real.'] as $rowType)
-            <tr class="group hover:bg-gray-50">
+            <tr class="hover:bg-gray-50">
                 @if($loop->first)
-                {{-- No --}}
-                <td rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['no'] }}px; background:white;"
-                    class="border border-gray-300 px-1 py-1 text-center group-hover:bg-gray-50">
-                    {{ $itemNo++ }}
-                </td>
-                {{-- Nama Alat --}}
-                <td rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['nama'] }}px; background:white;"
-                    class="border border-gray-300 px-2 py-1 group-hover:bg-gray-50">
-                    {{ $sched->equipment_name }}
-                </td>
-                {{-- Item Pekerjaan --}}
-                <td rowspan="2"
-                    style="{{ $stickyBase }} left:{{ $left['item'] }}px; background:white;"
-                    class="border border-gray-300 px-2 py-1 group-hover:bg-gray-50">
-                    {{ $sched->item_pekerjaan }}
-                </td>
+                <td rowspan="2" class="border border-gray-300 px-1 py-1 text-center">{{ $itemNo++ }}</td>
+                <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->equipment_name }}</td>
+                <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->item_pekerjaan_text }}</td>
                 @endif
 
-                {{-- Renc./Real. --}}
-                <td style="{{ $stickyBase }} left:{{ $left['renc'] }}px; background:white;"
-                    class="border border-gray-300 px-1 py-1 text-center font-medium group-hover:bg-gray-50
-                           {{ $rowType === 'Renc.' ? 'text-blue-700' : 'text-gray-700' }}">
+                <td class="border border-gray-300 px-1 py-1 text-center font-medium {{ $rowType === 'Renc.' ? 'text-blue-700' : 'text-gray-700' }}">
                     {{ $rowType }}
                 </td>
-
-                {{-- Shutdown --}}
-                <td style="{{ $stickyBase }} left:{{ $left['shut'] }}px; background:white; {{ $frozenBorder }}"
-                    class="border border-gray-300 px-1 py-1 text-center group-hover:bg-gray-50
-                           {{ $sched->shutdown_required ? 'text-orange-600 font-semibold' : 'text-gray-400' }}">
+                <td class="border border-gray-300 px-1 py-1 text-center {{ $sched->shutdown_required ? 'text-orange-600 font-semibold' : 'text-gray-400' }}">
                     {{ $sched->shutdown_required ? 'Y' : 'N' }}
                 </td>
 
@@ -165,15 +91,29 @@ $frozenBorder = 'box-shadow: 2px 0 0 0 #d1d5db;'; // shadow kanan pada kolom ter
                     @php
                         $key       = $month . '-' . $week;
                         $isPlanned = in_array($key, $plannedSet);
-                        $weekDate  = \Carbon\Carbon::createFromDate($year, $month, 1)->addWeeks($week - 1);
-                        $isPast    = $weekDate->isPast();
+                        // isPast = true only when the ENTIRE week has already ended
+                        $weekEnd   = \Carbon\Carbon::createFromDate($year, $month, 1)->addWeeks($week)->subDay()->endOfDay();
+                        $isPast    = $weekEnd->isPast();
 
+                        // Check completed WO (by month)
                         $completedWO = $workOrders->where('maintenance_schedule_id', $sched->id)
                             ->filter(fn($wo) =>
                                 $wo->completed_at &&
                                 $wo->completed_at->month == $month &&
                                 $wo->completed_at->year == $year
                             )->first();
+
+                        // Check submitted checksheet session (by month + week for weekly, by month for others)
+                        $completedSession = ($sessions ?? collect())->where('maintenance_schedule_id', $sched->id)
+                            ->where('status', 'submitted')
+                            ->filter(fn($s) =>
+                                $s->month == $month &&
+                                ($sched->frequency === 'weekly' ? $s->week_number == $week : true)
+                            )->first();
+
+                        $isDone    = $completedWO || $completedSession;
+                        $doneAt    = $completedWO?->completed_at ?? $completedSession?->submitted_at;
+                        $isOnTime  = $doneAt && $doneAt->lte($weekEnd);
                     @endphp
                     <td class="border border-gray-300 px-0.5 py-1 text-center">
                         @if($rowType === 'Renc.')
@@ -181,11 +121,11 @@ $frozenBorder = 'box-shadow: 2px 0 0 0 #d1d5db;'; // shadow kanan pada kolom ter
                             <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mx-auto" title="Direncanakan"></span>
                             @endif
                         @else
-                            @if($isPlanned && $completedWO && !$isPast)
+                            @if($isPlanned && $isDone && $isOnTime)
                                 <span class="text-green-600 font-bold" title="Selesai tepat waktu">✓</span>
-                            @elseif($isPlanned && $completedWO && $isPast)
+                            @elseif($isPlanned && $isDone && !$isOnTime)
                                 <span class="text-orange-500 font-bold" title="Selesai terlambat">✓</span>
-                            @elseif($isPlanned && !$completedWO && $isPast)
+                            @elseif($isPlanned && !$isDone && $isPast)
                                 <span class="text-red-600 font-bold" title="Terlewat / belum dikerjakan">✗</span>
                             @endif
                         @endif
@@ -194,11 +134,24 @@ $frozenBorder = 'box-shadow: 2px 0 0 0 #d1d5db;'; // shadow kanan pada kolom ter
                 @endforeach
 
                 <td class="border border-gray-300 px-2 py-1 text-center text-gray-600">
-                    @if($rowType === 'Renc.' && $sched->shutdown_required)
-                        {{ $sched->shutdown_duration_hours }}h
+                    @if($sched->shutdown_required)
+                        @if($rowType === 'Renc.')
+                            <span class="text-blue-600">{{ $sched->shutdown_duration_hours ?? 0 }}h/kali</span>
+                        @else
+                            @if($actualShutdownHours > 0)
+                                <span class="font-semibold text-orange-600">{{ $actualShutdownHours }}h</span>
+                                <span class="text-gray-400 text-xs block">({{ $submittedCount }}× kali)</span>
+                            @else
+                                <span class="text-gray-300">—</span>
+                            @endif
+                        @endif
                     @endif
                 </td>
-                <td class="border border-gray-300 px-2 py-1 text-center text-gray-500"></td>
+                <td class="border border-gray-300 px-2 py-1 text-center text-gray-500 text-xs">
+                    @if($rowType === 'Real.' && $lastShutdownDate)
+                        {{ $lastShutdownDate->format('d/m/Y') }}
+                    @endif
+                </td>
             </tr>
             @endforeach
             @endforeach

@@ -1,16 +1,24 @@
 @php
-$monthlyType = $checksheetTypes->firstWhere('frequency', 'monthly');
-$monthlySessions = $sessions->where('checksheet_type_id', $monthlyType?->id)->values();
+$monthlySessions = $sessions->filter(fn($s) => $s->schedule?->frequency === 'monthly')->values();
+$monthlySchedules = \App\Models\MaintenanceSchedule::with('checklistTemplates')
+    ->where('frequency', 'monthly')->where('status', 'active')->get();
 $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 @endphp
 
-@if(!$monthlyType)
+@if($monthlySchedules->isEmpty())
     <div class="text-center py-8 text-gray-400">Data checksheet bulanan tidak tersedia.</div>
 @else
+@foreach($monthlySchedules as $monthlySchedule)
 @php
-    $templates = \App\Models\ChecksheetTemplate::where('checksheet_type_id', $monthlyType->id)->orderBy('order')->get();
+    $templates = $monthlySchedule->checklistTemplates()->orderBy('order')->get();
     $grouped = $templates->groupBy('lokasi_inspeksi');
+    $schedSessions = $monthlySessions->where('maintenance_schedule_id', $monthlySchedule->id)->values();
+    if($templates->isEmpty()) continue;
 @endphp
+<div class="mb-4">
+<div class="px-4 py-2 bg-blue-50 border-b border-blue-100 text-sm font-semibold text-blue-800">
+    {{ $monthlySchedule->equipment_name }} — {{ $monthlySchedule->item_pekerjaan_text }}
+</div>
 <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
     <table class="text-xs border-collapse" style="min-width:900px;">
         <thead>
@@ -37,7 +45,7 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
                 <td class="border border-gray-300 px-2 py-1 text-gray-500">{{ $template->standar_ketentuan }}</td>
                 @foreach(range(1,12) as $month)
                 @php
-                    $session = $monthlySessions->first(fn($s) => $s->month == $month);
+                    $session = $schedSessions->first(fn($s) => $s->month == $month);
                     $result = $session ? $session->results->firstWhere('template_id', $template->id) : null;
                 @endphp
                 <td class="border border-gray-300 px-1 py-1 text-center">
@@ -56,4 +64,6 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
         </tbody>
     </table>
 </div>
+</div>{{-- end per-schedule --}}
+@endforeach
 @endif

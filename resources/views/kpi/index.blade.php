@@ -36,7 +36,7 @@
     </div>
 
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         @php
         $cards = [
             ['label'=>'MTTR', 'value'=>$mttr.' h', 'sub'=>'Mean Time to Repair', 'color'=>'blue',
@@ -51,8 +51,10 @@
              'icon'=>'m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z M12 9v4 M12 17h.01'],
             ['label'=>'Total Downtime', 'value'=>$totalDowntime.' h', 'sub'=>'In Period', 'color'=>'orange',
              'icon'=>'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01'],
+            ['label'=>'Total Shutdown', 'value'=>$totalShutdownHours.' h', 'sub'=>'WO Shutdown Duration', 'color'=>'yellow',
+             'icon'=>'M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v4'],
         ];
-        $colorMap = ['blue'=>['bg'=>'bg-blue-50','text'=>'text-blue-700','icon'=>'text-blue-500'],'purple'=>['bg'=>'bg-purple-50','text'=>'text-purple-700','icon'=>'text-purple-500'],'green'=>['bg'=>'bg-green-50','text'=>'text-green-700','icon'=>'text-green-500'],'teal'=>['bg'=>'bg-teal-50','text'=>'text-teal-700','icon'=>'text-teal-500'],'red'=>['bg'=>'bg-red-50','text'=>'text-red-700','icon'=>'text-red-500'],'orange'=>['bg'=>'bg-orange-50','text'=>'text-orange-700','icon'=>'text-orange-500']];
+        $colorMap = ['blue'=>['bg'=>'bg-blue-50','text'=>'text-blue-700','icon'=>'text-blue-500'],'purple'=>['bg'=>'bg-purple-50','text'=>'text-purple-700','icon'=>'text-purple-500'],'green'=>['bg'=>'bg-green-50','text'=>'text-green-700','icon'=>'text-green-500'],'teal'=>['bg'=>'bg-teal-50','text'=>'text-teal-700','icon'=>'text-teal-500'],'red'=>['bg'=>'bg-red-50','text'=>'text-red-700','icon'=>'text-red-500'],'orange'=>['bg'=>'bg-orange-50','text'=>'text-orange-700','icon'=>'text-orange-500'],'yellow'=>['bg'=>'bg-yellow-50','text'=>'text-yellow-700','icon'=>'text-yellow-500']];
         @endphp
 
         @foreach($cards as $card)
@@ -104,6 +106,16 @@
         </div>
     </div>
 
+    {{-- Charts Row 3 --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {{-- Shutdown Trend --}}
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 class="text-sm font-semibold text-gray-900 mb-1">Shutdown Trend (hours)</h2>
+            <p class="text-xs text-gray-400 mb-4">Akumulasi durasi shutdown dari WO yang diselesaikan</p>
+            <div style="height:220px"><canvas id="chartShutdown"></canvas></div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -112,6 +124,7 @@
 const monthlyData = @json($monthlyData);
 const mttrTrend = @json($mttrTrend);
 const downtimeTrend = @json($downtimeTrend);
+const shutdownTrend = @json($shutdownTrend);
 const byPriority = @json($byPriority);
 
 const labels = monthlyData.map(d => d.label);
@@ -174,6 +187,31 @@ new Chart(document.getElementById('chartMttr'), {
             fill: true,
             tension: 0.3,
             pointRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { font: { size: 11 } } },
+            y: { beginAtZero: true, ticks: { font: { size: 11 } } }
+        }
+    }
+});
+
+// Shutdown trend bar
+new Chart(document.getElementById('chartShutdown'), {
+    type: 'bar',
+    data: {
+        labels: shutdownTrend.map(d => d.label),
+        datasets: [{
+            label: 'Shutdown (h)',
+            data: shutdownTrend.map(d => d.value),
+            backgroundColor: 'rgba(234,179,8,0.7)',
+            borderColor: '#ca8a04',
+            borderWidth: 1,
+            borderRadius: 4,
         }]
     },
     options: {

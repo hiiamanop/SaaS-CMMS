@@ -45,20 +45,26 @@ class MaintenanceRecordController extends Controller
             $workOrder = WorkOrder::with(['asset', 'assignedTo', 'checklistItems'])->find($request->work_order_id);
         }
 
-        $assets = Asset::orderBy('name')->get();
+        $workOrders = WorkOrder::with(['asset', 'assignedTo'])->latest()->get();
         $technicians = User::where('role', 'technician')->get();
         $spareParts = SparePart::orderBy('name')->get();
 
-        return view('maintenance-records.create', compact('workOrder', 'assets', 'technicians', 'spareParts'));
+        return view('maintenance-records.create', compact('workOrder', 'workOrders', 'technicians', 'spareParts'));
     }
 
     public function store(Request $request)
     {
+        // If a WO is selected, derive asset_id from it
+        if ($request->filled('work_order_id') && !$request->filled('asset_id')) {
+            $wo = WorkOrder::find($request->work_order_id);
+            $request->merge(['asset_id' => $wo?->asset_id]);
+        }
+
         $validated = $request->validate([
             'work_order_id' => 'nullable|exists:work_orders,id',
             'asset_id' => 'required|exists:assets,id',
             'technician_id' => 'required|exists:users,id',
-            'type' => 'required|in:preventive,corrective',
+            'type' => 'nullable|in:preventive,corrective',
             'maintenance_date' => 'required|date',
             'findings' => 'nullable|string',
             'actions_taken' => 'nullable|string',
@@ -73,12 +79,18 @@ class MaintenanceRecordController extends Controller
         ]);
 
         DB::transaction(function() use ($validated, $request) {
+            // Auto-derive type: if linked to WO → corrective; else fallback to submitted value or preventive
+            $type = $validated['type'] ?? 'preventive';
+            if (!empty($validated['work_order_id'])) {
+                $type = 'corrective';
+            }
+
             $record = MaintenanceRecord::create([
                 'record_number' => MaintenanceRecord::generateNumber(),
                 'work_order_id' => $validated['work_order_id'] ?? null,
                 'asset_id' => $validated['asset_id'],
                 'technician_id' => $validated['technician_id'],
-                'type' => $validated['type'],
+                'type' => $type,
                 'maintenance_date' => $validated['maintenance_date'],
                 'findings' => $validated['findings'] ?? null,
                 'actions_taken' => $validated['actions_taken'] ?? null,

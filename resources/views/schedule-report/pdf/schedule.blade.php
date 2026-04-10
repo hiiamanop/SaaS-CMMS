@@ -39,7 +39,7 @@
             <tr>
                 <td>{{ $i+1 }}</td>
                 <td>{{ $sched->equipment_name }}</td>
-                <td>{{ $sched->item_pekerjaan }}</td>
+                <td>{{ $sched->item_pekerjaan_text }}</td>
                 <td>{{ $sched->type }}</td>
                 <td>{{ $sched->shutdown_required ? 'Y' : 'N' }}</td>
                 @php $plannedWeeks = $sched->planned_weeks ?? []; $plannedSet = collect($plannedWeeks)->map(fn($p) => $p['month'].'-'.$p['week'])->all(); @endphp

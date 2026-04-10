@@ -82,27 +82,27 @@
 
     {{-- Tab: Schedule Maintenance --}}
     <div x-show="tab === 'schedule'" x-transition>
-        @include('schedule-report.partials.schedule', compact('schedules', 'workOrders', 'year'))
+        @include('schedule-report.partials.schedule', compact('schedules', 'workOrders', 'sessions', 'year'))
     </div>
 
     {{-- Tab: Mingguan --}}
     <div x-show="tab === 'mingguan'" x-transition>
-        @include('schedule-report.partials.mingguan', compact('sessions', 'checksheetTypes', 'year', 'pltsLocation'))
+        @include('schedule-report.partials.mingguan', compact('sessions', 'year', 'pltsLocation'))
     </div>
 
     {{-- Tab: Bulanan --}}
     <div x-show="tab === 'bulanan'" x-transition>
-        @include('schedule-report.partials.bulanan', compact('sessions', 'checksheetTypes', 'year', 'pltsLocation'))
+        @include('schedule-report.partials.bulanan', compact('sessions', 'year', 'pltsLocation'))
     </div>
 
     {{-- Tab: Semesteran --}}
     <div x-show="tab === 'semesteran'" x-transition>
-        @include('schedule-report.partials.semesteran', compact('sessions', 'checksheetTypes', 'year', 'pltsLocation'))
+        @include('schedule-report.partials.semesteran', compact('sessions', 'year', 'pltsLocation'))
     </div>
 
     {{-- Tab: Tahunan --}}
     <div x-show="tab === 'tahunan'" x-transition>
-        @include('schedule-report.partials.tahunan', compact('sessions', 'checksheetTypes', 'year', 'pltsLocation'))
+        @include('schedule-report.partials.tahunan', compact('sessions', 'year', 'pltsLocation'))
     </div>
 
 </div>

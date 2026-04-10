@@ -21,7 +21,7 @@ class CheckChecksheets extends Command
         $currentYear = $today->year;
 
         // Find draft weekly checksheets that should have been submitted today
-        $drafts = ChecksheetSession::where('status', 'draft')
+        $drafts = ChecksheetSession::with('schedule')->where('status', 'draft')
             ->where('year', $currentYear)
             ->whereNotNull('week_number')
             ->where('week_number', $currentWeek)
@@ -41,7 +41,7 @@ class CheckChecksheets extends Command
                     'user_id' => $user->id,
                     'type' => 'checksheet_reminder',
                     'title' => 'Checksheet Belum Disubmit',
-                    'message' => "Checksheet {$session->type->name} - {$session->plts_location} periode {$session->period_label} belum disubmit.",
+                    'message' => "Checksheet {$session->schedule->equipment_name} periode {$session->period_label} belum disubmit.",
                     'data' => ['session_id' => $session->id],
                     'is_read' => false,
                 ]);

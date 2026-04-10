@@ -72,6 +72,7 @@
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Preventive</span>
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span>Corrective</span>
         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>Completed / Closed</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>Checksheet</span>
     </div>
 
     {{-- LIST VIEW --}}
@@ -86,35 +87,47 @@
             <div class="space-y-4 pl-16">
             @foreach($timeline as $item)
             @php
+            $isPreventive = str_starts_with($item['wo_type'] ?? '', 'preventive');
             $dotColor = match(true) {
-                in_array($item['status'],['completed','closed']) => 'bg-green-500',
-                $item['wo_type']==='preventive' => 'bg-blue-500',
-                default => 'bg-orange-500',
+                $item['type']==='checksheet' => '#14b8a6',
+                in_array($item['status'],['completed','closed']) => '#10b981',
+                $isPreventive => '#3b82f6',
+                default => '#f97316',
             };
             $borderColor = match(true) {
+                $item['type']==='checksheet' => 'border-teal-100',
                 in_array($item['status'],['completed','closed']) => 'border-green-100',
-                $item['wo_type']==='preventive' => 'border-blue-100',
+                $isPreventive => 'border-blue-100',
                 default => 'border-orange-100',
             };
             $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700'];
             @endphp
             <div class="relative">
-                <div class="absolute -left-10 top-4 w-3 h-3 rounded-full {{ $dotColor }} ring-2 ring-white z-10"></div>
+                <div class="absolute -left-10 top-4 w-3 h-3 rounded-full ring-2 ring-white z-10 {{ $item['deleted'] ? 'opacity-40' : '' }}"
+                     style="background-color:{{ $dotColor }}"></div>
+                @if($item['url'])
                 <a href="{{ $item['url'] }}" class="block bg-white rounded-xl border {{ $borderColor }} shadow-sm p-4 hover:shadow-md transition-shadow">
+                @else
+                <div class="block bg-white rounded-xl border border-gray-200 shadow-sm p-4 opacity-60">
+                @endif
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap mb-1">
-                                <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $item['type']==='work_order'?'bg-gray-100 text-gray-600':'bg-green-100 text-green-700' }}">
-                                    {{ $item['type']==='work_order'?'Work Order':'Maint. Record' }}
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                                    {{ $item['type']==='work_order'?'bg-gray-100 text-gray-600':($item['type']==='checksheet'?'bg-teal-100 text-teal-700':'bg-green-100 text-green-700') }}">
+                                    {{ $item['type']==='work_order'?'Work Order':($item['type']==='checksheet'?'Checksheet':'Maint. Record') }}
                                 </span>
-                                <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $item['wo_type']==='preventive'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">
-                                    {{ ucfirst($item['wo_type']) }}
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $isPreventive?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">
+                                    {{ ucfirst(str_replace('_',' ',$item['wo_type'])) }}
                                 </span>
                                 @if($item['priority'])
                                 <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $pColors[$item['priority']]??'' }}">{{ ucfirst($item['priority']) }}</span>
                                 @endif
+                                @if($item['deleted'])
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-500">Dihapus</span>
+                                @endif
                             </div>
-                            <p class="font-medium text-gray-900 truncate">{{ $item['title'] }}</p>
+                            <p class="font-medium truncate {{ $item['deleted'] ? 'line-through text-gray-400' : 'text-gray-900' }}">{{ $item['title'] }}</p>
                             <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
                                 <span>{{ $item['asset'] }}</span>
                                 <span>{{ $item['person'] }}</span>
@@ -124,7 +137,11 @@
                             {{ \Carbon\Carbon::parse($item['date'])->format('M d, Y') }}
                         </span>
                     </div>
+                @if($item['url'])
                 </a>
+                @else
+                </div>
+                @endif
             </div>
             @endforeach
             </div>

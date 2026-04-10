@@ -1,17 +1,25 @@
 @php
-$weeklyType = $checksheetTypes->firstWhere('frequency', 'weekly');
-$weeklySessions = $sessions->where('checksheet_type_id', $weeklyType?->id)->values();
+$weeklySessions = $sessions->filter(fn($s) => $s->schedule?->frequency === 'weekly')->values();
+$weeklySchedules = \App\Models\MaintenanceSchedule::with('checklistTemplates')
+    ->where('frequency', 'weekly')->where('status', 'active')->get();
 $months = range(1, 12);
 $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 @endphp
 
-@if(!$weeklyType)
+@if($weeklySchedules->isEmpty())
     <div class="text-center py-8 text-gray-400">Data checksheet mingguan tidak tersedia.</div>
 @else
+@foreach($weeklySchedules as $weeklySchedule)
 @php
-    $templates = \App\Models\ChecksheetTemplate::where('checksheet_type_id', $weeklyType->id)->orderBy('order')->get();
+    $templates = $weeklySchedule->checklistTemplates()->orderBy('order')->get();
     $grouped = $templates->groupBy('lokasi_inspeksi');
+    $schedSessions = $weeklySessions->where('maintenance_schedule_id', $weeklySchedule->id)->values();
+    if($templates->isEmpty()) continue;
 @endphp
+<div class="mb-4">
+<div class="px-4 py-2 bg-blue-50 border-b border-blue-100 text-sm font-semibold text-blue-800">
+    {{ $weeklySchedule->equipment_name }} — {{ $weeklySchedule->item_pekerjaan_text }}
+</div>
 <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
     <table class="text-xs border-collapse" style="min-width:900px;">
         <thead>
@@ -47,7 +55,7 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
                 @foreach($months as $month)
                     @foreach([1,2,3,4] as $week)
                     @php
-                        $session = $weeklySessions->first(fn($s) => $s->month == $month && $s->week_number == $week);
+                        $session = $schedSessions->first(fn($s) => $s->month == $month && $s->week_number == $week);
                         $result = $session ? $session->results->firstWhere('template_id', $template->id) : null;
                     @endphp
                     <td class="border border-gray-300 px-0.5 py-1 text-center">
@@ -71,7 +79,7 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
 
 {{-- Abnormal sub-table --}}
 @php
-$allAbnormals = $weeklySessions->flatMap(fn($s) => $s->abnormals ?? collect())->filter(fn($a) => $a->abnormal_description);
+$allAbnormals = $schedSessions->flatMap(fn($s) => $s->abnormals ?? collect())->filter(fn($a) => $a->abnormal_description);
 @endphp
 @if($allAbnormals->isNotEmpty())
 <div class="mt-4 bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -100,29 +108,6 @@ $allAbnormals = $weeklySessions->flatMap(fn($s) => $s->abnormals ?? collect())->
     </table>
 </div>
 @endif
-
-{{-- Signature section --}}
-@php $latestSession = $weeklySessions->sortByDesc('updated_at')->first(); @endphp
-@if($latestSession)
-<div class="mt-4 bg-white rounded-lg border border-gray-200 overflow-hidden">
-    <div class="bg-gray-100 px-4 py-2 font-bold text-sm">Tanda Tangan</div>
-    <div class="grid grid-cols-3 divide-x divide-gray-200 text-center py-6 px-4 text-sm">
-        <div>
-            <p class="text-gray-500 text-xs mb-2">Dibuat oleh (Teknisi ONM)</p>
-            <p class="font-medium">{{ $latestSession->signed_by_teknisi ?? '—' }}</p>
-            <p class="text-xs text-gray-400">{{ $latestSession->signed_date_teknisi?->format('d M Y') ?? '' }}</p>
-        </div>
-        <div>
-            <p class="text-gray-500 text-xs mb-2">Diperiksa oleh (SPV ONM)</p>
-            <p class="font-medium">{{ $latestSession->signed_by_spv ?? '—' }}</p>
-            <p class="text-xs text-gray-400">{{ $latestSession->signed_date_spv?->format('d M Y') ?? '' }}</p>
-        </div>
-        <div>
-            <p class="text-gray-500 text-xs mb-2">Disetujui oleh (PM)</p>
-            <p class="font-medium">{{ $latestSession->signed_by_pm ?? '—' }}</p>
-            <p class="text-xs text-gray-400">{{ $latestSession->signed_date_pm?->format('d M Y') ?? '' }}</p>
-        </div>
-    </div>
-</div>
-@endif
+</div>{{-- end per-schedule --}}
+@endforeach
 @endif

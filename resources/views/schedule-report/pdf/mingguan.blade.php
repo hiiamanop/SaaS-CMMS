@@ -19,9 +19,9 @@
     <h1>Checksheet Mingguan</h1>
     <div class="meta">{{ $pltsLocation ?: 'Semua Lokasi' }} · Tahun {{ $year }}</div>
     @php
-        $weeklyType = $checksheetTypes->firstWhere('frequency', 'weekly');
-        $weeklySessions = $sessions->where('checksheet_type_id', $weeklyType?->id)->values();
-        $templates = $weeklyType ? \App\Models\ChecksheetTemplate::where('checksheet_type_id', $weeklyType->id)->orderBy('order')->get() : collect();
+        $weeklyType = // removed
+        $weeklySessions = // removed
+        $templates = $weeklyType ? \App\Models\// removed
         $grouped = $templates->groupBy('lokasi_inspeksi');
         $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
     @endphp

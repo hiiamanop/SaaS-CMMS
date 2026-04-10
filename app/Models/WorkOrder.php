@@ -14,6 +14,7 @@ class WorkOrder extends Model
         'wo_number', 'title', 'asset_id', 'assigned_to', 'assigned_to_external', 'created_by',
         'maintenance_schedule_id', 'type', 'priority', 'status',
         'due_date', 'start_date', 'started_at', 'completed_at', 'description', 'notes',
+        'shutdown_required',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class WorkOrder extends Model
             'start_date' => 'date',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'shutdown_required' => 'boolean',
         ];
     }
 
@@ -98,10 +100,20 @@ class WorkOrder extends Model
         };
     }
 
+    /** Actual shutdown duration in minutes (only when shutdown_required, started, and closed). */
+    public function getShutdownMinutesAttribute(): int
+    {
+        if (!$this->shutdown_required || !$this->started_at || !$this->completed_at) return 0;
+        return (int) $this->started_at->diffInMinutes($this->completed_at);
+    }
+
     public static function generateNumber(): string
     {
         $prefix = 'WO-' . date('Ym') . '-';
-        $last = static::where('wo_number', 'like', $prefix . '%')->latest()->first();
+        $last = static::withTrashed()
+            ->where('wo_number', 'like', $prefix . '%')
+            ->orderByDesc('wo_number')
+            ->first();
         $seq = $last ? ((int) substr($last->wo_number, -4)) + 1 : 1;
         return $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
     }

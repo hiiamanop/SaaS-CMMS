@@ -49,16 +49,18 @@ class WorkOrderController extends Controller
             'title' => 'required|string|max:255',
             'asset_id' => 'required|exists:assets,id',
             'assigned_to' => 'nullable|exists:users,id',
-            'type' => 'required|in:preventive,corrective',
+            'type' => 'required|in:corrective',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
             'description' => 'nullable|string',
+            'shutdown_required' => 'nullable|boolean',
             'checklist' => 'nullable|array',
             'checklist.*' => 'nullable|string',
         ]);
 
         $validated['wo_number'] = WorkOrder::generateNumber();
         $validated['created_by'] = auth()->id();
+        $validated['shutdown_required'] = $request->boolean('shutdown_required');
         unset($validated['checklist']);
 
         $workOrder = WorkOrder::create($validated);
@@ -114,7 +116,7 @@ class WorkOrderController extends Controller
             'title' => 'required|string|max:255',
             'asset_id' => 'required|exists:assets,id',
             'assigned_to' => 'nullable|exists:users,id',
-            'type' => 'required|in:preventive,corrective',
+            'type' => 'required|in:corrective',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
             'description' => 'nullable|string',

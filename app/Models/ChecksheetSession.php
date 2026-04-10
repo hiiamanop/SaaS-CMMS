@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ChecksheetSession extends Model
 {
     protected $fillable = [
-        'checksheet_type_id', 'plts_location', 'equipment_location',
+        'maintenance_schedule_id', 'plts_location', 'equipment_location',
         'period_label', 'year', 'week_number', 'month', 'semester',
         'status', 'submitted_at', 'submitted_by',
         'signed_by_teknisi', 'signed_date_teknisi',
@@ -18,15 +18,15 @@ class ChecksheetSession extends Model
     ];
 
     protected $casts = [
-        'submitted_at' => 'datetime',
+        'submitted_at'       => 'datetime',
         'signed_date_teknisi' => 'date',
-        'signed_date_spv' => 'date',
-        'signed_date_pm' => 'date',
+        'signed_date_spv'    => 'date',
+        'signed_date_pm'     => 'date',
     ];
 
-    public function type(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(ChecksheetType::class, 'checksheet_type_id');
+        return $this->belongsTo(MaintenanceSchedule::class, 'maintenance_schedule_id');
     }
 
     public function submittedBy(): BelongsTo
@@ -46,7 +46,7 @@ class ChecksheetSession extends Model
 
     public function getProgressAttribute(): array
     {
-        $total = $this->type->templates()->count();
+        $total = $this->schedule->checklistTemplates()->count();
         $filled = $this->results()->whereNotNull('result')->count();
         return ['total' => $total, 'filled' => $filled];
     }

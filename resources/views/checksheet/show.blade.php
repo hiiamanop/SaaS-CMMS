@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Checksheet — ' . $session->type->name)
+@section('title', 'Checksheet — ' . $session->schedule->equipment_name)
 
 @section('breadcrumb')
 <nav class="flex" aria-label="Breadcrumb">
@@ -9,7 +9,7 @@
         <li><span class="mx-2">/</span></li>
         <li><a href="{{ route('checksheet.index') }}" class="hover:text-gray-700">Checksheet</a></li>
         <li><span class="mx-2">/</span></li>
-        <li class="text-gray-900 font-medium">{{ $session->type->name }} — {{ $session->period_label }}</li>
+        <li class="text-gray-900 font-medium">{{ $session->schedule->equipment_name }} — {{ $session->period_label }}</li>
     </ol>
 </nav>
 @endsection
@@ -20,7 +20,7 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <h1 class="text-2xl font-bold text-gray-900">Checksheet {{ $session->type->name }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900">Checksheet {{ $session->schedule->equipment_name }}</h1>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
                     {{ $session->status === 'submitted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                     {{ ucfirst($session->status) }}
@@ -43,7 +43,7 @@
     <div class="bg-white rounded-lg border border-gray-200 p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
             <p class="text-gray-500">Tipe</p>
-            <p class="font-medium text-gray-900">{{ $session->type->name }}</p>
+            <p class="font-medium text-gray-900">{{ $session->schedule->equipment_name }}</p>
         </div>
         <div>
             <p class="text-gray-500">Lokasi PLTS</p>

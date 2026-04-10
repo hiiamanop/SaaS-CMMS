@@ -23,11 +23,12 @@
                         @foreach($technicians as $t)<option value="{{ $t->id }}" {{ old('assigned_to',$workOrder->assigned_to)==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
                     </select>
                 </div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Type</label>
-                    <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="corrective" {{ old('type',$workOrder->type)=='corrective'?'selected':'' }}>Corrective</option>
-                        <option value="preventive" {{ old('type',$workOrder->type)=='preventive'?'selected':'' }}>Preventive</option>
-                    </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe</label>
+                    <div class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
+                        Corrective
+                    </div>
+                    <input type="hidden" name="type" value="corrective">
                 </div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
                     <select name="priority" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">

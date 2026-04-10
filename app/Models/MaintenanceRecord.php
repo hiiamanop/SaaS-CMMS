@@ -30,7 +30,7 @@ class MaintenanceRecord extends Model
     public static function generateNumber(): string
     {
         $prefix = 'MR-' . date('Ym') . '-';
-        $last = static::where('record_number', 'like', $prefix . '%')->latest()->first();
+        $last = static::withTrashed()->where('record_number', 'like', $prefix . '%')->orderByDesc('record_number')->first();
         $seq = $last ? ((int) substr($last->record_number, -4)) + 1 : 1;
         return $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
     }

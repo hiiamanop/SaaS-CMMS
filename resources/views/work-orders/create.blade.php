@@ -23,11 +23,12 @@
                         @foreach($technicians as $t)<option value="{{ $t->id }}" {{ old('assigned_to')==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
                     </select>
                 </div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Type <span class="text-red-500">*</span></label>
-                    <select name="type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="corrective" {{ old('type','corrective')=='corrective'?'selected':'' }}>Corrective</option>
-                        <option value="preventive" {{ old('type')=='preventive'?'selected':'' }}>Preventive</option>
-                    </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe</label>
+                    <div class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
+                        Corrective
+                    </div>
+                    <input type="hidden" name="type" value="corrective">
                 </div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Priority <span class="text-red-500">*</span></label>
                     <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -35,6 +36,16 @@
                     </select>
                 </div>
                 <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1.5">Due Date <span class="text-red-500">*</span></label><input name="due_date" type="date" value="{{ old('due_date') }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">@error('due_date')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
+                <div class="sm:col-span-2 flex items-start gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <input type="hidden" name="shutdown_required" value="0">
+                    <input type="checkbox" name="shutdown_required" value="1" id="shutdownRequired"
+                           {{ old('shutdown_required') ? 'checked' : '' }}
+                           class="mt-0.5 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                    <div>
+                        <label for="shutdownRequired" class="text-sm font-medium text-orange-800 cursor-pointer">Memerlukan Shutdown</label>
+                        <p class="text-xs text-orange-600 mt-0.5">Durasi shutdown dihitung otomatis dari saat WO mulai dikerjakan hingga diselesaikan.</p>
+                    </div>
+                </div>
             </div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label><textarea name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('description') }}</textarea></div>
             <div>

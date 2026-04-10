@@ -12,11 +12,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             AssetSeeder::class,
             SparePartSeeder::class,
-            MaintenanceScheduleSeeder::class,
-            WorkOrderSeeder::class,
-            MaintenanceRecordSeeder::class,
-            ChecksheetSeeder::class,
-            NotificationSeeder::class,
+            // MaintenanceScheduleSeeder::class,
+            // ChecksheetTemplateSeeder::class,
+            // WorkOrderSeeder::class,
+            // MaintenanceRecordSeeder::class,
+            // NotificationSeeder::class,
         ]);
     }
 }

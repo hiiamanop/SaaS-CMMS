@@ -16,16 +16,35 @@
         <form action="{{ route('maintenance-records.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5"
               x-data="{parts:[{spare_part_id:'',qty_used:1}]}">
             @csrf
-            @if($workOrder)<input type="hidden" name="work_order_id" value="{{ $workOrder->id }}">@endif
+            {{-- Work Order picker --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Work Order <span class="text-red-500">*</span></label>
+                <select name="work_order_id" id="woSelect" onchange="onWoChange(this)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('work_order_id') border-red-400 @enderror">
+                    <option value="">Pilih Work Order...</option>
+                    @foreach($workOrders as $wo)
+                    <option value="{{ $wo->id }}"
+                            data-asset-id="{{ $wo->asset_id }}"
+                            data-asset-name="{{ $wo->asset?->name }}"
+                            data-technician-id="{{ $wo->assigned_to }}"
+                            {{ old('work_order_id', $workOrder?->id) == $wo->id ? 'selected' : '' }}>
+                        {{ $wo->wo_number }} — {{ $wo->title }} ({{ $wo->asset?->name }})
+                    </option>
+                    @endforeach
+                </select>
+                @error('work_order_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+            </div>
+            {{-- Derived asset (read-only display + hidden) --}}
+            <input type="hidden" name="asset_id" id="hiddenAssetId" value="{{ old('asset_id', $workOrder?->asset_id) }}">
+            <div id="assetDisplay" class="text-sm text-gray-500 -mt-2 px-1">
+                @if($workOrder) Asset: <span class="font-medium text-gray-800">{{ $workOrder->asset?->name }}</span> @endif
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Asset <span class="text-red-500">*</span></label>
-                    <select name="asset_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('asset_id') border-red-400 @enderror">
-                        <option value="">Select asset...</option>
-                        @foreach($assets as $a)<option value="{{ $a->id }}" {{ (old('asset_id',$workOrder?->asset_id))==$a->id?'selected':'' }}>{{ $a->name }}</option>@endforeach
-                    </select>@error('asset_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Technician <span class="text-red-500">*</span></label>
-                    <select name="technician_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        @foreach($technicians as $t)<option value="{{ $t->id }}" {{ (old('technician_id',$workOrder?->assigned_to))==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Teknisi <span class="text-red-500">*</span></label>
+                    <select name="technician_id" id="technicianSelect" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Pilih teknisi...</option>
+                        @foreach($technicians as $t)<option value="{{ $t->id }}" {{ old('technician_id', $workOrder?->assigned_to) == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
                     </select>
                 </div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Type <span class="text-red-500">*</span></label>
@@ -76,4 +95,29 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+function onWoChange(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const assetId   = opt.dataset.assetId   || '';
+    const assetName = opt.dataset.assetName  || '';
+    const techId    = opt.dataset.technicianId || '';
+
+    document.getElementById('hiddenAssetId').value = assetId;
+
+    const display = document.getElementById('assetDisplay');
+    display.innerHTML = assetId
+        ? 'Asset: <span class="font-medium text-gray-800">' + assetName + '</span>'
+        : '';
+
+    const techSel = document.getElementById('technicianSelect');
+    if (techId) techSel.value = techId;
+}
+// Pre-fill on page load if a WO is already selected
+window.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('woSelect');
+    if (sel && sel.value) onWoChange(sel);
+});
+</script>
+@endpush
 @endsection
