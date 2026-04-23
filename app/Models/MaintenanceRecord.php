@@ -13,7 +13,7 @@ class MaintenanceRecord extends Model
     protected $fillable = [
         'record_number', 'work_order_id', 'asset_id', 'technician_id',
         'type', 'maintenance_date', 'findings', 'actions_taken',
-        'duration_minutes', 'shutdown_minutes', 'notes',
+        'duration_minutes', 'shutdown_minutes', 'notes', 'status_after',
     ];
 
     protected function casts(): array

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Checksheet — ' . $session->schedule->equipment_name)
+@section('title', 'Checksheet — ' . $session->schedule->category)
 
 @section('breadcrumb')
 <nav class="flex" aria-label="Breadcrumb">
@@ -9,7 +9,7 @@
         <li><span class="mx-2">/</span></li>
         <li><a href="{{ route('checksheet.index') }}" class="hover:text-gray-700">Checksheet</a></li>
         <li><span class="mx-2">/</span></li>
-        <li class="text-gray-900 font-medium">{{ $session->schedule->equipment_name }} — {{ $session->period_label }}</li>
+        <li class="text-gray-900 font-medium">{{ $session->schedule->category }} — {{ $session->period_label }}</li>
     </ol>
 </nav>
 @endsection
@@ -20,7 +20,7 @@
     <div class="flex items-center justify-between">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <h1 class="text-2xl font-bold text-gray-900">Checksheet {{ $session->schedule->equipment_name }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900">Checksheet {{ $session->schedule->category }}</h1>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
                     {{ $session->status === 'submitted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                     {{ ucfirst($session->status) }}
@@ -61,28 +61,43 @@
         @endif
     </div>
 
-    {{-- Results grouped --}}
-    @php $grouped = $templates->groupBy('lokasi_inspeksi'); @endphp
-    @foreach($grouped as $lokasi => $items)
+    {{-- Results list --}}
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div class="bg-gray-50 px-4 py-2.5 font-bold text-gray-900 border-b border-gray-200">{{ $lokasi }}</div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-gray-600 font-medium">Item Inspeksi</th>
-                    <th class="px-4 py-2 text-left text-gray-600 font-medium hidden md:table-cell">Metode</th>
-                    <th class="px-4 py-2 text-left text-gray-600 font-medium hidden md:table-cell">Standar</th>
-                    <th class="px-4 py-2 text-center text-gray-600 font-medium">Hasil</th>
-                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Catatan</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Metode</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Standar</th>
+                    <th class="px-4 py-2 text-center text-gray-600 font-medium w-20">Hasil</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-medium">Catatan & Foto</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-                @foreach($items as $template)
-                @php $res = $results[$template->id] ?? null; @endphp
+                @php
+                    $groupedItems = [];
+                    foreach($items as $i) {
+                        $lok = is_array($i) ? ($i['lokasi_inspeksi'] ?? '') : '';
+                        $groupedItems[$lok][] = $i;
+                    }
+                @endphp
+                @foreach($groupedItems as $lokasi => $groupItems)
+                @if($lokasi)
+                <tr class="bg-blue-50/50">
+                    <td colspan="5" class="px-4 py-2 text-xs font-bold text-blue-900 uppercase tracking-wide">LOKASI: {{ $lokasi }}</td>
+                </tr>
+                @endif
+                @foreach($groupItems as $item)
+                @php
+                    $itemKey    = is_array($item) ? ($item['name']    ?? '') : $item;
+                    $itemMetode = is_array($item) ? ($item['metode']  ?? '') : '';
+                    $itemStandar= is_array($item) ? ($item['standar'] ?? '') : '';
+                    $res = $results[$itemKey] ?? null;
+                @endphp
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-gray-900">{{ $template->item_inspeksi }}</td>
-                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ $template->metode_inspeksi }}</td>
-                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ $template->standar_ketentuan }}</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">{{ $itemKey }}</td>
+                    <td class="px-4 py-3 text-gray-500 text-xs">{{ $itemMetode ?: '—' }}</td>
+                    <td class="px-4 py-3 text-gray-500 text-xs">{{ $itemStandar ?: '—' }}</td>
                     <td class="px-4 py-3 text-center">
                         @if($res?->result === 'P')
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">P</span>
@@ -94,10 +109,10 @@
                     </td>
                     <td class="px-4 py-3">
                         @if($res?->notes)
-                            <p class="text-gray-600 text-xs">{{ $res->notes }}</p>
+                            <p class="text-gray-600 text-xs mb-1">{{ $res->notes }}</p>
                         @endif
                         @if($res?->photos)
-                        <div class="flex flex-wrap gap-1 mt-1">
+                        <div class="flex flex-wrap gap-1">
                             @foreach($res->photos as $photo)
                             <img src="{{ Storage::url($photo) }}" class="w-10 h-10 object-cover rounded border border-gray-200 cursor-pointer"
                                  onclick="window.open('{{ Storage::url($photo) }}','_blank')">
@@ -107,10 +122,10 @@
                     </td>
                 </tr>
                 @endforeach
+                @endforeach
             </tbody>
         </table>
     </div>
-    @endforeach
 
     {{-- Abnormals --}}
     @if($session->abnormals->isNotEmpty())

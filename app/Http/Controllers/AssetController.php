@@ -32,7 +32,8 @@ class AssetController extends Controller
 
     public function create()
     {
-        return view('assets.create');
+        $pltsList = \App\Models\Location::where('is_active', true)->orderBy('name')->get();
+        return view('assets.create', compact('pltsList'));
     }
 
     public function store(Request $request)
@@ -40,6 +41,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_code' => 'required|string|unique:assets',
             'name' => 'required|string|max:255',
+            'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
             'location' => 'required|string|max:255',
             'status' => 'required|in:active,inactive,under_maintenance,retired',
@@ -63,7 +65,7 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
-        $asset->load(['workOrders.assignedTo', 'maintenanceSchedules', 'maintenanceRecords.technician']);
+        $asset->load(['workOrders.assignedTo', 'maintenanceRecords.technician']);
         $openWorkOrders = $asset->workOrders()->whereNotIn('status', ['closed'])->count();
         $totalMaintenance = $asset->maintenanceRecords()->count();
         $totalDowntime = $asset->maintenanceRecords()->sum('shutdown_minutes');
@@ -73,7 +75,8 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
-        return view('assets.edit', compact('asset'));
+        $pltsList = \App\Models\Location::where('is_active', true)->orderBy('name')->get();
+        return view('assets.edit', compact('asset', 'pltsList'));
     }
 
     public function update(Request $request, Asset $asset)
@@ -81,6 +84,7 @@ class AssetController extends Controller
         $validated = $request->validate([
             'asset_code' => 'required|string|unique:assets,asset_code,'.$asset->id,
             'name' => 'required|string|max:255',
+            'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
             'location' => 'required|string|max:255',
             'status' => 'required|in:active,inactive,under_maintenance,retired',

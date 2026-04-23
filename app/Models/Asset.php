@@ -11,7 +11,7 @@ class Asset extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'asset_code', 'name', 'category', 'location', 'status',
+        'asset_code', 'location_id', 'name', 'category', 'location', 'status',
         'brand', 'model', 'serial_number', 'purchase_date',
         'purchase_price', 'warranty_expiry', 'description', 'photo',
     ];
@@ -25,6 +25,8 @@ class Asset extends Model
         ];
     }
 
+    public function locationId() { return $this->belongsTo(Location::class, 'location_id'); }
+    public function plts() { return $this->belongsTo(Location::class, 'location_id'); }
     public function workOrders() { return $this->hasMany(WorkOrder::class); }
     public function maintenanceSchedules() { return $this->hasMany(MaintenanceSchedule::class); }
     public function maintenanceRecords() { return $this->hasMany(MaintenanceRecord::class); }

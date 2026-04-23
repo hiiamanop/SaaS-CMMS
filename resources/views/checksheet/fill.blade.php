@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Isi Checksheet')
+@section('title', 'Isi Checksheet — ' . $session->schedule->category)
 
 @section('content')
 <div x-data="checksheetFill({{ $session->id }}, {{ $total }})" x-init="init()" class="max-w-2xl mx-auto">
@@ -9,7 +9,7 @@
     <div class="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 shadow-sm -mx-4 mb-6">
         <div class="flex items-center justify-between gap-4">
             <div>
-                <p class="font-semibold text-gray-900 text-base">{{ $session->schedule->equipment_name }} — {{ $session->plts_location }}</p>
+                <p class="font-semibold text-gray-900 text-base">{{ $session->schedule->category }} — {{ $session->plts_location }}</p>
                 <p class="text-sm text-gray-500">{{ $session->period_label }}</p>
             </div>
             <div class="text-right flex-shrink-0">
@@ -41,39 +41,64 @@
     </div>
     @endif
 
-    {{-- Inspection Items grouped by lokasi --}}
+    {{-- Inspection Items list --}}
     @php
-        $grouped = $templates->groupBy('lokasi_inspeksi');
         $isWeekly = $session->schedule->frequency === 'weekly';
+        $groupedItems = [];
+        foreach($items as $i) {
+            $lok = is_array($i) ? ($i['lokasi_inspeksi'] ?? '') : '';
+            $groupedItems[$lok][] = $i;
+        }
     @endphp
 
-    @foreach($grouped as $lokasi => $items)
     <div class="mb-6">
-        <h3 class="text-base font-bold text-gray-900 bg-gray-100 rounded-lg px-4 py-2.5 mb-3">{{ $lokasi }}</h3>
-
-        <div class="space-y-4">
-            @foreach($items as $template)
-            @php $existing = $results[$template->id] ?? null; @endphp
+        @foreach($groupedItems as $lokasi => $groupItems)
+        @if($lokasi)
+        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3 mt-4 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            {{ $lokasi }}
+        </h3>
+        @endif
+        <div class="space-y-4 mb-6">
+            @foreach($groupItems as $item)
+            @php
+                $itemKey    = is_array($item) ? ($item['name']    ?? '') : $item;
+                $itemMetode = is_array($item) ? ($item['metode']  ?? '') : '';
+                $itemStandar= is_array($item) ? ($item['standar'] ?? '') : '';
+                $existing   = $results[$itemKey] ?? null;
+            @endphp
             <div class="bg-white rounded-lg border border-gray-200 p-4"
                  x-data="{ result: '{{ $existing?->result ?? '' }}', notes: {{ json_encode($existing?->notes ?? '') }}, photos: [] }"
                  x-init="if(result) $dispatch('item-filled')">
 
                 <div class="mb-3">
-                    <p class="font-semibold text-gray-900 text-base">{{ $template->item_inspeksi }}</p>
-                    <p class="text-sm text-gray-500 mt-0.5">{{ $template->metode_inspeksi }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Standar: {{ $template->standar_ketentuan }}</p>
+                    <p class="font-semibold text-gray-900 text-base">{{ $itemKey }}</p>
+                    @if($itemMetode || $itemStandar)
+                    <div class="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                        @if($itemMetode)
+                        <span class="flex items-center gap-1">
+                            <span class="font-medium text-gray-600">Metode:</span> {{ $itemMetode }}
+                        </span>
+                        @endif
+                        @if($itemStandar)
+                        <span class="flex items-center gap-1">
+                            <span class="font-medium text-gray-600">Standar:</span> {{ $itemStandar }}
+                        </span>
+                        @endif
+                    </div>
+                    @endif
                 </div>
 
                 {{-- P / X toggle --}}
                 <div class="flex gap-3 mb-3">
                     <button type="button"
-                            @click="result = 'P'; saveItem({{ $template->id }}, 'P', notes)"
+                            @click="result = 'P'; saveItem('{{ addslashes($itemKey) }}', 'P', notes)"
                             :class="result === 'P' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-green-50'"
                             class="flex-1 min-h-[48px] text-base font-bold rounded-lg border-2 transition-colors">
                         ✓ P (Normal)
                     </button>
                     <button type="button"
-                            @click="result = 'X'; saveItem({{ $template->id }}, 'X', notes)"
+                            @click="result = 'X'; saveItem('{{ addslashes($itemKey) }}', 'X', notes)"
                             :class="result === 'X' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
                             class="flex-1 min-h-[48px] text-base font-bold rounded-lg border-2 transition-colors">
                         ✗ X (Anomali)
@@ -85,7 +110,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Catatan <span class="text-red-500">*</span></label>
                         <textarea x-model="notes"
-                                  @change="saveItem({{ $template->id }}, result, notes)"
+                                  @change="saveItem('{{ addslashes($itemKey) }}', result, notes)"
                                   rows="2" placeholder="Deskripsikan anomali..."
                                   class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:ring-2 focus:ring-gray-900 min-h-[60px]"></textarea>
                     </div>
@@ -97,7 +122,7 @@
                             <span class="text-gray-400 font-normal">(JPG/PNG/HEIC, max 5MB)</span>
                         </label>
                         <input type="file" accept=".jpg,.jpeg,.png,.heic"
-                               @change="uploadPhoto($event, {{ $template->id }})"
+                               @change="uploadPhoto($event, '{{ addslashes($itemKey) }}')"
                                class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-900 file:text-white hover:file:bg-gray-700">
 
                         {{-- Existing photos --}}
@@ -119,8 +144,8 @@
             </div>
             @endforeach
         </div>
+        @endforeach
     </div>
-    @endforeach
 
     {{-- Abnormal Notes (Semesteran & Tahunan) --}}
     @if(in_array($session->schedule->frequency, ['semester', 'yearly']))
@@ -188,10 +213,12 @@
             <div class="flex gap-3 pt-2">
                 <button type="submit"
                         :disabled="filled < {{ $total }}"
-                        :title="filled < {{ $total }} ? 'Lengkapi semua item terlebih dahulu' : ''"
-                        :class="filled >= {{ $total }} ? 'bg-gray-900 hover:bg-gray-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'"
-                        class="flex-1 text-white text-sm font-medium py-3 rounded-lg min-h-[48px] transition-colors">
-                    Submit Checksheet
+                        :title="filled < {{ $total }} ? 'Lengkapi semua item terlebih dahulu (' + filled + '/{{ $total }})' : 'Submit Checksheet'"
+                        :class="filled >= {{ $total }}
+                            ? 'bg-gray-900 hover:bg-gray-700 text-white cursor-pointer'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+                        class="flex-1 text-sm font-medium py-3 rounded-lg min-h-[48px] transition-colors">
+                    <span x-text="filled >= {{ $total }} ? 'Submit Checksheet' : 'Submit (' + filled + '/{{ $total }} terisi)'"></span>
                 </button>
                 <a href="{{ url()->previous() }}" class="px-6 flex items-center justify-center bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 min-h-[48px]">
                     Kembali
@@ -203,33 +230,40 @@
 
 @push('scripts')
 <script>
+@php
+    $confirmedItemsJson = json_encode(
+        $results->whereNotNull('result')
+            ->mapWithKeys(fn($r) => [$r->item_name => true])
+            ->toArray()
+    );
+@endphp
 function checksheetFill(sessionId, totalItems) {
     return {
         filled: {{ $results->whereNotNull('result')->count() }},
+        confirmedItems: {!! $confirmedItemsJson !!},
         saveStatus: 'Belum disimpan',
         autosaveTimer: null,
         pendingItems: {},
 
         init() {
-            // Auto-save every 30 seconds
             this.autosaveTimer = setInterval(() => this.autosave(), 30000);
         },
 
         saveItem(templateId, result, notes) {
             this.pendingItems[templateId] = { result, notes };
             this.updateFilled();
-            // Debounce individual saves
             clearTimeout(this._debounce);
             this._debounce = setTimeout(() => this.autosave(), 2000);
         },
 
         updateFilled() {
-            let count = {{ $results->whereNotNull('result')->count() }};
-            Object.values(this.pendingItems).forEach(item => {
-                if (item.result) count++;
+            // Merge confirmed server state with pending changes
+            const effective = { ...this.confirmedItems };
+            Object.entries(this.pendingItems).forEach(([key, val]) => {
+                if (val.result) effective[key] = true;
+                else delete effective[key];
             });
-            // Deduplicate - just count non-null results in pending
-            this.filled = Math.min(count, totalItems);
+            this.filled = Math.min(Object.keys(effective).length, totalItems);
         },
 
         async autosave() {
@@ -246,8 +280,14 @@ function checksheetFill(sessionId, totalItems) {
                 });
                 const data = await resp.json();
                 if (data.ok) {
-                    this.saveStatus = 'Tersimpan ' + data.saved_at;
+                    // Update confirmed state so updateFilled stays accurate after clear
+                    Object.entries(this.pendingItems).forEach(([key, val]) => {
+                        if (val.result) this.confirmedItems[key] = true;
+                        else delete this.confirmedItems[key];
+                    });
                     this.pendingItems = {};
+                    this.saveStatus = 'Tersimpan ' + data.saved_at;
+                    this.updateFilled();
                 }
             } catch (e) {
                 this.saveStatus = 'Gagal menyimpan';

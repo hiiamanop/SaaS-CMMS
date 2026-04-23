@@ -52,10 +52,8 @@
                         ['route' => 'spare-parts.index', 'label' => 'Spare Parts', 'icon' => 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6v6l4 2', 'match' => 'spare-parts*', 'roles' => null],
                         ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule', 'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'match' => 'maintenance-schedules*', 'roles' => null],
                         ['route' => 'schedule-report.index', 'label' => 'Schedule Report', 'icon' => 'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z', 'match' => 'schedule-report*', 'roles' => null],
-                        ['route' => 'work-orders.index', 'label' => 'Work Orders', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => ['admin', 'supervisor', 'pm']],
-                        ['route' => 'maintenance-records.index', 'label' => 'WO Records', 'icon' => 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8', 'match' => 'maintenance-records*', 'roles' => null],
+                        ['route' => 'work-orders.index', 'label' => 'Work Orders & Records', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
                         ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
-                        ['route' => 'checksheet.templates.index', 'label' => 'Checksheet Template', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'match' => 'checksheet.templates*', 'roles' => ['admin', 'supervisor', 'pm']],
                         ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6', 'match' => 'timeline*', 'roles' => null],
                         ['route' => 'kpi.index', 'label' => 'KPI Dashboard', 'icon' => 'M18 20V10 M12 20V4 M6 20v-6', 'match' => 'kpi*', 'roles' => null],
                     ];
@@ -321,8 +319,10 @@
                 </div>
             @endif
 
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
-                @yield('content')
+            <main class="flex-1 overflow-y-auto p-4 lg:p-5 w-full">
+                <div class="w-full">
+                    @yield('content')
+                </div>
             </main>
         </div>
     </div>

@@ -22,7 +22,8 @@ class SettingsController extends Controller
         $this->authorizeAdmin();
         $users = User::orderBy('name')->get();
         $roles = Role::orderBy('label')->get();
-        return view('settings.index', compact('users', 'roles'));
+        $locations = \App\Models\Location::orderBy('name')->get();
+        return view('settings.index', compact('users', 'roles', 'locations'));
     }
 
     public function createUser()
@@ -157,5 +158,62 @@ class SettingsController extends Controller
         $role->delete();
         return redirect()->route('settings.index', ['tab' => 'roles'])
             ->with('success', 'Role berhasil dihapus.');
+    }
+
+    // ─── Lokasi PLTS CRUD ───────────────────────────────────────────────────
+
+    public function storeLocation(Request $request)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'name'         => 'required|string|max:255|unique:locations,name',
+            'code'         => 'nullable|string|max:50',
+            'capacity_kwp' => 'nullable|numeric|min:0',
+        ]);
+
+        \App\Models\Location::create([
+            'name'         => $request->name,
+            'code'         => $request->code,
+            'capacity_kwp' => $request->capacity_kwp,
+            'is_active'    => true,
+        ]);
+
+        return redirect()->route('settings.index', ['tab' => 'locations'])
+            ->with('success', 'Lokasi PLTS berhasil ditambahkan.');
+    }
+
+    public function updateLocation(Request $request, \App\Models\Location $location)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'name'         => 'required|string|max:255|unique:locations,name,' . $location->id,
+            'code'         => 'nullable|string|max:50',
+            'capacity_kwp' => 'nullable|numeric|min:0',
+            'is_active'    => 'boolean',
+        ]);
+
+        $location->update([
+            'name'         => $request->name,
+            'code'         => $request->code,
+            'capacity_kwp' => $request->capacity_kwp,
+            'is_active'    => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('settings.index', ['tab' => 'locations'])
+            ->with('success', 'Lokasi PLTS berhasil diperbarui.');
+    }
+
+    public function destroyLocation(\App\Models\Location $location)
+    {
+        $this->authorizeAdmin();
+        
+        if ($location->users()->exists() || $location->maintenanceSchedules()->exists()) {
+            return back()->with('error', 'Lokasi PLTS sedang digunakan dan tidak dapat dihapus.');
+        }
+
+        $location->delete();
+        
+        return redirect()->route('settings.index', ['tab' => 'locations'])
+            ->with('success', 'Lokasi PLTS berhasil dihapus.');
     }
 }

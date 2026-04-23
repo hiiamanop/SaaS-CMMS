@@ -46,7 +46,8 @@ class ChecksheetSession extends Model
 
     public function getProgressAttribute(): array
     {
-        $total = $this->schedule->checklistTemplates()->count();
+        $items  = $this->schedule->item_pekerjaan ?? [];
+        $total  = is_array($items) ? count($items) : 0;
         $filled = $this->results()->whereNotNull('result')->count();
         return ['total' => $total, 'filled' => $filled];
     }

@@ -19,7 +19,7 @@ class ScheduleReportController extends Controller
         $pltsLocations = ['PLTS Pertiwi Lestari', 'PLTS Rengiat', 'PLTS Demo Site'];
         $categories    = ['PV Module', 'Inverter', 'Panel LV', 'Transformer'];
 
-        $schedules = MaintenanceSchedule::with('asset')
+        $schedules = MaintenanceSchedule::with('location')
             ->when($category, fn($q) => $q->where('category', $category))
             ->where('status', 'active')
             ->get();
@@ -51,7 +51,7 @@ class ScheduleReportController extends Controller
             ->when($pltsLocation && $pltsLocation !== 'All', fn($q) => $q->where('plts_location', $pltsLocation))
             ->get();
 
-        $schedules = MaintenanceSchedule::with('asset')
+        $schedules = MaintenanceSchedule::with('location')
             ->when($category, fn($q) => $q->where('category', $category))
             ->where('status', 'active')
             ->get();

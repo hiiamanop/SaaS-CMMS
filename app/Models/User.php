@@ -10,7 +10,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'avatar', 'is_active'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'location_id', 'phone', 'avatar', 'is_active'];
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
@@ -25,6 +25,8 @@ class User extends Authenticatable
     public function isSupervisor(): bool { return $this->role === 'supervisor'; }
     public function isTechnician(): bool { return $this->role === 'technician'; }
     public function isAdminOrSupervisor(): bool { return in_array($this->role, ['admin', 'supervisor']); }
+
+    public function location() { return $this->belongsTo(Location::class); }
 
     public function assignedWorkOrders() { return $this->hasMany(WorkOrder::class, 'assigned_to'); }
     public function createdWorkOrders() { return $this->hasMany(WorkOrder::class, 'created_by'); }

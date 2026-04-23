@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChecksheetSession;
-use App\Models\ChecksheetTemplate;
+
 use App\Models\ChecksheetResult;
 use App\Models\ChecksheetAbnormal;
 use App\Models\MaintenanceSchedule;
@@ -20,8 +20,11 @@ class ChecksheetController extends Controller
         $sessionMonth   = $request->get('month');
         $sessionYear    = $request->get('year'); // null = no year filter (show all years)
 
-        $schedules = MaintenanceSchedule::with(['asset', 'technician', 'checklistTemplates'])
+        $user = Auth::user();
+
+        $schedules = MaintenanceSchedule::with(['technician', 'location'])
             ->where('status', 'active')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('location_id', $user->location_id))
             ->orderBy('category')
             ->orderBy('equipment_name')
             ->get();
@@ -101,6 +104,7 @@ class ChecksheetController extends Controller
             'year'                    => 'required|integer',
             'week_number'             => 'nullable|integer',
             'month'                   => 'nullable|integer',
+            'quarter'                 => 'nullable|integer',
             'semester'                => 'nullable|integer',
         ]);
 
@@ -109,12 +113,13 @@ class ChecksheetController extends Controller
 
         $session = ChecksheetSession::create([
             'maintenance_schedule_id' => $schedule->id,
-            'plts_location'           => $schedule->asset->name ?? $schedule->equipment_name,
+            'plts_location'           => $schedule->location?->name ?? $schedule->equipment_name,
             'equipment_location'      => $schedule->equipment_name,
             'period_label'            => $period,
             'year'                    => $request->year,
             'week_number'             => $request->week_number,
             'month'                   => $request->month,
+            'quarter'                 => $request->quarter,
             'semester'                => $request->semester,
             'status'                  => 'draft',
         ]);
@@ -124,14 +129,14 @@ class ChecksheetController extends Controller
 
     public function fill(ChecksheetSession $session)
     {
-        $session->load(['schedule.checklistTemplates', 'results.template', 'abnormals']);
+        $session->load(['schedule', 'results', 'abnormals']);
 
-        $templates = $session->schedule->checklistTemplates()->orderBy('order')->get();
-        $results   = $session->results->keyBy('template_id');
-        $total     = $templates->count();
-        $filled    = $session->results->whereNotNull('result')->count();
+        $items   = $session->schedule->item_pekerjaan ?? [];
+        $results = $session->results->keyBy('item_name');
+        $total   = is_array($items) ? count($items) : 0;
+        $filled  = $session->results->whereNotNull('result')->count();
 
-        return view('checksheet.fill', compact('session', 'templates', 'results', 'total', 'filled'));
+        return view('checksheet.fill', compact('session', 'items', 'results', 'total', 'filled'));
     }
 
     public function autosave(Request $request, ChecksheetSession $session)
@@ -141,10 +146,10 @@ class ChecksheetController extends Controller
         }
 
         $items = $request->get('items', []);
-        foreach ($items as $templateId => $data) {
+        foreach ($items as $itemName => $data) {
             $result = ChecksheetResult::firstOrNew([
-                'session_id'  => $session->id,
-                'template_id' => $templateId,
+                'session_id' => $session->id,
+                'item_name'  => $itemName,
             ]);
             $result->result = $data['result'] ?? null;
             $result->notes  = $data['notes'] ?? null;
@@ -182,8 +187,8 @@ class ChecksheetController extends Controller
         );
 
         $result = ChecksheetResult::firstOrNew([
-            'session_id'  => $session->id,
-            'template_id' => $templateId,
+            'session_id' => $session->id,
+            'item_name'  => $templateId, // using templateId param as itemName
         ]);
         $photos   = $result->photos ?? [];
         $photos[] = $path;
@@ -204,7 +209,8 @@ class ChecksheetController extends Controller
             'signed_date_pm'      => 'nullable|date',
         ]);
 
-        $totalCount  = $session->schedule->checklistTemplates()->count();
+        $items       = $session->schedule->item_pekerjaan ?? [];
+        $totalCount  = is_array($items) ? count($items) : 0;
         $filledCount = $session->results()->whereNotNull('result')->count();
 
         if ($filledCount < $totalCount) {
@@ -229,20 +235,20 @@ class ChecksheetController extends Controller
 
     public function show(ChecksheetSession $session)
     {
-        $session->load(['schedule.checklistTemplates', 'results.template', 'abnormals', 'submittedBy']);
-        $templates = $session->schedule->checklistTemplates()->orderBy('order')->get();
-        $results   = $session->results->keyBy('template_id');
+        $session->load(['schedule', 'results', 'abnormals', 'submittedBy']);
+        $items   = $session->schedule->item_pekerjaan ?? [];
+        $results = $session->results->keyBy('item_name');
 
-        return view('checksheet.show', compact('session', 'templates', 'results'));
+        return view('checksheet.show', compact('session', 'items', 'results'));
     }
 
     public function exportPdf(ChecksheetSession $session)
     {
-        $session->load(['schedule.checklistTemplates', 'results.template', 'abnormals', 'submittedBy']);
-        $templates = $session->schedule->checklistTemplates()->orderBy('order')->get();
-        $results   = $session->results->keyBy('template_id');
+        $session->load(['schedule', 'results', 'abnormals', 'submittedBy']);
+        $items   = $session->schedule->item_pekerjaan ?? [];
+        $results = $session->results->keyBy('item_name');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('checksheet.pdf', compact('session', 'templates', 'results'))
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('checksheet.pdf', compact('session', 'items', 'results'))
             ->setPaper('a4', 'landscape');
 
         $filename = implode('_', [
@@ -264,6 +270,13 @@ class ChecksheetController extends Controller
         return match($frequency) {
             'weekly'    => Carbon::createFromDate($year, $s->month ?? 1, 1)->addWeeks($s->week_number ?? 1)->subDay()->endOfDay(),
             'monthly'   => Carbon::createFromDate($year, $s->month ?? 1, 1)->endOfMonth(),
+            'triwulan'  => match((int)($s->quarter ?? 1)) {
+                1 => Carbon::createFromDate($year, 3, 31)->endOfDay(),
+                2 => Carbon::createFromDate($year, 6, 30)->endOfDay(),
+                3 => Carbon::createFromDate($year, 9, 30)->endOfDay(),
+                4 => Carbon::createFromDate($year, 12, 31)->endOfDay(),
+                default => Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            },
             'quarterly' => ($s->semester == 1)
                 ? Carbon::createFromDate($year, 6, 30)->endOfDay()
                 : Carbon::createFromDate($year, 12, 31)->endOfDay(),
@@ -277,6 +290,7 @@ class ChecksheetController extends Controller
         return match($frequency) {
             'weekly'    => 'Week ' . ($data['week_number'] ?? 1) . ' - ' . Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('M Y'),
             'monthly'   => Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('F Y'),
+            'triwulan'  => 'Kuartal ' . ($data['quarter'] ?? 1) . ' ' . $data['year'],
             'quarterly' => 'Semester ' . ($data['semester'] ?? 1) . ' ' . $data['year'],
             'annually'  => (string)$data['year'],
             default     => (string)$data['year'],

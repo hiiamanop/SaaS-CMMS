@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOrder;
 use App\Models\MaintenanceRecord;
+use App\Models\MaintenanceSchedule;
 use App\Models\ChecksheetSession;
 use App\Models\Asset;
 use App\Models\User;
@@ -15,18 +16,10 @@ class TimelineController extends Controller
     {
         $query_wo = WorkOrder::withTrashed()->with(['asset', 'assignedTo']);
         $query_mr = MaintenanceRecord::withTrashed()->with(['asset', 'technician']);
-        $query_cs = ChecksheetSession::with(['schedule.asset', 'submittedBy'])
+        $query_cs  = ChecksheetSession::with(['schedule' => fn($q) => $q->withTrashed()], 'submittedBy')
             ->where('status', 'submitted');
+        $query_sch = MaintenanceSchedule::onlyTrashed()->with(['technician', 'location', 'deletedBy']);
 
-        if ($request->asset_id) {
-            $query_wo->where('asset_id', $request->asset_id);
-            $query_mr->where('asset_id', $request->asset_id);
-        }
-        if ($request->technician_id) {
-            $query_wo->where('assigned_to', $request->technician_id);
-            $query_mr->where('technician_id', $request->technician_id);
-            $query_cs->where('submitted_by', $request->technician_id);
-        }
         if ($request->date_from) {
             $query_wo->where('created_at', '>=', $request->date_from);
             $query_mr->where('maintenance_date', '>=', $request->date_from);
@@ -36,6 +29,7 @@ class TimelineController extends Controller
             $query_wo->where('created_at', '<=', $request->date_to.' 23:59:59');
             $query_mr->where('maintenance_date', '<=', $request->date_to);
             $query_cs->where('submitted_at', '<=', $request->date_to.' 23:59:59');
+            $query_sch->where('deleted_at', '<=', $request->date_to.' 23:59:59');
         }
 
         $workOrders = $query_wo->get()->map(function($wo) {
@@ -88,11 +82,29 @@ class TimelineController extends Controller
             ];
         });
 
-        $timeline = $workOrders->concat($maintenanceRecords)->concat($checksheets)->sortByDesc('date')->values();
+        $deletedSchedules = $query_sch->get()->map(function($sch) {
+            return [
+                'id'       => $sch->id,
+                'type'     => 'maintenance_schedule',
+                'title'    => 'Jadwal Dihapus: '.($sch->title ?: $sch->equipment_name),
+                'asset'    => $sch->location?->name ?? '—',
+                'person'   => $sch->technician?->name ?? '—',
+                'executor' => $sch->deletedBy?->name ?? 'System',
+                'status'   => 'deleted',
+                'wo_type'  => 'system',
+                'priority' => null,
+                'date'     => $sch->deleted_at,
+                'url'      => null,
+                'deleted'  => true,
+            ];
+        });
+
+        $timeline = $workOrders->concat($maintenanceRecords)->concat($checksheets)->concat($deletedSchedules)->sortByDesc('date')->values();
 
         $calendarEvents = $timeline->map(function($item) {
             $color = match(true) {
                 $item['type'] === 'checksheet' => '#14b8a6',
+                $item['status'] === 'deleted' => '#ef4444',
                 in_array($item['status'], ['completed', 'closed']) => '#10b981',
                 str_starts_with($item['wo_type'] ?? '', 'preventive') => '#3b82f6',
                 default => '#f97316',
@@ -113,9 +125,6 @@ class TimelineController extends Controller
             ];
         })->values();
 
-        $assets = Asset::orderBy('name')->get();
-        $technicians = User::where('role', 'technician')->get();
-
-        return view('timeline.index', compact('timeline', 'assets', 'technicians', 'calendarEvents'));
+        return view('timeline.index', compact('timeline', 'calendarEvents'));
     }
 }

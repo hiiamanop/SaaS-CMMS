@@ -48,12 +48,6 @@ $freqLabels = [
     {{-- Filter --}}
     <div x-show="view==='list'" class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Semua Aset</option>
-                @foreach($assets as $a)
-                <option value="{{ $a->id }}" {{ request('asset_id') == $a->id ? 'selected' : '' }}>{{ $a->name }}</option>
-                @endforeach
-            </select>
             <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Semua Kategori</option>
                 @foreach($categories as $cat)
@@ -117,9 +111,9 @@ $freqLabels = [
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                         <th class="px-4 py-3 text-left w-8">No</th>
-                        <th class="px-4 py-3 text-left">Nama Alat / Item Pekerjaan</th>
-                        <th class="px-4 py-3 text-left">Kategori</th>
-                        <th class="px-4 py-3 text-left">Aset</th>
+                        <th class="px-4 py-3 text-left">Judul Schedule</th>
+                        <th class="px-4 py-3 text-left">Lokasi PLTS</th>
+                        <th class="px-4 py-3 text-left">Nama Trafo</th>
                         <th class="px-4 py-3 text-center">Frekuensi</th>
                         <th class="px-4 py-3 text-center">Shutdown</th>
                         <th class="px-4 py-3 text-center">Minggu Terjadwal</th>
@@ -148,13 +142,10 @@ $freqLabels = [
                 <tr class="hover:bg-blue-50/20">
                     <td class="px-4 py-3 text-gray-400 text-xs">{{ $no++ }}</td>
                     <td class="px-4 py-3">
-                        <p class="font-medium text-gray-900">{{ $s->equipment_name ?: $s->title }}</p>
-                        @if($s->item_pekerjaan)
-                        <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $s->item_pekerjaan_text }}</p>
-                        @endif
+                        <p class="text-sm text-gray-900 font-medium">{{ $s->title ?: '—' }}</p>
                     </td>
-                    <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->category ?: '—' }}</td>
-                    <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->asset->name }}</td>
+                    <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->location->name ?? '—' }}</td>
+                    <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->trafo_name ?: '—' }}</td>
                     <td class="px-4 py-3 text-center">
                         <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium {{ $fl['class'] }}">{{ $fl['label'] }}</span>
                     </td>

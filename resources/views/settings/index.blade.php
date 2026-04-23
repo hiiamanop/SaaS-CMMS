@@ -48,6 +48,11 @@
                 class="py-3 text-sm transition-colors">
                 Role
             </button>
+            <button @click="tab='locations'"
+                :class="tab==='locations' ? 'border-b-2 border-gray-900 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'"
+                class="py-3 text-sm transition-colors">
+                Lokasi PLTS
+            </button>
         </nav>
     </div>
 
@@ -242,6 +247,133 @@
                 <div class="flex-1 min-w-48">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Deskripsi</label>
                     <input name="description" value="{{ old('description') }}" placeholder="Opsional" maxlength="255"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
+                    Tambah
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {{-- ── Tab: Lokasi PLTS ──────────────────────────────────────────────────── --}}
+    <div x-show="tab==='locations'" x-transition>
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900">Manajemen Lokasi PLTS</h2>
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left font-medium text-gray-600">Nama Lokasi</th>
+                        <th class="px-5 py-3 text-left font-medium text-gray-600">Kode</th>
+                        <th class="px-5 py-3 text-left font-medium text-gray-600">Kapasitas (kWp)</th>
+                        <th class="px-5 py-3 text-center font-medium text-gray-600">Status</th>
+                        <th class="px-5 py-3 text-right font-medium text-gray-600">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($locations as $loc)
+                    <tr class="hover:bg-gray-50" x-data="{ editing: false }">
+                        {{-- Name --}}
+                        <template x-if="!editing">
+                            <td class="px-5 py-3 font-medium text-gray-900">{{ $loc->name }}</td>
+                        </template>
+                        <template x-if="editing">
+                            <td class="px-5 py-3">
+                                <input form="form-loc-{{ $loc->id }}" name="name" value="{{ $loc->name }}" required
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </td>
+                        </template>
+
+                        {{-- Code --}}
+                        <template x-if="!editing">
+                            <td class="px-5 py-3 text-gray-600">{{ $loc->code ?: '—' }}</td>
+                        </template>
+                        <template x-if="editing">
+                            <td class="px-5 py-3">
+                                <input form="form-loc-{{ $loc->id }}" name="code" value="{{ $loc->code }}"
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </td>
+                        </template>
+
+                        {{-- Capacity --}}
+                        <template x-if="!editing">
+                            <td class="px-5 py-3 text-gray-600">{{ $loc->capacity_kwp ? number_format((float)$loc->capacity_kwp, 2) : '—' }}</td>
+                        </template>
+                        <template x-if="editing">
+                            <td class="px-5 py-3">
+                                <input type="number" step="0.01" form="form-loc-{{ $loc->id }}" name="capacity_kwp" value="{{ $loc->capacity_kwp }}"
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            </td>
+                        </template>
+
+                        {{-- Status --}}
+                        <template x-if="!editing">
+                            <td class="px-5 py-3 text-center">
+                                @if($loc->is_active)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Nonaktif</span>
+                                @endif
+                            </td>
+                        </template>
+                        <template x-if="editing">
+                            <td class="px-5 py-3 text-center">
+                                <select form="form-loc-{{ $loc->id }}" name="is_active" class="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none">
+                                    <option value="1" {{ $loc->is_active ? 'selected' : '' }}>Aktif</option>
+                                    <option value="0" {{ !$loc->is_active ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            </td>
+                        </template>
+
+                        {{-- Actions --}}
+                        <td class="px-5 py-3 text-right">
+                            <form id="form-loc-{{ $loc->id }}" action="{{ route('settings.locations.update', $loc) }}" method="POST" x-show="editing" class="inline">
+                                @csrf @method('PUT')
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="submit" class="text-sm text-green-700 hover:text-green-900 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50">Simpan</button>
+                                    <button type="button" @click="editing=false" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Batal</button>
+                                </div>
+                            </form>
+                            <div class="flex items-center justify-end gap-2" x-show="!editing">
+                                <button type="button" @click="editing=true"
+                                        class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                    Edit
+                                </button>
+                                <button @click="$dispatch('open-delete', {action: '{{ route('settings.locations.destroy', $loc) }}', message: 'Hapus lokasi PLTS {{ addslashes($loc->name) }}?'})"
+                                        class="text-sm text-red-600 hover:text-red-800 px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50">
+                                    Hapus
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">Belum ada lokasi PLTS.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Add new location form --}}
+        <div class="bg-white rounded-lg border border-gray-200 p-5 mt-4">
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Tambah Lokasi PLTS</h3>
+            <form action="{{ route('settings.locations.store') }}" method="POST" class="flex flex-wrap gap-3 items-end">
+                @csrf
+                <div class="flex-1 min-w-48">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Nama Lokasi <span class="text-red-500">*</span></label>
+                    <input name="name" value="{{ old('name') }}" required placeholder="cth: PLTS Atap Gedung A" maxlength="255"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-400 @enderror">
+                    @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Kode / ID</label>
+                    <input name="code" value="{{ old('code') }}" placeholder="cth: GDA-01" maxlength="50"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas (kWp)</label>
+                    <input type="number" step="0.01" name="capacity_kwp" value="{{ old('capacity_kwp') }}" placeholder="cth: 50.5"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">

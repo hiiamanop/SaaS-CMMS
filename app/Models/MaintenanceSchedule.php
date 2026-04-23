@@ -12,10 +12,11 @@ class MaintenanceSchedule extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'asset_id', 'technician_id', 'type', 'frequency', 'frequency_days',
+        'title', 'location_id', 'technician_id', 'type', 'frequency', 'frequency_days',
         'start_date', 'next_due_date', 'last_done_date', 'status', 'notes',
-        'category', 'equipment_name', 'item_pekerjaan',
+        'category', 'equipment_name', 'trafo_name', 'item_pekerjaan',
         'planned_weeks', 'shutdown_required', 'shutdown_duration_hours', 'checklist_template',
+        'deleted_by',
     ];
 
     protected function casts(): array
@@ -31,9 +32,9 @@ class MaintenanceSchedule extends Model
         ];
     }
 
-    public function asset()              { return $this->belongsTo(Asset::class); }
+    public function location()           { return $this->belongsTo(Location::class); }
     public function technician()         { return $this->belongsTo(User::class, 'technician_id'); }
-    public function checklistTemplates() { return $this->hasMany(ChecksheetTemplate::class)->orderBy('order'); }
+    public function deletedBy()          { return $this->belongsTo(User::class, 'deleted_by'); }
     public function checksheetSessions() { return $this->hasMany(ChecksheetSession::class); }
     public function workOrders()         { return $this->hasMany(WorkOrder::class); }
 
@@ -51,26 +52,44 @@ class MaintenanceSchedule extends Model
     {
         $base = $this->last_done_date ?? $this->start_date;
         return match($this->frequency) {
-            'daily'    => $base->addDay(),
-            'weekly'   => $base->addWeek(),
-            'monthly'  => $base->addMonth(),
-            'quarterly'=> $base->addMonths(3),
-            'annually' => $base->addYear(),
-            'custom'   => $base->addDays($this->frequency_days ?? 30),
+            'daily'     => $base->addDay(),
+            'weekly'    => $base->addWeek(),
+            'monthly'   => $base->addMonth(),
+            'triwulan'  => $base->addMonths(3),
+            'quarterly' => $base->addMonths(6),
+            'annually'  => $base->addYear(),
+            'custom'    => $base->addDays($this->frequency_days ?? 30),
             default    => $base->addMonth(),
         };
     }
 
     /**
-     * Human-readable list of item_pekerjaan as string.
+     * Human-readable list of item_pekerjaan as string (Inspection Items).
      */
     public function getItemPekerjaanTextAttribute(): string
     {
         $items = $this->item_pekerjaan;
-        if (is_array($items)) {
-            return implode(', ', $items);
-        }
-        return $items ?? '';
+        if (!is_array($items)) return $items ?? '';
+        return implode(', ', array_unique(array_filter(array_map(
+            fn($i) => is_array($i) ? ($i['name'] ?? '') : $i,
+            $items
+        ))));
+    }
+
+    /**
+     * Human-readable list of unique lokasi_inspeksi as string.
+     */
+    public function getLokasiInspeksiTextAttribute(): string
+    {
+        $items = $this->item_pekerjaan;
+        if (!is_array($items)) return '';
+        
+        $locations = array_unique(array_filter(array_map(
+            fn($i) => is_array($i) ? ($i['lokasi_inspeksi'] ?? '') : '',
+            $items
+        )));
+
+        return implode(', ', $locations);
     }
 
     /**
@@ -81,6 +100,7 @@ class MaintenanceSchedule extends Model
         return match($this->frequency) {
             'weekly'    => 'Week ' . ($data['week_number'] ?? 1) . ' - ' . Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('M Y'),
             'monthly'   => Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('F Y'),
+            'triwulan'  => 'Kuartal ' . ($data['quarter'] ?? 1) . ' ' . $data['year'],
             'quarterly' => 'Semester ' . ($data['semester'] ?? 1) . ' ' . $data['year'],
             'annually'  => (string) $data['year'],
             default     => (string) $data['year'],
@@ -119,6 +139,9 @@ class MaintenanceSchedule extends Model
                 }
                 break;
 
+            case 'triwulan':
+                $periodParams = [['quarter' => 1], ['quarter' => 2], ['quarter' => 3], ['quarter' => 4]];
+                break;
             case 'quarterly':
                 $periodParams[] = ['semester' => 1];
                 $periodParams[] = ['semester' => 2];
@@ -136,6 +159,7 @@ class MaintenanceSchedule extends Model
             $q->where(fn($q) => $q
                 ->when(isset($params['month']),       fn($q) => $q->where('month', $params['month']),       fn($q) => $q->whereNull('month'))
                 ->when(isset($params['week_number']), fn($q) => $q->where('week_number', $params['week_number']), fn($q) => $q->whereNull('week_number'))
+                ->when(isset($params['quarter']),     fn($q) => $q->where('quarter', $params['quarter']),   fn($q) => $q->whereNull('quarter'))
                 ->when(isset($params['semester']),    fn($q) => $q->where('semester', $params['semester']),  fn($q) => $q->whereNull('semester'))
             );
 
@@ -145,7 +169,7 @@ class MaintenanceSchedule extends Model
 
             ChecksheetSession::create([
                 'maintenance_schedule_id' => $this->id,
-                'plts_location'           => $this->asset?->name ?? $this->equipment_name,
+                'plts_location'           => $this->location?->name ?? $this->equipment_name,
                 'equipment_location'      => $this->equipment_name,
                 'period_label'            => $this->periodLabel($allParams),
                 'year'                    => $year,

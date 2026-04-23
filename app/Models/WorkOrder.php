@@ -11,8 +11,9 @@ class WorkOrder extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'wo_number', 'title', 'asset_id', 'assigned_to', 'assigned_to_external', 'created_by',
-        'maintenance_schedule_id', 'type', 'priority', 'status',
+        'wo_number', 'title', 'asset_id', 'is_external_client', 'client_name', 
+        'assigned_to', 'assigned_to_external', 'created_by',
+        'maintenance_schedule_id', 'type', 'priority', 'status', 'order_date',
         'due_date', 'start_date', 'started_at', 'completed_at', 'description', 'notes',
         'shutdown_required',
     ];
@@ -20,6 +21,8 @@ class WorkOrder extends Model
     protected function casts(): array
     {
         return [
+            'is_external_client' => 'boolean',
+            'order_date' => 'datetime',
             'due_date' => 'date',
             'start_date' => 'date',
             'started_at' => 'datetime',
@@ -64,7 +67,7 @@ class WorkOrder extends Model
 
     public function isOverdue(): bool
     {
-        return $this->due_date->isPast() && !in_array($this->status, ['closed']);
+        return $this->due_date->isPast() && !in_array($this->status, ['closed', 'solved']);
     }
 
     public function getPriorityColorAttribute(): string
@@ -84,7 +87,7 @@ class WorkOrder extends Model
             'open' => 'blue',
             'in_progress' => 'yellow',
             'pending_review' => 'purple',
-            'closed' => 'green',
+            'closed', 'solved' => 'green',
             default => 'gray',
         };
     }
@@ -96,6 +99,7 @@ class WorkOrder extends Model
             'in_progress' => 'In Progress',
             'pending_review' => 'Pending Review',
             'closed' => 'Closed',
+            'solved' => 'Solved',
             default => ucfirst($this->status),
         };
     }

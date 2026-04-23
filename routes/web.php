@@ -11,7 +11,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\ChecksheetController;
-use App\Http\Controllers\ChecksheetTemplateController;
 use App\Http\Controllers\ScheduleReportController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
@@ -60,15 +59,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
 
-    // Checksheet Templates (per Maintenance Schedule)
-    Route::get('checksheet/templates', [ChecksheetTemplateController::class, 'index'])->name('checksheet.templates.index');
-    Route::post('checksheet/templates/{schedule}/items', [ChecksheetTemplateController::class, 'storeItem'])->name('checksheet.templates.store-item');
-    Route::put('checksheet/templates/items/{item}', [ChecksheetTemplateController::class, 'updateItem'])->name('checksheet.templates.update-item');
-    Route::delete('checksheet/templates/items/{item}', [ChecksheetTemplateController::class, 'destroyItem'])->name('checksheet.templates.destroy-item');
+
 
     // Checksheet Sessions
     Route::get('checksheet', [ChecksheetController::class, 'index'])->name('checksheet.index');
-    Route::get('checksheet/create', fn() => redirect()->route('checksheet.templates.index'))->name('checksheet.create');
+    Route::get('checksheet/create', fn() => redirect()->route('checksheet.index'))->name('checksheet.create');
     Route::post('checksheet', [ChecksheetController::class, 'store'])->name('checksheet.store');
     Route::get('checksheet/{session}/fill', [ChecksheetController::class, 'fill'])->name('checksheet.fill');
     Route::post('checksheet/{session}/autosave', [ChecksheetController::class, 'autosave'])->name('checksheet.autosave');
@@ -91,6 +86,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/roles', [SettingsController::class, 'storeRole'])->name('settings.roles.store');
     Route::put('settings/roles/{role}', [SettingsController::class, 'updateRole'])->name('settings.roles.update');
     Route::delete('settings/roles/{role}', [SettingsController::class, 'destroyRole'])->name('settings.roles.destroy');
+    Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
+    Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
+    Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
 });
 
 require __DIR__.'/auth.php';

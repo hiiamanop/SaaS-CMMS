@@ -26,6 +26,7 @@
                 'schedule' => 'Schedule Maintenance',
                 'mingguan' => 'Checksheet Mingguan',
                 'bulanan' => 'Checksheet Bulanan',
+                'triwulan' => 'Checksheet Triwulan',
                 'semesteran' => 'Checksheet Semesteran',
                 'tahunan' => 'Checksheet Tahunan',
             ] as $key => $label)
@@ -98,6 +99,11 @@
     {{-- Tab: Semesteran --}}
     <div x-show="tab === 'semesteran'" x-transition>
         @include('schedule-report.partials.semesteran', compact('sessions', 'year', 'pltsLocation'))
+    </div>
+
+    {{-- Tab: Triwulan --}}
+    <div x-show="tab === 'triwulan'" x-transition>
+        @include('schedule-report.partials.triwulan', compact('sessions', 'year', 'pltsLocation'))
     </div>
 
     {{-- Tab: Tahunan --}}

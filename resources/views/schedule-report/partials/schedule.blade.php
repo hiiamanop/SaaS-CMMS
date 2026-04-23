@@ -24,7 +24,7 @@ $now = \Carbon\Carbon::now();
             <tr class="bg-gray-100">
                 <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:36px">No</th>
                 <th class="border border-gray-300 px-2 py-2 text-left" style="min-width:140px">Nama Alat/Mesin</th>
-                <th class="border border-gray-300 px-2 py-2 text-left" style="min-width:160px">Item Pekerjaan</th>
+                <th class="border border-gray-300 px-2 py-2 text-left" style="min-width:160px">Lokasi Inspeksi</th>
                 <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:68px">Renc./<br>Real.</th>
                 <th class="border border-gray-300 px-2 py-2 text-center" style="min-width:60px">Shut<br>down</th>
                 @foreach($months as $m)
@@ -71,7 +71,7 @@ $now = \Carbon\Carbon::now();
                 @if($loop->first)
                 <td rowspan="2" class="border border-gray-300 px-1 py-1 text-center">{{ $itemNo++ }}</td>
                 <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->equipment_name }}</td>
-                <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->item_pekerjaan_text }}</td>
+                <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->lokasi_inspeksi_text }}</td>
                 @endif
 
                 <td class="border border-gray-300 px-1 py-1 text-center font-medium {{ $rowType === 'Renc.' ? 'text-blue-700' : 'text-gray-700' }}">

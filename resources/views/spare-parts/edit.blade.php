@@ -2,7 +2,7 @@
 @section('title','Edit Spare Part')
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('spare-parts.index') }}" class="hover:text-gray-800">Spare Parts</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Edit</span>@endsection
 @section('content')
-<div class="max-w-2xl">
+<div class="max-w-none mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('spare-parts.index') }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
         <h1 class="text-2xl font-bold text-gray-900">Edit Spare Part</h1>

@@ -41,8 +41,9 @@ $wo = $workOrder;
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="border-b border-gray-200 px-2">
             <div class="flex gap-1 -mb-px">
-                @foreach(['details'=>'Details','checklist'=>'Checklist ('.$wo->checklistItems->count().')','activity'=>'Activity Log'] as $k=>$l)
-                <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-blue-600 text-blue-600':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
+                @foreach(['details'=>'Details','checklist'=>'Checklist ('.$wo->checklistItems->count().')', 'maintenance' => 'Maintenance Detail', 'activity'=>'Activity Log'] as $k=>$l)
+                    @if($k === 'maintenance' && !$wo->maintenanceRecord) @continue @endif
+                    <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-blue-600 text-blue-600':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
                 @endforeach
             </div>
         </div>
@@ -62,18 +63,22 @@ $wo = $workOrder;
             @if($wo->checklistItems->isEmpty())
             <p class="text-sm text-gray-400 text-center py-8">No checklist items</p>
             @else
-            <div class="space-y-2">
+            <div class="space-y-4">
             @foreach($wo->checklistItems as $item)
-            <div class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50">
-                <form action="{{ route('work-orders.toggle-checklist', [$wo, $item]) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors {{ $item->is_checked ? 'border-green-500 bg-green-500' : 'border-gray-300 hover:border-blue-400' }}">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
+                <div class="flex-1 flex items-center gap-3">
+                    <div class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 {{ $item->is_checked ? 'border-green-500 bg-green-500' : 'border-gray-300' }}">
                         @if($item->is_checked)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>@endif
-                    </button>
-                </form>
-                <span class="flex-1 text-sm {{ $item->is_checked ? 'line-through text-gray-400' : 'text-gray-700' }}">{{ $item->description }}</span>
-                @if($item->is_checked && $item->checkedBy)
-                <span class="text-xs text-gray-400">by {{ $item->checkedBy->name }}</span>
+                    </div>
+                    <span class="text-sm font-medium {{ $item->is_checked ? 'text-gray-900' : 'text-gray-500' }}">{{ $item->description }}</span>
+                </div>
+                @if($item->is_checked)
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $item->result === 'ok' ? 'bg-green-100 text-green-700' : ($item->result === 'repaired' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700') }}">
+                        {{ $item->result ?: 'N/A' }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 font-medium">Checked by {{ $item->checkedBy?->name }}</span>
+                </div>
                 @endif
             </div>
             @endforeach
@@ -85,6 +90,48 @@ $wo = $workOrder;
             </div>
             @endif
         </div>
+
+        {{-- Maintenance Details tab --}}
+        @if($mr = $wo->maintenanceRecord)
+        <div x-show="tab==='maintenance'" class="p-6 space-y-6">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Completion Result</p>
+                    <div class="mt-1 flex items-center gap-2">
+                        @php $resColors=['solved'=>'bg-green-100 text-green-700','pending'=>'bg-yellow-100 text-yellow-700','failure'=>'bg-red-100 text-red-700']; @endphp
+                        <span class="px-3 py-1 rounded-lg text-sm font-bold uppercase {{ $resColors[$mr->status_after]??'bg-gray-100' }}">{{ $mr->status_after }}</span>
+                        <span class="text-gray-400 text-xs">— Registered on {{ $mr->maintenance_date->format('M d, Y') }}</span>
+                    </div>
+                </div>
+                <a href="{{ route('maintenance-records.show', $mr) }}" class="text-blue-600 text-sm font-bold hover:underline">View Full Record →</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Findings</h4>
+                    <p class="text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-100 min-h-[60px]">{{ $mr->findings ?: 'No findings reported.' }}</p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Actions Taken</h4>
+                    <p class="text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-100 min-h-[60px]">{{ $mr->actions_taken ?: 'No actions reported.' }}</p>
+                </div>
+            </div>
+
+            @if($mr->parts->isNotEmpty())
+            <div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Parts Replaced</h4>
+                <div class="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
+                    @foreach($mr->parts as $part)
+                    <div class="flex items-center justify-between px-4 py-2.5 bg-white">
+                        <span class="text-sm text-gray-800">{{ $part->sparePart->name }}</span>
+                        <span class="text-sm font-bold text-gray-900">{{ $part->qty_used }} {{ $part->sparePart->unit }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+        @endif
 
         {{-- Activity log --}}
         <div x-show="tab==='activity'" class="p-6">

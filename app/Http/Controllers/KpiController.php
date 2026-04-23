@@ -6,6 +6,7 @@ use App\Models\WorkOrder;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceSchedule;
 use Illuminate\Http\Request;
+use App\Models\ChecksheetSession;
 use Carbon\Carbon;
 
 class KpiController extends Controller
@@ -37,10 +38,9 @@ class KpiController extends Controller
             $mtbf = count($diffs) > 0 ? round(array_sum($diffs) / count($diffs), 2) : 0;
         }
 
-        $pmScheduled = MaintenanceSchedule::where('status', 'active')
-            ->where('next_due_date', '<=', $dateTo)->count();
-        $pmDone = $workOrders->where('type', 'preventive')->where('status', 'closed')->count();
-        $pmCompliance = $pmScheduled > 0 ? round(($pmDone / $pmScheduled) * 100, 1) : 0;
+        $pmCompliance = ChecksheetSession::whereBetween('created_at', [$dateFrom, $dateTo])
+            ->whereIn('status', ['submitted', 'signed_teknisi', 'signed_spv', 'signed_pm'])
+            ->count();
 
         $totalWo = $workOrders->count();
         $closedWo = $workOrders->where('status', 'closed')->count();

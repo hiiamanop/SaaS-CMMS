@@ -2,9 +2,9 @@
 @section('title','New Maintenance Record')
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('maintenance-records.index') }}" class="hover:text-gray-800">Records</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">New Record</span>@endsection
 @section('content')
-<div class="max-w-3xl">
+<div class="max-w-none mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('maintenance-records.index') }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
+        <a href="{{ route('work-orders.index', ['tab' => 'records']) }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
         <h1 class="text-2xl font-bold text-gray-900">New Maintenance Record</h1>
     </div>
     @if($workOrder)
@@ -61,6 +61,59 @@
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actions Taken</label><textarea name="actions_taken" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Describe what was done...">{{ old('actions_taken') }}</textarea></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('notes') }}</textarea></div>
 
+            {{-- Checklist Tasks (if WO exists) --}}
+            @if($workOrder && $workOrder->checklistItems->isNotEmpty())
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
+                    Checklist Task Completion
+                </h3>
+                <div class="space-y-3">
+                    @foreach($workOrder->checklistItems as $item)
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900">{{ $item->description }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select name="checklist[{{ $item->id }}][result]" class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="ok" {{ old("checklist.{$item->id}.result") == 'ok' ? 'selected' : '' }}>OK</option>
+                                <option value="not_ok" {{ old("checklist.{$item->id}.result") == 'not_ok' ? 'selected' : '' }}>NOT OK</option>
+                                <option value="repaired" {{ old("checklist.{$item->id}.result") == 'repaired' ? 'selected' : '' }}>REPAIRED</option>
+                            </select>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <div class="pt-4 pb-2 border-t border-gray-100">
+                <label class="block text-sm font-bold text-gray-700 mb-3">Finish Status <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-green-50 has-[:checked]:border-green-300">
+                        <input type="radio" name="status_after" value="solved" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300" {{ old('status_after', 'solved') == 'solved' ? 'checked' : '' }}>
+                        <div>
+                            <p class="text-sm font-bold text-green-800">SOLVED</p>
+                            <p class="text-[10px] text-green-600">Pekerjaan selesai & aman.</p>
+                        </div>
+                    </label>
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-yellow-50 has-[:checked]:border-yellow-300">
+                        <input type="radio" name="status_after" value="pending" class="w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300" {{ old('status_after') == 'pending' ? 'checked' : '' }}>
+                        <div>
+                            <p class="text-sm font-bold text-yellow-800">PENDING</p>
+                            <p class="text-[10px] text-yellow-600">Butuh pengecekan lanjut.</p>
+                        </div>
+                    </label>
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-red-50 has-[:checked]:border-red-300">
+                        <input type="radio" name="status_after" value="failure" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300" {{ old('status_after') == 'failure' ? 'checked' : '' }}>
+                        <div>
+                            <p class="text-sm font-bold text-red-800">FAILURE</p>
+                            <p class="text-[10px] text-red-600">Gagal diperbaiki.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             {{-- Parts used --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Parts Used</label>
@@ -90,7 +143,7 @@
 
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Save Record</button>
-                <a href="{{ route('maintenance-records.index') }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
+                <a href="{{ route('work-orders.index', ['tab' => 'records']) }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
             </div>
         </form>
     </div>

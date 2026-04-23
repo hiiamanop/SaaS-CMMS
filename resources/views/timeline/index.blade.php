@@ -46,18 +46,6 @@
     {{-- Filters --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Assets</option>
-                @foreach($assets as $a)
-                    <option value="{{ $a->id }}" {{ request('asset_id')==$a->id?'selected':'' }}>{{ $a->name }}</option>
-                @endforeach
-            </select>
-            <select name="technician_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">All Technicians</option>
-                @foreach($technicians as $t)
-                    <option value="{{ $t->id }}" {{ request('technician_id')==$t->id?'selected':'' }}>{{ $t->name }}</option>
-                @endforeach
-            </select>
             <input name="date_from" type="date" value="{{ request('date_from') }}"
                 class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <input name="date_to" type="date" value="{{ request('date_to') }}"
@@ -131,6 +119,9 @@
                             <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
                                 <span>{{ $item['asset'] }}</span>
                                 <span>{{ $item['person'] }}</span>
+                                @if(isset($item['executor']))
+                                <span class="bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100 italic">Oleh: {{ $item['executor'] }}</span>
+                                @endif
                             </div>
                         </div>
                         <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">

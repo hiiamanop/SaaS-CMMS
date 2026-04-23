@@ -29,23 +29,30 @@ $oldWeeks   = old('planned_weeks', []);
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
             <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Informasi Alat</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {{-- Lokasi PLTS --}}
+                @if(auth()->user()->isAdmin())
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Alat/Mesin <span class="text-red-500">*</span></label>
-                    <input name="equipment_name" value="{{ old('equipment_name') }}" required
-                           placeholder="cth: Inverter SMA 100kW"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('equipment_name') border-red-400 @enderror">
-                    @error('equipment_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Asset <span class="text-red-500">*</span></label>
-                    <select name="asset_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('asset_id') border-red-400 @enderror">
-                        <option value="">Pilih asset...</option>
-                        @foreach($assets as $a)
-                        <option value="{{ $a->id }}" {{ old('asset_id')==$a->id ? 'selected' : '' }}>{{ $a->name }}</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi PLTS <span class="text-red-500">*</span></label>
+                    <select name="location_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('location_id') border-red-400 @enderror">
+                        <option value="">Pilih lokasi PLTS...</option>
+                        @foreach($locations as $loc)
+                        <option value="{{ $loc->id }}" {{ old('location_id') == $loc->id ? 'selected' : '' }}>
+                            {{ $loc->name }} ({{ $loc->code }})
+                        </option>
                         @endforeach
                     </select>
-                    @error('asset_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    @error('location_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
+                @else
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi PLTS</label>
+                    <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                        {{ $userLocation?->name ?? '—' }}
+                        @if($userLocation)<span class="text-gray-400 text-xs ml-1">({{ $userLocation->code }})</span>@endif
+                    </div>
+                    <input type="hidden" name="location_id" value="{{ $userLocation?->id }}">
+                </div>
+                @endif
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Teknisi / PIC <span class="text-red-500">*</span></label>
                     <select name="technician_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('technician_id') border-red-400 @enderror">
@@ -56,49 +63,102 @@ $oldWeeks   = old('planned_weeks', []);
                     </select>
                     @error('technician_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Kategori <span class="text-red-500">*</span></label>
-                    <input name="category" value="{{ old('category') }}" required
-                           placeholder="cth: Inverter, Panel Surya, Baterai"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('category') border-red-400 @enderror">
-                    @error('category')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Alat / Trafo <span class="text-red-500">*</span></label>
+                    <input name="trafo_name" value="{{ old('trafo_name') }}" required
+                           placeholder="cth: Trafo 1600 kVA, TR-01"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('trafo_name') border-red-400 @enderror">
+                    @error('trafo_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Frekuensi <span class="text-red-500">*</span></label>
                     <select name="frequency" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('frequency') border-red-400 @enderror">
                         <option value="weekly"    {{ old('frequency')=='weekly'    ? 'selected' : '' }}>Mingguan</option>
                         <option value="monthly"   {{ old('frequency','monthly')=='monthly'   ? 'selected' : '' }}>Bulanan</option>
+                        <option value="triwulan"  {{ old('frequency')=='triwulan'  ? 'selected' : '' }}>Triwulan</option>
                         <option value="quarterly" {{ old('frequency')=='quarterly' ? 'selected' : '' }}>Semesteran</option>
                         <option value="annually"  {{ old('frequency')=='annually'  ? 'selected' : '' }}>Tahunan</option>
                     </select>
                     @error('frequency')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div class="sm:col-span-2"
-                     x-data="{ items: {{ json_encode(old('item_pekerjaan', [''])) }} }">
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Item Pekerjaan <span class="text-red-500">*</span></label>
-                    @error('item_pekerjaan')<p class="text-xs text-red-500 mb-1">{{ $message }}</p>@enderror
-                    @error('item_pekerjaan.*')<p class="text-xs text-red-500 mb-1">{{ $message }}</p>@enderror
-                    <div class="space-y-2">
-                        <template x-for="(item, idx) in items" :key="idx">
-                            <div class="flex gap-2">
-                                <input :name="'item_pekerjaan[' + idx + ']'"
-                                       :value="item"
-                                       @input="items[idx] = $event.target.value"
-                                       required
-                                       placeholder="cth: Pembersihan panel surya"
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <button type="button" x-show="items.length > 1" @click="items.splice(idx, 1)"
-                                        class="px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
+                     x-data="{
+                        groups: {{ json_encode(
+                            empty($rawItems = old('item_pekerjaan', []))
+                                ? [['lokasi_inspeksi' => '', 'items' => [['name' => '', 'metode' => '', 'standar' => '']]]]
+                                : collect($rawItems)->map(fn($i) => is_string($i) ? ['name'=>$i,'metode'=>'','standar'=>'','lokasi_inspeksi'=>''] : $i)
+                                    ->groupBy(fn($i) => $i['lokasi_inspeksi'] ?? '')
+                                    ->map(fn($items, $lok) => ['lokasi_inspeksi' => $lok, 'items' => $items->values()->all()])
+                                    ->values()->all()
+                        ) }}
+                     }">
+                    
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Grup Item Pekerjaan <span class="text-red-500">*</span></label>
+                        <button type="button" @click="groups.push({lokasi_inspeksi:'', items:[{name:'',metode:'',standar:''}]})"
+                                class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Tambah Lokasi Inspeksi
+                        </button>
+                    </div>
+
+                    @error('item_pekerjaan')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
+
+                    <div class="space-y-4">
+                        <template x-for="(group, gIdx) in groups" :key="gIdx">
+                            <div class="border border-gray-300 rounded-xl p-4 bg-gray-50/50 shadow-sm">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-4 flex-1">
+                                        <input x-model="group.lokasi_inspeksi"
+                                               placeholder="Nama Lokasi Inspeksi (cth: Area Inverter, Atap)"
+                                               class="w-full sm:w-1/2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+                                        <button type="button" x-show="groups.length > 1" @click="groups.splice(gIdx, 1)"
+                                                class="flex-shrink-0 text-xs text-red-500 hover:text-red-700 font-medium">
+                                            Hapus Lokasi
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 pl-4 border-l-2 border-gray-200 mt-2">
+                                    <template x-for="(item, iIdx) in group.items" :key="iIdx">
+                                        <div class="border border-gray-200 rounded-lg p-3 space-y-2 bg-white">
+                                            <input type="hidden" :name="`item_pekerjaan[${gIdx}_${iIdx}][lokasi_inspeksi]`" :value="group.lokasi_inspeksi">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-medium text-gray-400 w-5 flex-shrink-0" x-text="(iIdx + 1) + '.'"></span>
+                                                <input :name="`item_pekerjaan[${gIdx}_${iIdx}][name]`"
+                                                       x-model="item.name" required
+                                                       placeholder="Nama item pekerjaan (cth: Pembersihan panel)"
+                                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <button type="button" x-show="group.items.length > 1" @click="group.items.splice(iIdx, 1)"
+                                                        class="flex-shrink-0 px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 pl-7">
+                                                <div>
+                                                    <label class="block text-xs text-gray-500 mb-1">Metode Inspeksi</label>
+                                                    <input :name="`item_pekerjaan[${gIdx}_${iIdx}][metode]`"
+                                                           x-model="item.metode" placeholder="cth: Visual, Pengukuran"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-gray-500 mb-1">Standar Ketentuan</label>
+                                                    <input :name="`item_pekerjaan[${gIdx}_${iIdx}][standar]`"
+                                                           x-model="item.standar" placeholder="cth: Tegangan ≥ 380V"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <button type="button" @click="group.items.push({name:'',metode:'',standar:''})"
+                                            class="mt-2 inline-block text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                        + Tambah Item Pekerjaan
+                                    </button>
+                                </div>
                             </div>
                         </template>
                     </div>
-                    <button type="button" @click="items.push('')"
-                            class="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Tambah Item Pekerjaan
-                    </button>
                 </div>
             </div>
         </div>

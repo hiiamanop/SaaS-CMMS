@@ -43,7 +43,7 @@
              'icon'=>'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2'],
             ['label'=>'MTBF', 'value'=>$mtbf.' h', 'sub'=>'Mean Time Between Failures', 'color'=>'purple',
              'icon'=>'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2'],
-            ['label'=>'PM Compliance', 'value'=>$pmCompliance.'%', 'sub'=>'Preventive Maintenance', 'color'=>'green',
+            ['label'=>'PM Completed', 'value'=>$pmCompliance, 'sub'=>'Checksheets Finished', 'color'=>'green',
              'icon'=>'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4 12 14.01 9 11.01'],
             ['label'=>'Completion Rate', 'value'=>$completionRate.'%', 'sub'=>'Work Orders Closed', 'color'=>'teal',
              'icon'=>'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'],

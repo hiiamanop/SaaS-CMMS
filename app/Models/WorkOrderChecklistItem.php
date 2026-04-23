@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class WorkOrderChecklistItem extends Model
 {
     protected $fillable = [
-        'work_order_id', 'description', 'is_checked', 'checked_by', 'checked_at', 'order',
+        'work_order_id', 'description', 'is_checked', 'result', 'checked_by', 'checked_at', 'order',
     ];
 
     protected function casts(): array

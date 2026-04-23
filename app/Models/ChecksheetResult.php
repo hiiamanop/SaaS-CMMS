@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChecksheetResult extends Model
 {
-    protected $fillable = ['session_id', 'template_id', 'result', 'notes', 'photos'];
+    protected $fillable = ['session_id', 'template_id', 'item_name', 'result', 'notes', 'photos'];
 
     protected $casts = [
         'photos' => 'array',

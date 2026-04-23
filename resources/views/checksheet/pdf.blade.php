@@ -26,7 +26,7 @@
         <div class="header-top">
             <div>
                 <strong>PREVENTIVE MAINTENANCE</strong><br>
-                <span style="font-size:12px; font-weight:bold;">CHECKSHEET {{ strtoupper($session->schedule->equipment_name) }}</span>
+                <span style="font-size:12px; font-weight:bold;">CHECKSHEET {{ strtoupper($session->schedule->category) }}</span>
             </div>
             <div style="text-align:right; font-size:10px;">FORMULIR</div>
         </div>
@@ -46,43 +46,59 @@
         </table>
     </div>
 
-    @php $grouped = $templates->groupBy('lokasi_inspeksi'); @endphp
-    @foreach($grouped as $lokasi => $items)
     <table>
         <thead>
-            <tr class="section-header">
-                <th colspan="5">{{ $lokasi }}</th>
-            </tr>
             <tr>
-                <th style="width:5%">No</th>
+                <th style="width:4%">No</th>
                 <th style="width:30%">Item Inspeksi</th>
-                <th style="width:20%">Metode Inspeksi</th>
-                <th style="width:25%">Standar Ketentuan</th>
-                <th style="width:20%">Hasil / Catatan</th>
+                <th style="width:18%">Metode Inspeksi</th>
+                <th style="width:22%">Standar Ketentuan</th>
+                <th style="width:8%; text-align:center;">Hasil</th>
+                <th style="width:18%">Catatan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($items as $i => $template)
-            @php $res = $results[$template->id] ?? null; @endphp
+            @php
+                $groupedItems = [];
+                foreach($items as $i) {
+                    $lok = is_array($i) ? ($i['lokasi_inspeksi'] ?? '') : '';
+                    $groupedItems[$lok][] = $i;
+                }
+                $idx = 1;
+            @endphp
+            @foreach($groupedItems as $lokasi => $groupItems)
+            @if($lokasi)
             <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>{{ $template->item_inspeksi }}</td>
-                <td>{{ $template->metode_inspeksi }}</td>
-                <td>{{ $template->standar_ketentuan }}</td>
-                <td>
+                <td colspan="6" style="background:#f9f9f9; font-weight:bold; text-align:left; font-size:11px;">LOKASI: {{ strtoupper($lokasi) }}</td>
+            </tr>
+            @endif
+            @foreach($groupItems as $item)
+            @php
+                $itemKey    = is_array($item) ? ($item['name']    ?? '') : $item;
+                $itemMetode = is_array($item) ? ($item['metode']  ?? '') : '';
+                $itemStandar= is_array($item) ? ($item['standar'] ?? '') : '';
+                $res = $results[$itemKey] ?? null;
+            @endphp
+            <tr>
+                <td>{{ $idx++ }}</td>
+                <td>{{ $itemKey }}</td>
+                <td>{{ $itemMetode ?: '—' }}</td>
+                <td>{{ $itemStandar ?: '—' }}</td>
+                <td style="text-align:center;">
                     @if($res?->result === 'P')
                         <span class="badge-p">P</span>
                     @elseif($res?->result === 'X')
-                        <span class="badge-x">X</span> {{ $res->notes }}
+                        <span class="badge-x">X</span>
                     @else
                         —
                     @endif
                 </td>
+                <td>{{ $res?->notes ?? '' }}</td>
             </tr>
+            @endforeach
             @endforeach
         </tbody>
     </table>
-    @endforeach
 
     @if($session->abnormals->isNotEmpty())
     <table>

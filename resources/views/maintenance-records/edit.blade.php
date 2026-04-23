@@ -2,7 +2,7 @@
 @section('title','Edit Record')
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('maintenance-records.index') }}" class="hover:text-gray-800">Records</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Edit</span>@endsection
 @section('content')
-<div class="max-w-3xl">
+<div class="max-w-none mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('maintenance-records.show',$maintenanceRecord) }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
         <h1 class="text-2xl font-bold text-gray-900">Edit Maintenance Record</h1>

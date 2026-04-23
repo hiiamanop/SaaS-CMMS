@@ -71,6 +71,8 @@ class MaintenanceRecordController extends Controller
             'duration_minutes' => 'required|integer|min:0',
             'shutdown_minutes' => 'required|integer|min:0',
             'notes' => 'nullable|string',
+            'status_after' => 'required|in:solved,pending,failure',
+            'checklist' => 'nullable|array',
             'parts' => 'nullable|array',
             'parts.*.spare_part_id' => 'required|exists:spare_parts,id',
             'parts.*.qty_used' => 'required|integer|min:1',
@@ -97,7 +99,45 @@ class MaintenanceRecordController extends Controller
                 'duration_minutes' => $validated['duration_minutes'],
                 'shutdown_minutes' => $validated['shutdown_minutes'],
                 'notes' => $validated['notes'] ?? null,
+                'status_after' => $validated['status_after'],
             ]);
+
+            // Update Work Order status and checklist results
+            if (!empty($validated['work_order_id'])) {
+                $wo = WorkOrder::find($validated['work_order_id']);
+                if ($wo) {
+                    $oldStatus = $wo->status;
+                    $newWoStatus = 'closed'; // Always closed when record is submitted
+                    
+                    $wo->update([
+                        'status' => $newWoStatus,
+                        'completed_at' => now()
+                    ]);
+
+                    \App\Models\WorkOrderActivityLog::create([
+                        'work_order_id' => $wo->id,
+                        'user_id' => auth()->id(),
+                        'from_status' => $oldStatus,
+                        'to_status' => $newWoStatus,
+                        'notes' => 'Work order closed via record. Result: ' . strtoupper($validated['status_after']),
+                    ]);
+
+                    // Update Checklist Results
+                    if (!empty($validated['checklist'])) {
+                        foreach ($validated['checklist'] as $itemId => $itemData) {
+                            $checkItem = \App\Models\WorkOrderChecklistItem::where('work_order_id', $wo->id)->find($itemId);
+                            if ($checkItem) {
+                                $checkItem->update([
+                                    'is_checked' => true,
+                                    'result' => $itemData['result'] ?? null,
+                                    'checked_by' => auth()->id(),
+                                    'checked_at' => now(),
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
 
             if (!empty($validated['parts'])) {
                 foreach ($validated['parts'] as $part) {
@@ -123,7 +163,7 @@ class MaintenanceRecordController extends Controller
             }
         });
 
-        return redirect()->route('maintenance-records.index')->with('success', 'Maintenance record created successfully.');
+        return redirect()->route('work-orders.index', ['tab' => 'records'])->with('success', 'Maintenance record created successfully.');
     }
 
     public function show(MaintenanceRecord $maintenanceRecord)
@@ -156,7 +196,7 @@ class MaintenanceRecordController extends Controller
         ]);
 
         $maintenanceRecord->update($validated);
-        return redirect()->route('maintenance-records.show', $maintenanceRecord)->with('success', 'Record updated.');
+        return redirect()->route('work-orders.index', ['tab' => 'records'])->with('success', 'Record updated.');
     }
 
     public function destroy(MaintenanceRecord $maintenanceRecord)

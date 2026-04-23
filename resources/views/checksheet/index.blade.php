@@ -10,15 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Checksheet</h1>
             <p class="text-sm text-gray-500 mt-1">Inspeksi kondisi PLTS berkala berdasarkan jadwal maintenance</p>
         </div>
-        @if(!auth()->user()->isTechnician())
-        <a href="{{ route('checksheet.templates.index') }}"
-           class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            Kelola Template
-        </a>
-        @endif
+
     </div>
 
     {{-- Filter Bar --}}
@@ -74,15 +66,15 @@
             @if($scheduleFilter !== 'all')
                 <a href="{{ route('checksheet.index') }}" class="text-blue-600 hover:underline">Lihat semua jadwal</a>
             @else
-                Buat template checksheet terlebih dahulu untuk setiap jadwal maintenance
+                Tambahkan item pekerjaan pada <a href="{{ route('maintenance-schedules.index') }}" class="text-blue-600 hover:underline">Jadwal Maintenance</a> untuk membuat checksheet
             @endif
         </p>
     </div>
     @else
 
     @php
-        $freqLabels = ['weekly'=>'Mingguan','monthly'=>'Bulanan','quarterly'=>'Semesteran','annually'=>'Tahunan'];
-        $freqColors = ['weekly'=>'blue','monthly'=>'purple','quarterly'=>'orange','annually'=>'green'];
+        $freqLabels = ['weekly'=>'Mingguan','monthly'=>'Bulanan','triwulan'=>'Triwulan','quarterly'=>'Semesteran','annually'=>'Tahunan'];
+        $freqColors = ['weekly'=>'blue','monthly'=>'purple','triwulan'=>'indigo','quarterly'=>'orange','annually'=>'green'];
         $grouped = $schedules->groupBy('category');
     @endphp
 
@@ -110,6 +102,7 @@
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
                             @if($color==='blue') bg-blue-100 text-blue-700
                             @elseif($color==='purple') bg-purple-100 text-purple-700
+                            @elseif($color==='indigo') bg-indigo-100 text-indigo-700
                             @elseif($color==='orange') bg-orange-100 text-orange-700
                             @else bg-green-100 text-green-700 @endif">
                             {{ $freqLabels[$freq] ?? $freq }}
@@ -127,10 +120,10 @@
                     @endif
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0 ml-3">
-                    @if($schedule->checklistTemplates->count() > 0)
-                    <span class="text-xs text-gray-400">{{ $schedule->checklistTemplates->count() }} item</span>
+                    @if($schedule->item_pekerjaan && count($schedule->item_pekerjaan) > 0)
+                    <span class="text-xs text-gray-400">{{ count($schedule->item_pekerjaan) }} item</span>
                     @else
-                    <span class="text-xs text-orange-400">Belum ada template</span>
+                    <span class="text-xs text-orange-400">Belum ada item pekerjaan</span>
                     @endif
                     <button onclick="openNewSession({{ $schedule->id }}, '{{ addslashes($schedule->equipment_name) }}', '{{ $schedule->frequency }}', {{ $plannedWeeksJson }})"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700">
@@ -158,12 +151,20 @@
                         $dueDate = match($freq) {
                             'weekly'    => \Carbon\Carbon::createFromDate($session->year, $session->month ?? 1, 1)->addWeeks($session->week_number ?? 1)->subDay(),
                             'monthly'   => \Carbon\Carbon::createFromDate($session->year, $session->month ?? 1, 1)->endOfMonth(),
+                            'triwulan'  => match((int)($session->quarter ?? 1)) {
+                                1 => \Carbon\Carbon::createFromDate($session->year, 3, 31),
+                                2 => \Carbon\Carbon::createFromDate($session->year, 6, 30),
+                                3 => \Carbon\Carbon::createFromDate($session->year, 9, 30),
+                                4 => \Carbon\Carbon::createFromDate($session->year, 12, 31),
+                                default => \Carbon\Carbon::createFromDate($session->year, 12, 31),
+                            },
                             'quarterly' => ($session->semester == 1) ? \Carbon\Carbon::createFromDate($session->year, 6, 30) : \Carbon\Carbon::createFromDate($session->year, 12, 31),
                             'annually'  => \Carbon\Carbon::createFromDate($session->year, 12, 31),
                             default     => now(),
                         };
                         $isOverdue = $dueDate->isPast() && $session->status !== 'submitted';
-                        $total  = $schedule->checklistTemplates->count();
+                        $items = $schedule->item_pekerjaan ?? [];
+                        $total  = is_array($items) ? count($items) : 0;
                         $filled = $session->results()->whereNotNull('result')->count();
                         $pct    = $total > 0 ? round(($filled / $total) * 100) : 0;
                     @endphp
@@ -251,6 +252,7 @@
             <input type="hidden" name="year" id="modalYear" value="{{ $currentYear }}">
             <input type="hidden" name="month" id="modalMonthHidden">
             <input type="hidden" name="week_number" id="modalWeekHidden">
+            <input type="hidden" name="quarter" id="modalQuarterHidden">
 
             {{-- Weekly: has planned_weeks → single combo select --}}
             <div id="weeklyPlanned" style="display:none">
@@ -284,6 +286,17 @@
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <div id="triwulanFields" style="display:none">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kuartal</label>
+                <select id="triwulanQuarterSel" onchange="document.getElementById('modalQuarterHidden').value=this.value"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="1">Kuartal 1 (Jan–Mar)</option>
+                    <option value="2">Kuartal 2 (Apr–Jun)</option>
+                    <option value="3">Kuartal 3 (Jul–Sep)</option>
+                    <option value="4">Kuartal 4 (Okt–Des)</option>
+                </select>
             </div>
 
             <div id="monthlyFields" style="display:none">
@@ -328,12 +341,13 @@ function openNewSession(scheduleId, name, frequency, plannedWeeks) {
     document.getElementById('modalYear').value = _currentYear;
 
     // Hide all field groups
-    ['weeklyPlanned','weeklyFree','monthlyFields','semesterFields'].forEach(id => {
+    ['weeklyPlanned','weeklyFree','triwulanFields','monthlyFields','semesterFields'].forEach(id => {
         document.getElementById(id).style.display = 'none';
     });
     // Reset hidden fields
     document.getElementById('modalMonthHidden').value = '';
     document.getElementById('modalWeekHidden').value  = '';
+    document.getElementById('modalQuarterHidden').value = '';
 
     if (frequency === 'weekly') {
         if (plannedWeeks && plannedWeeks.length > 0) {
@@ -362,6 +376,11 @@ function openNewSession(scheduleId, name, frequency, plannedWeeks) {
         document.getElementById('monthlyMonthSel').value = _currentMonth;
         document.getElementById('modalMonthHidden').value = _currentMonth;
         document.getElementById('monthlyFields').style.display = '';
+    } else if (frequency === 'triwulan') {
+        const currentQuarter = Math.ceil(_currentMonth / 3);
+        document.getElementById('triwulanQuarterSel').value = currentQuarter;
+        document.getElementById('modalQuarterHidden').value = currentQuarter;
+        document.getElementById('triwulanFields').style.display = '';
     } else if (frequency === 'quarterly') {
         document.getElementById('semesterFields').style.display = '';
     }

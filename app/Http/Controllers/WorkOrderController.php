@@ -34,10 +34,25 @@ class WorkOrderController extends Controller
         }
 
         $workOrders = $query->latest()->paginate(15)->withQueryString();
+
+        // Maintenance Records Query for Records Tab
+        $queryRecord = \App\Models\MaintenanceRecord::with(['asset', 'technician', 'workOrder']);
+        if ($request->search) {
+            $queryRecord->where(function($q) use ($request) {
+                $q->where('record_number', 'like', '%'.$request->search.'%')
+                  ->orWhere('findings', 'like', '%'.$request->search.'%');
+            });
+        }
+        if ($request->asset_id) $queryRecord->where('asset_id', $request->asset_id);
+        if ($request->date_from) $queryRecord->where('maintenance_date', '>=', $request->date_from);
+        if ($request->date_to) $queryRecord->where('maintenance_date', '<=', $request->date_to);
+
+        $records = $queryRecord->latest('maintenance_date')->paginate(15, ['*'], 'records_page')->withQueryString();
+
         $assets = Asset::orderBy('name')->get();
         $technicians = User::where('role', 'technician')->get();
 
-        return view('work-orders.index', compact('workOrders', 'assets', 'technicians'));
+        return view('work-orders.index', compact('workOrders', 'records', 'assets', 'technicians'));
     }
 
     public function create()
@@ -56,6 +71,8 @@ class WorkOrderController extends Controller
             'type' => 'required|in:corrective',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
+            'is_external_client' => 'nullable|boolean',
+            'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
             'shutdown_required' => 'nullable|boolean',
             'checklist' => 'nullable|array',
@@ -64,6 +81,8 @@ class WorkOrderController extends Controller
 
         $validated['wo_number'] = WorkOrder::generateNumber();
         $validated['created_by'] = auth()->id();
+        $validated['order_date'] = now();
+        $validated['is_external_client'] = $request->boolean('is_external_client');
         $validated['shutdown_required'] = $request->boolean('shutdown_required');
         unset($validated['checklist']);
 
@@ -123,8 +142,13 @@ class WorkOrderController extends Controller
             'type' => 'required|in:corrective',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
+            'is_external_client' => 'nullable|boolean',
+            'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
         ]);
+
+        $validated['is_external_client'] = $request->boolean('is_external_client');
+        if (!$validated['is_external_client']) $validated['client_name'] = null;
 
         $oldAssignee = $workOrder->assigned_to;
         $workOrder->update($validated);

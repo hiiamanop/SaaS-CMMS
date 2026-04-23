@@ -34,7 +34,7 @@
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" x-data="{tab:'overview'}">
         <div class="border-b border-gray-200 px-2">
             <div class="flex gap-1 -mb-px">
-                @foreach(['overview'=>'Overview','work_orders'=>'Work Orders','schedules'=>'Schedules','records'=>'Records'] as $key=>$label)
+                @foreach(['overview'=>'Overview','work_orders'=>'Work Orders','records'=>'Records'] as $key=>$label)
                 <button @click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $label }}</button>
                 @endforeach
             </div>
@@ -76,21 +76,7 @@
             @endif
         </div>
 
-        {{-- Schedules --}}
-        <div x-show="tab==='schedules'" class="p-6">
-            @if($asset->maintenanceSchedules->isEmpty())
-            <div class="text-center text-sm text-gray-400 py-8">No maintenance schedules</div>
-            @else
-            <div class="space-y-3">
-            @foreach($asset->maintenanceSchedules as $s)
-            <div class="flex items-center justify-between p-4 border border-gray-100 rounded-lg">
-                <div><p class="font-medium text-gray-900">{{ $s->title }}</p><p class="text-xs text-gray-500 mt-0.5">{{ ucfirst($s->frequency) }} · Next due: {{ $s->next_due_date->format('M d, Y') }}</p></div>
-                <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $s->type==='preventive'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">{{ ucfirst($s->type) }}</span>
-            </div>
-            @endforeach
-            </div>
-            @endif
-        </div>
+
 
         {{-- Records --}}
         <div x-show="tab==='records'" class="overflow-x-auto">
