@@ -20,12 +20,14 @@
             class="hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0 h-screen sticky top-0 shadow-sm">
             <div class="flex items-center h-20 px-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-100 p-1">
+                    <div
+                        class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-100 p-1">
                         <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
                     </div>
                     <div x-show="sidebarOpen" class="flex flex-col">
                         <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
-                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau Power</span>
+                        <span class="text-gray-400 font-bold uppercase tracking-tight mt-0.5"
+                            style="font-size: 9px !important;">PT Aruna Hijau Power</span>
                     </div>
                 </div>
                 <button x-show="sidebarOpen" @click="sidebarOpen=false"
@@ -61,7 +63,7 @@
                     @if(!$item['roles'] || in_array($user->role, $item['roles']))
                         <a href="{{ route($item['route']) }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all group
-                                              {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                                              {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path d="{{ $item['icon'] }}" />
@@ -73,7 +75,7 @@
                 @if($user->role === 'technician')
                     <a href="{{ route('work-orders.my-jobs') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                  {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                          {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -85,7 +87,7 @@
                 @if($user->role === 'admin')
                     <a href="{{ route('settings.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                  {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                          {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path
@@ -99,13 +101,21 @@
 
             <div class="border-t border-gray-100 p-3 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div
-                        class="w-10 h-10 rounded-full bg-brand text-white text-sm font-black flex items-center justify-center uppercase shadow-sm">
-                        {{ substr(auth()->user()->name, 0, 1) }}
-                    </div>
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/'.auth()->user()->avatar) }}" 
+                             class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand shadow-sm border border-brand/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                    @endif
                     <div x-show="sidebarOpen" class="min-w-0">
                         <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ auth()->user()->role }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                            {{ auth()->user()->role }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -116,18 +126,19 @@
             x-transition:enter="transition-opacity duration-200" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity duration-200"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display:none"></div>
-        <aside x-show="mobileOpen"
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-white lg:hidden flex flex-col shadow-2xl"
+        <aside x-show="mobileOpen" class="fixed inset-y-0 left-0 z-50 w-64 bg-white lg:hidden flex flex-col shadow-2xl"
             x-transition:enter="transition duration-200" x-transition:enter-start="-translate-x-full"
             x-transition:enter-end="translate-x-0" x-transition:leave="transition duration-200"
             x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" style="display:none">
             <div class="flex items-center h-20 px-4 border-b border-gray-100">
-                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3 flex-shrink-0 border border-gray-100 p-1">
+                <div
+                    class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3 flex-shrink-0 border border-gray-100 p-1">
                     <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
                 </div>
                 <div class="flex flex-col">
                     <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
-                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau Power</span>
+                    <span class="text-[6px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau
+                        Power</span>
                 </div>
                 <button @click="mobileOpen=false" class="ml-auto text-gray-400 hover:text-brand">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">

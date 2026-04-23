@@ -43,13 +43,20 @@ class SettingsController extends Controller
             'role'     => ['required', Rule::in($validRoles)],
             'phone'    => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
+            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
 
         User::create([
             'name'      => $request->name,
             'email'     => $request->email,
             'role'      => $request->role,
             'phone'     => $request->phone,
+            'avatar'    => $avatarPath,
             'password'  => Hash::make($request->password),
             'is_active' => true,
         ]);
@@ -75,6 +82,7 @@ class SettingsController extends Controller
             'phone'     => 'nullable|string|max:20',
             'is_active' => 'boolean',
             'password'  => 'nullable|string|min:8|confirmed',
+            'avatar'    => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $data = [
@@ -84,6 +92,14 @@ class SettingsController extends Controller
             'phone'     => $request->phone,
             'is_active' => $request->boolean('is_active', true),
         ];
+
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);

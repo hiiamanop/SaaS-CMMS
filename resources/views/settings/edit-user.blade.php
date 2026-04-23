@@ -18,7 +18,7 @@
 <div class="max-w-lg mx-auto space-y-6">
     <h1 class="text-2xl font-bold text-gray-900">Edit User</h1>
 
-    <form action="{{ route('settings.users.update', $user) }}" method="POST" class="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+    <form action="{{ route('settings.users.update', $user) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
         @csrf @method('PUT')
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama <span class="text-red-500">*</span></label>
@@ -41,6 +41,16 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">No. Telpon</label>
             <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Foto Profil</label>
+            @if($user->avatar)
+                <div class="mb-2">
+                    <img src="{{ asset('storage/'.$user->avatar) }}" class="w-16 h-16 rounded-full object-cover border border-gray-200">
+                </div>
+            @endif
+            <input type="file" name="avatar" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-brand hover:file:bg-gray-200">
+            @error('avatar') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
         </div>
         <div class="flex items-center gap-3">
             <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $user->is_active ?? true) ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300">
