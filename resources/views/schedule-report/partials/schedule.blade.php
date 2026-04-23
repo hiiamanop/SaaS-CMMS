@@ -136,7 +136,7 @@ $now = \Carbon\Carbon::now();
                 <td class="border border-gray-300 px-2 py-1 text-center text-gray-600">
                     @if($sched->shutdown_required)
                         @if($rowType === 'Renc.')
-                            <span class="text-blue-600">{{ $sched->shutdown_duration_hours ?? 0 }}h/kali</span>
+                            <span class="text-brand">{{ $sched->shutdown_duration_hours ?? 0 }}h/kali</span>
                         @else
                             @if($actualShutdownHours > 0)
                                 <span class="font-semibold text-orange-600">{{ $actualShutdownHours }}h</span>

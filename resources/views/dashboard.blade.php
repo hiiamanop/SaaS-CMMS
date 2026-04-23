@@ -22,11 +22,11 @@
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-500">Total Assets</span>
                 <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 </div>
             </div>
             <p class="text-3xl font-bold text-gray-900">{{ $totalAssets }}</p>
-            <a href="{{ route('assets.index') }}" class="text-xs text-blue-600 hover:underline mt-1 inline-block">View all →</a>
+            <a href="{{ route('assets.index') }}" class="text-xs text-brand hover:underline mt-1 inline-block">View all →</a>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
@@ -71,14 +71,14 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-gray-900">Upcoming (7 days)</h2>
-                <a href="{{ route('maintenance-schedules.index') }}" class="text-xs text-blue-600 hover:underline">View all</a>
+                <a href="{{ route('maintenance-schedules.index') }}" class="text-xs text-brand hover:underline">View all</a>
             </div>
             @forelse($upcomingSchedules as $schedule)
             <div class="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0">
                 <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {{ $schedule->type==='preventive' ? 'bg-blue-500' : 'bg-orange-500' }}"></div>
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-gray-900 truncate">{{ $schedule->title }}</p>
-                    <p class="text-xs text-gray-500">{{ $schedule->asset->name }}</p>
+                    <p class="text-xs text-gray-500">{{ $schedule->asset?->name ?? 'N/A' }}</p>
                     <p class="text-xs text-gray-400 mt-0.5">{{ $schedule->next_due_date->format('M d, Y') }}</p>
                 </div>
             </div>
@@ -96,7 +96,7 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <h2 class="font-semibold text-gray-900">Recent Work Orders</h2>
-                <a href="{{ route('work-orders.index') }}" class="text-xs text-blue-600 hover:underline">View all</a>
+                <a href="{{ route('work-orders.index') }}" class="text-xs text-brand hover:underline">View all</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -109,15 +109,22 @@
                     <tbody class="divide-y divide-gray-50">
                     @foreach($recentWorkOrders as $wo)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-3"><a href="{{ route('work-orders.show', $wo) }}" class="font-medium text-blue-600 hover:underline">{{ $wo->wo_number }}</a></td>
-                        <td class="px-5 py-3 text-gray-600 truncate max-w-[150px]">{{ $wo->asset->name }}</td>
+                        @php $isFollowUp = str_contains(strtoupper($wo->title), '[FOLLOW-UP]'); @endphp
+                        <td class="px-5 py-3"><a href="{{ route('work-orders.show', $wo) }}" class="font-medium {{ $isFollowUp ? 'text-red-600' : 'text-brand' }} hover:underline">{{ $wo->wo_number }}</a></td>
+                        <td class="px-5 py-3 text-gray-600 truncate max-w-[150px]">
+                            @if($wo->asset)
+                                {{ $wo->asset->name }}
+                            @else
+                                <span class="text-brand font-medium">{{ $wo->client_name ?: 'External Client' }}</span>
+                            @endif
+                        </td>
                         <td class="px-5 py-3">
-                            @php $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700']; @endphp
+                            @php $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-brand-50 text-brand','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $pColors[$wo->priority] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($wo->priority) }}</span>
                         </td>
                         <td class="px-5 py-3">
-                            @php $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700']; @endphp
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sColors[$wo->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $wo->status_label }}</span>
+                            @php $sColors=['open'=>'bg-brand-50 text-brand','in_progress'=>'bg-yellow-50 text-yellow-700','pending_review'=>'bg-purple-50 text-purple-700','closed'=>'bg-emerald-50 text-emerald-700']; @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $sColors[$wo->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $wo->status_label }}</span>
                         </td>
                     </tr>
                     @endforeach
@@ -130,13 +137,13 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <h2 class="font-semibold text-gray-900">Low Stock Parts</h2>
-                <a href="{{ route('spare-parts.index', ['filter'=>'low_stock']) }}" class="text-xs text-blue-600 hover:underline">View all</a>
+                <a href="{{ route('spare-parts.index', ['filter'=>'low_stock']) }}" class="text-xs text-brand hover:underline">View all</a>
             </div>
             <div class="divide-y divide-gray-50">
                 @forelse($lowStockParts as $part)
                 <div class="px-5 py-3">
                     <div class="flex items-center justify-between mb-1.5">
-                        <a href="{{ route('spare-parts.show', $part) }}" class="text-sm font-medium text-gray-900 hover:text-blue-600 truncate max-w-[200px]">{{ $part->name }}</a>
+                        <a href="{{ route('spare-parts.show', $part) }}" class="text-sm font-medium text-gray-900 hover:text-brand truncate max-w-[200px]">{{ $part->name }}</a>
                         <span class="text-xs {{ $part->qty_actual===0 ? 'text-red-600 font-semibold' : 'text-orange-600' }}">{{ $part->qty_actual }} / {{ $part->qty_minimum }} min</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-1.5">

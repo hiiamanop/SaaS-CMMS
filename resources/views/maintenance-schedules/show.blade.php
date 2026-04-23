@@ -32,7 +32,7 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                    <span class="font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{{ ucfirst($s->type) }}</span>
+                    <span class="font-medium text-brand bg-blue-50 px-2 py-0.5 rounded">{{ ucfirst($s->type) }}</span>
                     <span>•</span>
                     <span>Dibuat pada {{ $s->created_at->format('d M Y') }}</span>
                 </div>
@@ -143,7 +143,7 @@
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 class="text-xs font-bold text-gray-900 uppercase tracking-widest">History Checksheet</h2>
-                    <a href="{{ route('checksheet.index') }}" class="text-[10px] text-blue-600 font-bold hover:underline">View All</a>
+                    <a href="{{ route('checksheet.index') }}" class="text-[10px] text-brand font-bold hover:underline">View All</a>
                 </div>
                 <div class="p-0 max-h-[400px] overflow-y-auto">
                     @if($s->checksheetSessions->where('status','submitted')->isEmpty())
@@ -176,7 +176,7 @@
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 class="text-xs font-bold text-gray-900 uppercase tracking-widest">Recent Work Orders</h2>
-                    <span class="px-1.5 py-0.5 bg-blue-600 text-white text-[8px] font-bold rounded">{{ $s->workOrders->count() }}</span>
+                    <span class="px-1.5 py-0.5 bg-brand text-white text-[8px] font-bold rounded">{{ $s->workOrders->count() }}</span>
                 </div>
                 <div class="p-0">
                     @if($s->workOrders->isEmpty())
@@ -187,7 +187,7 @@
                             @php $stc=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700']; @endphp
                             <a href="{{ route('work-orders.show', $wo) }}" class="block p-4 hover:bg-gray-50 transition-colors">
                                 <div class="flex justify-between items-start mb-1">
-                                    <span class="text-[10px] font-bold text-blue-600">{{ $wo->wo_number }}</span>
+                                    <span class="text-[10px] font-bold text-brand">{{ $wo->wo_number }}</span>
                                     <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase {{ $stc[$wo->status] ?? '' }}">{{ $wo->status }}</span>
                                 </div>
                                 <p class="text-xs font-semibold text-gray-800 line-clamp-1 mb-1">{{ $wo->title }}</p>
@@ -200,7 +200,7 @@
                         </div>
                         @if($s->workOrders->count() > 3)
                         <div class="p-2 bg-gray-50">
-                            <button class="w-full py-1 text-[10px] font-bold text-gray-500 hover:text-blue-600 transition-colors">View All Work Orders</button>
+                            <button class="w-full py-1 text-[10px] font-bold text-gray-500 hover:text-brand transition-colors">View All Work Orders</button>
                         </div>
                         @endif
                     @endif

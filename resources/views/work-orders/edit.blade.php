@@ -16,20 +16,20 @@
                 <div class="lg:col-span-2 space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Task Title <span class="text-red-500">*</span></label>
-                        <input name="title" value="{{ old('title', $workOrder->title) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input name="title" value="{{ old('title', $workOrder->title) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="sm:col-span-2">
                              <div class="flex items-center gap-2 mb-2">
-                                <input type="checkbox" name="is_external_client" value="1" id="isExternal" x-model="isExternal" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input type="checkbox" name="is_external_client" value="1" id="isExternal" x-model="isExternal" class="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand">
                                 <label for="isExternal" class="text-sm font-semibold text-gray-700 cursor-pointer">Pekerjaan di Lokasi Client (Bukan PLTS Internal)</label>
                              </div>
                         </div>
 
                         <div x-show="!isExternal" class="sm:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Asset Internal <span class="text-red-500">*</span></label>
-                            <select name="asset_id" :required="!isExternal" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="asset_id" :required="!isExternal" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 <option value="">Select asset...</option>
                                 @foreach($assets as $a)<option value="{{ $a->id }}" {{ old('asset_id', $workOrder->asset_id)==$a->id?'selected':'' }}>{{ $a->name }} ({{ $a->asset_code }})</option>@endforeach
                             </select>
@@ -37,14 +37,14 @@
 
                         <div x-show="isExternal" class="sm:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Client / Lokasi Luar <span class="text-red-500">*</span></label>
-                            <input name="client_name" value="{{ old('client_name', $workOrder->client_name) }}" :required="isExternal" class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input name="client_name" value="{{ old('client_name', $workOrder->client_name) }}" :required="isExternal" class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                             {{-- Asset placeholder --}}
                             <input type="hidden" name="asset_id" value="1">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign To</label>
-                            <select name="assigned_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="assigned_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 <option value="">Unassigned</option>
                                 @foreach($technicians as $t)<option value="{{ $t->id }}" {{ old('assigned_to', $workOrder->assigned_to)==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
                             </select>
@@ -52,7 +52,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Priority <span class="text-red-500">*</span></label>
-                            <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="priority" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 @foreach(['low','medium','high','critical'] as $p)<option value="{{ $p }}" {{ old('priority', $workOrder->priority)==$p?'selected':'' }}>{{ ucfirst($p) }}</option>@endforeach
                             </select>
                         </div>
@@ -60,7 +60,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('description', $workOrder->description) }}</textarea>
+                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description', $workOrder->description) }}</textarea>
                     </div>
                 </div>
 
@@ -68,13 +68,13 @@
                 <div class="space-y-6">
                     <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Due Date <span class="text-red-500">*</span></label>
-                        <input name="due_date" type="date" value="{{ old('due_date', $workOrder->due_date?->format('Y-m-d')) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input name="due_date" type="date" value="{{ old('due_date', $workOrder->due_date?->format('Y-m-d')) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     </div>
                 </div>
             </div>
 
             <div class="flex gap-3 pt-6 border-t border-gray-100">
-                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-sm transition-all">Update Order</button>
+                <button type="submit" class="px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-bold hover:bg-brand-600 shadow-sm transition-all">Update Order</button>
                 <a href="{{ route('work-orders.show', $workOrder) }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
             </div>
             

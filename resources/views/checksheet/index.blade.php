@@ -32,13 +32,13 @@
             {{-- Session month/year filter --}}
             <form method="GET" action="{{ route('checksheet.index') }}" class="flex items-center gap-2 flex-wrap">
                 <input type="hidden" name="schedule_filter" value="{{ $scheduleFilter }}">
-                <select name="month" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="month" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     <option value="">Semua Bulan</option>
                     @foreach(['Jan'=>1,'Feb'=>2,'Mar'=>3,'Apr'=>4,'Mei'=>5,'Jun'=>6,'Jul'=>7,'Agu'=>8,'Sep'=>9,'Okt'=>10,'Nov'=>11,'Des'=>12] as $lbl => $num)
                     <option value="{{ $num }}" {{ $sessionMonth == $num ? 'selected' : '' }}>{{ $lbl }}</option>
                     @endforeach
                 </select>
-                <select name="year" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="year" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     <option value="">Semua Tahun</option>
                     @foreach(range(now()->year - 1, now()->year + 1) as $y)
                     <option value="{{ $y }}" {{ $sessionYear == $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -64,9 +64,9 @@
         </p>
         <p class="text-gray-400 text-sm mt-1">
             @if($scheduleFilter !== 'all')
-                <a href="{{ route('checksheet.index') }}" class="text-blue-600 hover:underline">Lihat semua jadwal</a>
+                <a href="{{ route('checksheet.index') }}" class="text-brand hover:underline">Lihat semua jadwal</a>
             @else
-                Tambahkan item pekerjaan pada <a href="{{ route('maintenance-schedules.index') }}" class="text-blue-600 hover:underline">Jadwal Maintenance</a> untuk membuat checksheet
+                Tambahkan item pekerjaan pada <a href="{{ route('maintenance-schedules.index') }}" class="text-brand hover:underline">Jadwal Maintenance</a> untuk membuat checksheet
             @endif
         </p>
     </div>
@@ -126,7 +126,7 @@
                     <span class="text-xs text-orange-400">Belum ada item pekerjaan</span>
                     @endif
                     <button onclick="openNewSession({{ $schedule->id }}, '{{ addslashes($schedule->equipment_name) }}', '{{ $schedule->frequency }}', {{ $plannedWeeksJson }})"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700">
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-white text-xs font-medium rounded-lg hover:bg-brand-600">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Buat Sesi
                     </button>
@@ -211,7 +211,7 @@
                 @if($totalSess > 5)
                 <div class="border-t border-gray-50 px-5 py-2.5 text-center">
                     <button @click="expanded = !expanded"
-                            class="text-xs font-medium text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                            class="text-xs font-medium text-brand hover:text-blue-700 inline-flex items-center gap-1">
                         <span x-show="!expanded">
                             <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             +{{ $totalSess - 5 }} sesi lainnya
@@ -258,7 +258,7 @@
             <div id="weeklyPlanned" style="display:none">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Jadwal Minggu</label>
                 <select id="plannedWeekSelect" onchange="onPlannedWeekChange(this)"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </select>
                 <p class="text-xs text-gray-400 mt-1">Hanya minggu yang ada di jadwal yang ditampilkan</p>
             </div>
@@ -318,7 +318,7 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                <button type="submit" class="flex-1 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-600">
                     Buat Sesi & Mulai Isi
                 </button>
                 <button type="button" onclick="closeNewSession()" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50">

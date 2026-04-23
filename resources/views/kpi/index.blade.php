@@ -19,14 +19,14 @@
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">From</label>
                 <input type="date" name="date_from" value="{{ $dateFrom->toDateString() }}"
-                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:ring-2 focus:ring-brand focus:border-transparent">
             </div>
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">To</label>
                 <input type="date" name="date_to" value="{{ $dateTo->toDateString() }}"
-                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:ring-2 focus:ring-brand focus:border-transparent">
             </div>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+            <button type="submit" class="px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-600">
                 Apply
             </button>
             <a href="{{ route('kpi.index') }}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50">

@@ -13,7 +13,7 @@
         @if($notifications->where('is_read', false)->count() > 0)
         <form action="{{ route('notifications.mark-all-read') }}" method="POST">
             @csrf
-            <button type="submit" class="text-sm text-blue-600 hover:underline font-medium">
+            <button type="submit" class="text-sm text-brand hover:underline font-medium">
                 Mark all as read
             </button>
         </form>
@@ -39,7 +39,7 @@
             <div class="flex-shrink-0 mt-0.5">
                 @php
                     $iconMap = [
-                        'work_order'    => ['path' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'bg' => 'bg-blue-100', 'text' => 'text-blue-600'],
+                        'work_order'    => ['path' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'bg' => 'bg-blue-100', 'text' => 'text-brand'],
                         'maintenance'   => ['path' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'bg' => 'bg-green-100', 'text' => 'text-green-600'],
                         'spare_part'    => ['path' => 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6v6l4 2', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-600'],
                         'alert'         => ['path' => 'm21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z M12 9v4 M12 17h.01', 'bg' => 'bg-red-100', 'text' => 'text-red-600'],
@@ -68,7 +68,7 @@
                         <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1"></span>
                         <form action="{{ route('notifications.mark-read', $notification) }}" method="POST">
                             @csrf
-                            <button type="submit" class="text-xs text-blue-600 hover:underline whitespace-nowrap">Mark read</button>
+                            <button type="submit" class="text-xs text-brand hover:underline whitespace-nowrap">Mark read</button>
                         </form>
                         @else
                         <span class="text-xs text-gray-400">Read</span>
@@ -76,7 +76,7 @@
                     </div>
                 </div>
                 @if($notification->url)
-                <a href="{{ $notification->url }}" class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-blue-600 hover:underline">
+                <a href="{{ $notification->url }}" class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-brand hover:underline">
                     View details
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
                 </a>

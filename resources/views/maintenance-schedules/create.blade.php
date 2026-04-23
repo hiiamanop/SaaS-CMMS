@@ -18,7 +18,7 @@ $oldWeeks   = old('planned_weeks', []);
         </a>
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Jadwal Maintenance Baru</h1>
-            <p class="text-sm text-gray-500 mt-0.5">Tipe: <span class="font-medium text-blue-600">Preventive</span></p>
+            <p class="text-sm text-gray-500 mt-0.5">Tipe: <span class="font-medium text-brand">Preventive</span></p>
         </div>
     </div>
 
@@ -33,7 +33,7 @@ $oldWeeks   = old('planned_weeks', []);
                 @if(auth()->user()->isAdmin())
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi PLTS <span class="text-red-500">*</span></label>
-                    <select name="location_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('location_id') border-red-400 @enderror">
+                    <select name="location_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('location_id') border-red-400 @enderror">
                         <option value="">Pilih lokasi PLTS...</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('location_id') == $loc->id ? 'selected' : '' }}>
@@ -55,7 +55,7 @@ $oldWeeks   = old('planned_weeks', []);
                 @endif
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Teknisi / PIC <span class="text-red-500">*</span></label>
-                    <select name="technician_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('technician_id') border-red-400 @enderror">
+                    <select name="technician_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('technician_id') border-red-400 @enderror">
                         <option value="">Pilih teknisi...</option>
                         @foreach($technicians as $t)
                         <option value="{{ $t->id }}" {{ old('technician_id')==$t->id ? 'selected' : '' }}>{{ $t->name }} ({{ ucfirst($t->role) }})</option>
@@ -68,12 +68,12 @@ $oldWeeks   = old('planned_weeks', []);
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Alat / Trafo <span class="text-red-500">*</span></label>
                     <input name="trafo_name" value="{{ old('trafo_name') }}" required
                            placeholder="cth: Trafo 1600 kVA, TR-01"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('trafo_name') border-red-400 @enderror">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('trafo_name') border-red-400 @enderror">
                     @error('trafo_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Frekuensi <span class="text-red-500">*</span></label>
-                    <select name="frequency" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('frequency') border-red-400 @enderror">
+                    <select name="frequency" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('frequency') border-red-400 @enderror">
                         <option value="weekly"    {{ old('frequency')=='weekly'    ? 'selected' : '' }}>Mingguan</option>
                         <option value="monthly"   {{ old('frequency','monthly')=='monthly'   ? 'selected' : '' }}>Bulanan</option>
                         <option value="triwulan"  {{ old('frequency')=='triwulan'  ? 'selected' : '' }}>Triwulan</option>
@@ -97,7 +97,7 @@ $oldWeeks   = old('planned_weeks', []);
                     <div class="flex items-center justify-between mb-2">
                         <label class="block text-sm font-medium text-gray-700">Grup Item Pekerjaan <span class="text-red-500">*</span></label>
                         <button type="button" @click="groups.push({lokasi_inspeksi:'', items:[{name:'',metode:'',standar:''}]})"
-                                class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                class="inline-flex items-center gap-1.5 text-xs text-brand hover:text-blue-700 font-medium">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Tambah Lokasi Inspeksi
                         </button>
@@ -112,7 +112,7 @@ $oldWeeks   = old('planned_weeks', []);
                                     <div class="flex items-center gap-4 flex-1">
                                         <input x-model="group.lokasi_inspeksi"
                                                placeholder="Nama Lokasi Inspeksi (cth: Area Inverter, Atap)"
-                                               class="w-full sm:w-1/2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+                                               class="w-full sm:w-1/2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand bg-white shadow-sm">
                                         <button type="button" x-show="groups.length > 1" @click="groups.splice(gIdx, 1)"
                                                 class="flex-shrink-0 text-xs text-red-500 hover:text-red-700 font-medium">
                                             Hapus Lokasi
@@ -129,7 +129,7 @@ $oldWeeks   = old('planned_weeks', []);
                                                 <input :name="`item_pekerjaan[${gIdx}_${iIdx}][name]`"
                                                        x-model="item.name" required
                                                        placeholder="Nama item pekerjaan (cth: Pembersihan panel)"
-                                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                                 <button type="button" x-show="group.items.length > 1" @click="group.items.splice(iIdx, 1)"
                                                         class="flex-shrink-0 px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -140,19 +140,19 @@ $oldWeeks   = old('planned_weeks', []);
                                                     <label class="block text-xs text-gray-500 mb-1">Metode Inspeksi</label>
                                                     <input :name="`item_pekerjaan[${gIdx}_${iIdx}][metode]`"
                                                            x-model="item.metode" placeholder="cth: Visual, Pengukuran"
-                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs text-gray-500 mb-1">Standar Ketentuan</label>
                                                     <input :name="`item_pekerjaan[${gIdx}_${iIdx}][standar]`"
                                                            x-model="item.standar" placeholder="cth: Tegangan ≥ 380V"
-                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                                 </div>
                                             </div>
                                         </div>
                                     </template>
                                     <button type="button" @click="group.items.push({name:'',metode:'',standar:''})"
-                                            class="mt-2 inline-block text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                            class="mt-2 inline-block text-xs text-brand hover:text-blue-700 font-medium">
                                         + Tambah Item Pekerjaan
                                     </button>
                                 </div>
@@ -168,14 +168,14 @@ $oldWeeks   = old('planned_weeks', []);
             <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Shutdown</h2>
             <label class="flex items-center gap-3 cursor-pointer w-fit">
                 <input type="checkbox" name="shutdown_required" value="1" x-model="shutdown" {{ old('shutdown_required') ? 'checked' : '' }}
-                       class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                       class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand">
                 <span class="text-sm font-medium text-gray-700">Pekerjaan ini membutuhkan shutdown</span>
             </label>
             <div x-show="shutdown" x-transition>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Estimasi Durasi Shutdown (jam)</label>
                 <input name="shutdown_duration_hours" type="number" min="1" value="{{ old('shutdown_duration_hours') }}"
                        placeholder="cth: 4"
-                       class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             </div>
         </div>
 
@@ -186,7 +186,7 @@ $oldWeeks   = old('planned_weeks', []);
                 <div class="flex items-center gap-2">
                     <p class="text-xs text-gray-400 hidden sm:block">Klik header baris/kolom untuk pilih semua di baris/kolom tersebut</p>
                     <button type="button" id="btnCheckAllWeeks" onclick="toggleAllWeeks(this)"
-                            class="text-xs px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md border border-blue-200 font-medium whitespace-nowrap">
+                            class="text-xs px-2.5 py-1 bg-blue-50 text-brand hover:bg-blue-100 rounded-md border border-blue-200 font-medium whitespace-nowrap">
                         Ceklis Semua
                     </button>
                 </div>
@@ -206,7 +206,7 @@ $oldWeeks   = old('planned_weeks', []);
                     <tbody>
                         @foreach([1,2,3,4] as $week)
                         <tr class="hover:bg-blue-50/30">
-                            <td class="border border-gray-300 px-2 py-1.5 font-medium text-blue-600 text-center cursor-pointer hover:bg-blue-100 select-none"
+                            <td class="border border-gray-300 px-2 py-1.5 font-medium text-brand text-center cursor-pointer hover:bg-blue-100 select-none"
                                 onclick="toggleWeekRow({{ $week }})" title="Pilih semua Minggu {{ $week }}">W{{ $week }}</td>
                             @foreach(range(1,12) as $month)
                             @php $key = $month.'_'.$week; $checked = isset($oldWeeks[$key]); @endphp
@@ -214,7 +214,7 @@ $oldWeeks   = old('planned_weeks', []);
                                 <input type="checkbox" name="planned_weeks[{{ $key }}]" value="1"
                                        {{ $checked ? 'checked' : '' }}
                                        data-week="{{ $week }}" data-month="{{ $month }}"
-                                       class="week-cb w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                       class="week-cb w-3.5 h-3.5 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer">
                             </td>
                             @endforeach
                         </tr>
@@ -229,11 +229,11 @@ $oldWeeks   = old('planned_weeks', []);
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Catatan</label>
             <textarea name="notes" rows="3" placeholder="Catatan tambahan..."
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('notes') }}</textarea>
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('notes') }}</textarea>
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+            <button type="submit" class="px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
                 Simpan Jadwal
             </button>
             <a href="{{ route('maintenance-schedules.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">

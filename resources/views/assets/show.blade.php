@@ -35,7 +35,7 @@
         <div class="border-b border-gray-200 px-2">
             <div class="flex gap-1 -mb-px">
                 @foreach(['overview'=>'Overview','work_orders'=>'Work Orders','records'=>'Records'] as $key=>$label)
-                <button @click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $label }}</button>
+                <button @click="tab='{{ $key }}'" :class="tab==='{{ $key }}' ? 'border-b-2 border-brand text-brand' : 'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $label }}</button>
                 @endforeach
             </div>
         </div>
@@ -64,7 +64,7 @@
                 @foreach($asset->workOrders as $wo)
                 @php $pc=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700'];$stc=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700']; @endphp
                 <tr class="hover:bg-gray-50">
-                    <td class="px-5 py-3"><a href="{{ route('work-orders.show',$wo) }}" class="text-blue-600 hover:underline font-medium">{{ $wo->wo_number }}</a></td>
+                    <td class="px-5 py-3"><a href="{{ route('work-orders.show',$wo) }}" class="text-brand hover:underline font-medium">{{ $wo->wo_number }}</a></td>
                     <td class="px-5 py-3 text-gray-700">{{ $wo->title }}</td>
                     <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $pc[$wo->priority]??'' }}">{{ ucfirst($wo->priority) }}</span></td>
                     <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $stc[$wo->status]??'' }}">{{ $wo->status_label }}</span></td>
@@ -88,7 +88,7 @@
                 <tbody class="divide-y divide-gray-50">
                 @foreach($asset->maintenanceRecords as $mr)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-5 py-3"><a href="{{ route('maintenance-records.show',$mr) }}" class="text-blue-600 hover:underline font-medium">{{ $mr->record_number }}</a></td>
+                    <td class="px-5 py-3"><a href="{{ route('maintenance-records.show',$mr) }}" class="text-brand hover:underline font-medium">{{ $mr->record_number }}</a></td>
                     <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $mr->type==='preventive'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">{{ ucfirst($mr->type) }}</span></td>
                     <td class="px-5 py-3 text-gray-600">{{ $mr->maintenance_date->format('M d, Y') }}</td>
                     <td class="px-5 py-3 text-gray-600">{{ $mr->technician->name }}</td>

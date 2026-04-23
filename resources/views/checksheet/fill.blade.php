@@ -162,7 +162,7 @@
             </div>
             @endforeach
         </div>
-        <button type="button" onclick="addAbnormalRow()" class="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium">+ Tambah Baris</button>
+        <button type="button" onclick="addAbnormalRow()" class="mt-3 text-sm text-brand hover:text-blue-800 font-medium">+ Tambah Baris</button>
     </div>
     @endif
 

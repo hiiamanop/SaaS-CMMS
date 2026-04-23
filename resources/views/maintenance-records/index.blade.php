@@ -5,28 +5,28 @@
 <div class="space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div><h1 class="text-2xl font-bold text-gray-900">Maintenance Records</h1><p class="text-sm text-gray-500 mt-0.5">History of all maintenance activities</p></div>
-        <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+        <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>New Record
         </a>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <input name="search" value="{{ request('search') }}" placeholder="Search records..." class="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input name="search" value="{{ request('search') }}" placeholder="Search records..." class="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Assets</option>
                 @foreach($assets as $a)<option value="{{ $a->id }}" {{ request('asset_id')==$a->id?'selected':'' }}>{{ $a->name }}</option>@endforeach
             </select>
-            <select name="technician_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="technician_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Technicians</option>
                 @foreach($technicians as $t)<option value="{{ $t->id }}" {{ request('technician_id')==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
             </select>
-            <select name="type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Types</option>
                 <option value="preventive" {{ request('type')=='preventive'?'selected':'' }}>Preventive</option>
                 <option value="corrective" {{ request('type')=='corrective'?'selected':'' }}>Corrective</option>
             </select>
-            <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">Filter</button>
             <a href="{{ route('maintenance-records.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
         </form>
@@ -54,7 +54,7 @@
             @foreach($records as $r)
             <tr class="hover:bg-gray-50">
                 <td class="px-5 py-3">
-                    <a href="{{ route('maintenance-records.show',$r) }}" class="font-mono text-xs font-semibold text-blue-600 hover:underline">
+                    <a href="{{ route('maintenance-records.show',$r) }}" class="font-mono text-xs font-semibold text-brand hover:underline">
                         {{ $r->record_number }}
                     </a>
                 </td>
@@ -83,7 +83,7 @@
                 </td>
                 <td class="px-5 py-3 text-right">
                     <div class="flex justify-end gap-1">
-                        <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                        <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                         </a>
                         @if(!auth()->user()->isTechnician())

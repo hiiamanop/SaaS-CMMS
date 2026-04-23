@@ -164,7 +164,7 @@
                                 <code class="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">{{ $role->name }}</code>
                                 @else
                                 <input form="form-role-{{ $role->id }}" name="name" value="{{ $role->name }}" required
-                                    class="w-32 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-32 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                                 @endif
                             </td>
                         </template>
@@ -176,7 +176,7 @@
                         <template x-if="editing">
                             <td class="px-5 py-3">
                                 <input form="form-role-{{ $role->id }}" name="label" value="{{ $role->label }}" required
-                                    class="w-40 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-40 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
 
@@ -188,7 +188,7 @@
                             <td class="px-5 py-3">
                                 <input form="form-role-{{ $role->id }}" name="description" value="{{ $role->description }}"
                                     placeholder="Deskripsi..."
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
 
@@ -235,19 +235,19 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Slug <span class="text-red-500">*</span></label>
                     <input name="name" value="{{ old('name') }}" required placeholder="cth: viewer" maxlength="50"
-                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-400 @enderror">
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('name') border-red-400 @enderror">
                     @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Label <span class="text-red-500">*</span></label>
                     <input name="label" value="{{ old('label') }}" required placeholder="cth: Viewer" maxlength="100"
-                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('label') border-red-400 @enderror">
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('label') border-red-400 @enderror">
                     @error('label')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div class="flex-1 min-w-48">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Deskripsi</label>
                     <input name="description" value="{{ old('description') }}" placeholder="Opsional" maxlength="255"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
                     Tambah
@@ -282,7 +282,7 @@
                         <template x-if="editing">
                             <td class="px-5 py-3">
                                 <input form="form-loc-{{ $loc->id }}" name="name" value="{{ $loc->name }}" required
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
 
@@ -293,7 +293,7 @@
                         <template x-if="editing">
                             <td class="px-5 py-3">
                                 <input form="form-loc-{{ $loc->id }}" name="code" value="{{ $loc->code }}"
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
 
@@ -304,7 +304,7 @@
                         <template x-if="editing">
                             <td class="px-5 py-3">
                                 <input type="number" step="0.01" form="form-loc-{{ $loc->id }}" name="capacity_kwp" value="{{ $loc->capacity_kwp }}"
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
 
@@ -363,18 +363,18 @@
                 <div class="flex-1 min-w-48">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Nama Lokasi <span class="text-red-500">*</span></label>
                     <input name="name" value="{{ old('name') }}" required placeholder="cth: PLTS Atap Gedung A" maxlength="255"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-400 @enderror">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('name') border-red-400 @enderror">
                     @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Kode / ID</label>
                     <input name="code" value="{{ old('code') }}" placeholder="cth: GDA-01" maxlength="50"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas (kWp)</label>
                     <input type="number" step="0.01" name="capacity_kwp" value="{{ old('capacity_kwp') }}" placeholder="cth: 50.5"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
                     Tambah

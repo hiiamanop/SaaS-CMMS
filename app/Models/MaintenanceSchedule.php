@@ -12,7 +12,7 @@ class MaintenanceSchedule extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'location_id', 'technician_id', 'type', 'frequency', 'frequency_days',
+        'title', 'asset_id', 'location_id', 'technician_id', 'type', 'frequency', 'frequency_days',
         'start_date', 'next_due_date', 'last_done_date', 'status', 'notes',
         'category', 'equipment_name', 'trafo_name', 'item_pekerjaan',
         'planned_weeks', 'shutdown_required', 'shutdown_duration_hours', 'checklist_template',
@@ -32,6 +32,7 @@ class MaintenanceSchedule extends Model
         ];
     }
 
+    public function asset()              { return $this->belongsTo(Asset::class); }
     public function location()           { return $this->belongsTo(Location::class); }
     public function technician()         { return $this->belongsTo(User::class, 'technician_id'); }
     public function deletedBy()          { return $this->belongsTo(User::class, 'deleted_by'); }

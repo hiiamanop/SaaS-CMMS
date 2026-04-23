@@ -31,7 +31,7 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
                     <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $sColors[$wo->status]??'' }}">{{ $wo->status_label }}</span>
                     @if($overdue)<span class="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded-full">Overdue</span>@endif
                 </div>
-                <a href="{{ route('work-orders.show',$wo) }}" class="text-base font-semibold text-gray-900 hover:text-blue-600">{{ $wo->title }}</a>
+                <a href="{{ route('work-orders.show',$wo) }}" class="text-base font-semibold text-gray-900 hover:text-brand">{{ $wo->title }}</a>
                 <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
                     <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>{{ $wo->asset->name }}</span>
                     <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>Due {{ $wo->due_date->format('M d, Y') }}</span>

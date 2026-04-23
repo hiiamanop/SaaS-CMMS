@@ -9,7 +9,7 @@
             <p class="text-sm text-gray-500 mt-0.5">Inventory management</p>
         </div>
         @if(!auth()->user()->isTechnician())
-        <a href="{{ route('spare-parts.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+        <a href="{{ route('spare-parts.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Part
         </a>
         @endif
@@ -25,12 +25,12 @@
 
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <input name="search" value="{{ request('search') }}" placeholder="Search parts..." class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input name="search" value="{{ request('search') }}" placeholder="Search parts..." class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Categories</option>
                 @foreach($categories as $cat)<option value="{{ $cat }}" {{ request('category')==$cat?'selected':'' }}>{{ $cat }}</option>@endforeach
             </select>
-            <select name="filter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="filter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Stock</option>
                 <option value="low_stock" {{ request('filter')=='low_stock'?'selected':'' }}>Low Stock Only</option>
             </select>
@@ -81,12 +81,12 @@
                                 <p class="text-sm font-medium text-gray-900 mb-3">Adjust Stock</p>
                                 <form action="{{ route('spare-parts.adjust-stock', $part) }}" method="POST" class="space-y-3">
                                     @csrf
-                                    <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand">
                                         <option value="add">Add Stock</option>
                                         <option value="reduce">Reduce Stock</option>
                                     </select>
-                                    <input name="quantity" type="number" min="1" placeholder="Quantity" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <button type="submit" class="w-full px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">Update</button>
+                                    <input name="quantity" type="number" min="1" placeholder="Quantity" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand">
+                                    <button type="submit" class="w-full px-3 py-1.5 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-600">Update</button>
                                 </form>
                             </div>
                         </div>

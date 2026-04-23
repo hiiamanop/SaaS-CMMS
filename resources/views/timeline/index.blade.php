@@ -47,9 +47,9 @@
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
             <input name="date_from" type="date" value="{{ request('date_from') }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <input name="date_to" type="date" value="{{ request('date_to') }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">Filter</button>
             <a href="{{ route('timeline.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
         </form>
@@ -156,7 +156,7 @@
                 <div class="flex gap-1"><span class="font-medium text-gray-700">Type:</span><span id="fc-tooltip-type" class="capitalize"></span></div>
                 <div class="flex gap-1"><span class="font-medium text-gray-700">Status:</span><span id="fc-tooltip-status" class="capitalize"></span></div>
             </div>
-            <p class="text-xs text-blue-600 mt-2">Click to open</p>
+            <p class="text-xs text-brand mt-2">Click to open</p>
         </div>
     </div>
 

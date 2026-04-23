@@ -17,27 +17,26 @@
 
         {{-- Desktop Sidebar --}}
         <aside :class="sidebarOpen ? 'w-64' : 'w-16'"
-            class="hidden lg:flex flex-col bg-gray-900 text-white transition-all duration-300 ease-in-out flex-shrink-0 h-screen sticky top-0">
-            <div class="flex items-center h-16 px-4 border-b border-gray-700 flex-shrink-0">
+            class="hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0 h-screen sticky top-0 shadow-sm">
+            <div class="flex items-center h-20 px-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path
-                                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                        </svg>
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-100 p-1">
+                        <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
                     </div>
-                    <span x-show="sidebarOpen" class="font-bold text-lg tracking-tight whitespace-nowrap">CMMS</span>
+                    <div x-show="sidebarOpen" class="flex flex-col">
+                        <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau Power</span>
+                    </div>
                 </div>
                 <button x-show="sidebarOpen" @click="sidebarOpen=false"
-                    class="ml-auto text-gray-400 hover:text-white p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    class="ml-auto text-gray-400 hover:text-brand p-1 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path d="m15 18-6-6 6-6" />
                     </svg>
                 </button>
                 <button x-show="!sidebarOpen" @click="sidebarOpen=true"
-                    class="ml-auto text-gray-400 hover:text-white p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    class="ml-auto text-gray-400 hover:text-brand p-1 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path d="m9 18 6-6-6-6" />
                     </svg>
                 </button>
@@ -61,8 +60,8 @@
                 @foreach($nav as $item)
                     @if(!$item['roles'] || in_array($user->role, $item['roles']))
                         <a href="{{ route($item['route']) }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group
-                                              {{ request()->routeIs($item['match']) ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all group
+                                              {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path d="{{ $item['icon'] }}" />
@@ -73,8 +72,8 @@
                 @endforeach
                 @if($user->role === 'technician')
                     <a href="{{ route('work-orders.my-jobs') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                                  {{ request()->routeIs('work-orders.my-jobs') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
+                                  {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -85,8 +84,8 @@
                 @endif
                 @if($user->role === 'admin')
                     <a href="{{ route('settings.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                                  {{ request()->routeIs('settings*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
+                                  {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path
@@ -98,15 +97,15 @@
                 @endif
             </nav>
 
-            <div class="border-t border-gray-700 p-3 flex-shrink-0">
+            <div class="border-t border-gray-100 p-3 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div
-                        class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold uppercase flex-shrink-0">
+                        class="w-10 h-10 rounded-full bg-brand text-white text-sm font-black flex items-center justify-center uppercase shadow-sm">
                         {{ substr(auth()->user()->name, 0, 1) }}
                     </div>
                     <div x-show="sidebarOpen" class="min-w-0">
-                        <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-400 capitalize">{{ auth()->user()->role }}</p>
+                        <p class="text-sm font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ auth()->user()->role }}</p>
                     </div>
                 </div>
             </div>
@@ -118,21 +117,20 @@
             x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity duration-200"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display:none"></div>
         <aside x-show="mobileOpen"
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white lg:hidden flex flex-col"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-white lg:hidden flex flex-col shadow-2xl"
             x-transition:enter="transition duration-200" x-transition:enter-start="-translate-x-full"
             x-transition:enter-end="translate-x-0" x-transition:leave="transition duration-200"
             x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" style="display:none">
-            <div class="flex items-center h-16 px-4 border-b border-gray-700">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path
-                            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                    </svg>
+            <div class="flex items-center h-20 px-4 border-b border-gray-100">
+                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3 flex-shrink-0 border border-gray-100 p-1">
+                    <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
                 </div>
-                <span class="font-bold text-lg">CMMS</span>
-                <button @click="mobileOpen=false" class="ml-auto text-gray-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="flex flex-col">
+                    <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau Power</span>
+                </div>
+                <button @click="mobileOpen=false" class="ml-auto text-gray-400 hover:text-brand">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <line x1="18" x2="6" y1="6" y2="18" />
                         <line x1="6" x2="18" y1="6" y2="18" />
                     </svg>
@@ -188,7 +186,7 @@
                                 <span class="font-semibold text-sm text-gray-900">Notifications</span>
                                 <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-xs text-blue-600 hover:underline">Mark all
+                                    <button type="submit" class="text-xs text-brand hover:underline">Mark all
                                         read</button>
                                 </form>
                             </div>
@@ -210,7 +208,7 @@
                             </div>
                             <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100">
                                 <a href="{{ route('notifications.index') }}"
-                                    class="text-xs font-medium text-blue-600 hover:underline">View all</a>
+                                    class="text-xs font-medium text-brand hover:underline">View all</a>
                             </div>
                         </div>
                     </div>
@@ -219,7 +217,7 @@
                         <button @click="open=!open"
                             class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
                             <div
-                                class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-semibold flex items-center justify-center uppercase">
+                                class="w-7 h-7 rounded-full bg-brand text-white text-xs font-semibold flex items-center justify-center uppercase">
                                 {{ substr(auth()->user()->name, 0, 1) }}
                             </div>
                             <span

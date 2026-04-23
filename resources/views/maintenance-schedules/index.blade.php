@@ -37,7 +37,7 @@ $freqLabels = [
             </div>
             @if(!auth()->user()->isTechnician())
             <a href="{{ route('maintenance-schedules.create') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+               class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
                 Jadwal Baru
             </a>
@@ -48,30 +48,30 @@ $freqLabels = [
     {{-- Filter --}}
     <div x-show="view==='list'" class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">Semua Kategori</option>
                 @foreach($categories as $cat)
                 <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                 @endforeach
             </select>
-            <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">Semua Status</option>
                 <option value="active"   {{ request('status') == 'active'   ? 'selected' : '' }}>Active</option>
                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
             </select>
-            <select name="filter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="filter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">Semua</option>
                 <option value="overdue" {{ request('filter') == 'overdue' ? 'selected' : '' }}>Overdue Saja</option>
             </select>
             {{-- Month filter --}}
-            <select name="month" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="month" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">Semua Bulan</option>
                 @foreach(['Jan'=>1,'Feb'=>2,'Mar'=>3,'Apr'=>4,'Mei'=>5,'Jun'=>6,'Jul'=>7,'Agu'=>8,'Sep'=>9,'Okt'=>10,'Nov'=>11,'Des'=>12] as $label => $num)
                 <option value="{{ $num }}" {{ request('month') == $num ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
             {{-- Year filter --}}
-            <select name="year" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="year" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">Semua Tahun</option>
                 @foreach(range(now()->year - 1, now()->year + 2) as $y)
                 <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -81,11 +81,11 @@ $freqLabels = [
             <div class="flex items-center gap-1.5">
                 <input type="date" name="date_from" value="{{ request('date_from') }}"
                        placeholder="Dari tanggal"
-                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <span class="text-gray-400 text-sm">—</span>
                 <input type="date" name="date_to" value="{{ request('date_to') }}"
                        placeholder="Sampai tanggal"
-                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             </div>
             <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
             <a href="{{ route('maintenance-schedules.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
@@ -99,7 +99,7 @@ $freqLabels = [
             <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
             <p class="text-gray-400 font-medium">Belum ada jadwal maintenance</p>
             @if(!auth()->user()->isTechnician())
-            <a href="{{ route('maintenance-schedules.create') }}" class="mt-3 inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline">
+            <a href="{{ route('maintenance-schedules.create') }}" class="mt-3 inline-flex items-center gap-1.5 text-sm text-brand hover:underline">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
                 Buat jadwal pertama
             </a>
@@ -161,7 +161,7 @@ $freqLabels = [
                     </td>
                     <td class="px-4 py-3 text-center">
                         @if($weekCount > 0)
-                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-brand">
                                 {{ $weekCount }}x / tahun
                             </span>
                         @else
@@ -178,7 +178,7 @@ $freqLabels = [
                     <td class="px-4 py-3 text-right">
                         <div class="flex items-center justify-end gap-1">
                             <a href="{{ route('maintenance-schedules.show', $s) }}"
-                               class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Detail">
+                               class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg" title="Detail">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                             </a>
                             @if(!auth()->user()->isTechnician())

@@ -15,7 +15,7 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
         </div>
         <div class="flex gap-2">
             @if(!auth()->user()->isTechnician())
-            <a href="{{ route('work-orders.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all shadow-sm">
+            <a href="{{ route('work-orders.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
                 New Work Order
             </a>
@@ -31,13 +31,13 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
     <div class="border-b border-gray-200">
         <nav class="-mb-px flex space-x-8">
             <button @click="tab = 'work_orders'" 
-                :class="tab === 'work_orders' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                :class="tab === 'work_orders' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
                 Work Orders
                 <span class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-[10px]">{{ $workOrders->total() }}</span>
             </button>
             <button @click="tab = 'records'" 
-                :class="tab === 'records' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                :class="tab === 'records' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
                 Maintenance Records
                 <span class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-[10px]">{{ $records->total() }}</span>
@@ -48,28 +48,28 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
     {{-- Filter bar --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <form method="GET" class="flex flex-wrap gap-3">
-            <input name="search" value="{{ request('search') }}" placeholder="Search ID or title..." class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <input name="search" value="{{ request('search') }}" placeholder="Search ID or title..." class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all">
             
             <div x-show="tab === 'work_orders'" class="contents">
-                <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     <option value="">All Statuses</option>
                     @foreach(['open'=>'Open','in_progress'=>'In Progress','pending_review'=>'Pending Review','closed'=>'Closed'] as $v=>$l)
                     <option value="{{ $v }}" {{ request('status')==$v?'selected':'' }}>{{ $l }}</option>
                     @endforeach
                 </select>
-                <select name="priority" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="priority" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     <option value="">All Priorities</option>
                     @foreach(['low','medium','high','critical'] as $p)<option value="{{ $p }}" {{ request('priority')==$p?'selected':'' }}>{{ ucfirst($p) }}</option>@endforeach
                 </select>
             </div>
 
-            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Assets</option>
                 @foreach($assets as $a)<option value="{{ $a->id }}" {{ request('asset_id')==$a->id?'selected':'' }}>{{ $a->name }}</option>@endforeach
             </select>
 
-            <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             
             <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-all shadow-sm">Filter</button>
             <a href="{{ route('work-orders.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-sm">Reset</a>
@@ -90,18 +90,44 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
             @foreach($workOrders as $wo)
             @php $overdue = $wo->due_date->isPast() && $wo->status !== 'closed'; @endphp
             <tr class="hover:bg-gray-50 transition-colors {{ $overdue?'bg-red-50/20':'' }}">
-                <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700"><a href="{{ route('work-orders.show',$wo) }}" class="text-blue-600 hover:underline">{{ $wo->wo_number }}</a></td>
+                <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700"><a href="{{ route('work-orders.show',$wo) }}" class="text-brand hover:underline">{{ $wo->wo_number }}</a></td>
                 <td class="px-5 py-4">
-                    <a href="{{ route('work-orders.show',$wo) }}" class="font-semibold text-gray-900 hover:text-blue-600 max-w-[200px] truncate block">{{ $wo->title }}</a>
+                    @php $isFollowUp = str_contains(strtoupper($wo->title), '[FOLLOW-UP]'); @endphp
+                    <a href="{{ route('work-orders.show',$wo) }}" class="font-semibold {{ $isFollowUp ? 'text-red-600' : 'text-gray-900' }} hover:text-brand max-w-[200px] truncate block">{{ $wo->title }}</a>
                 </td>
-                <td class="px-5 py-4 text-gray-600 text-xs">{{ $wo->asset->name }}</td>
+                <td class="px-5 py-4 text-gray-600 text-xs">
+                    @if($wo->asset)
+                        {{ $wo->asset->name }}
+                    @else
+                        <span class="text-brand font-semibold">{{ $wo->client_name ?: 'External Client' }}</span>
+                    @endif
+                </td>
                 <td class="px-5 py-4 text-gray-600 text-xs">{{ $wo->assignedTo?->name ?? '—' }}</td>
                 <td class="px-5 py-4"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $pColors[$wo->priority]??'' }}">{{ $wo->priority }}</span></td>
-                <td class="px-5 py-4"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $sColors[$wo->status]??'' }}">{{ str_replace('_',' ',$wo->status) }}</span></td>
+                <td class="px-5 py-4">
+                    @if($wo->status === 'closed' && $wo->maintenanceRecord)
+                        @php 
+                            $mStatus = $wo->maintenanceRecord->status_after;
+                            $mColor = match($mStatus) {
+                                'solved' => 'bg-green-100 text-green-700 border-green-200',
+                                'pending' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                                'failure' => 'bg-red-100 text-red-700 border-red-200',
+                                default => 'bg-gray-100 text-gray-700'
+                            };
+                        @endphp
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border {{ $mColor }}">
+                            {{ $mStatus }}
+                        </span>
+                    @else
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $sColors[$wo->status]??'' }}">
+                            {{ str_replace('_',' ',$wo->status) }}
+                        </span>
+                    @endif
+                </td>
                 <td class="px-5 py-4 text-xs {{ $overdue ? 'text-red-600 font-bold' : 'text-gray-500' }}">{{ $wo->due_date->format('d M Y') }}</td>
                 <td class="px-5 py-4 text-right">
                     <div class="flex items-center justify-end gap-1">
-                        <a href="{{ route('work-orders.show',$wo) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                        <a href="{{ route('work-orders.show',$wo) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
                     </div>
                 </td>
             </tr>
@@ -136,17 +162,23 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
             @foreach($records as $r)
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700">
-                    <a href="{{ route('maintenance-records.show',$r) }}" class="text-blue-600 hover:underline">{{ $r->record_number }}</a>
+                    <a href="{{ route('maintenance-records.show',$r) }}" class="text-brand hover:underline">{{ $r->record_number }}</a>
                 </td>
-                <td class="px-5 py-4 text-gray-900 font-medium">{{ $r->asset->name }}</td>
+                <td class="px-5 py-4 text-gray-900 font-medium">
+                    @if($r->asset)
+                        {{ $r->asset->name }}
+                    @else
+                        <span class="text-brand font-bold">{{ $r->workOrder?->client_name ?: 'External Client' }}</span>
+                    @endif
+                </td>
                 <td class="px-5 py-4 font-semibold text-[10px] uppercase tracking-wider">
-                    <span class="{{ $r->type === 'preventive' ? 'text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded' }}">
+                    <span class="{{ $r->type === 'preventive' ? 'text-brand bg-blue-50 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded' }}">
                         {{ $r->type }}
                     </span>
                 </td>
                 <td class="px-5 py-4">
                     @if($r->workOrder)
-                        <a href="{{ route('work-orders.show', $r->workOrder) }}" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline uppercase">
+                        <a href="{{ route('work-orders.show', $r->workOrder) }}" class="inline-flex items-center gap-1 text-[10px] font-bold text-brand hover:underline uppercase">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                             {{ $r->workOrder->wo_number }}
                         </a>
@@ -165,7 +197,7 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
                     </div>
                 </td>
                 <td class="px-5 py-4 text-right">
-                    <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                    <a href="{{ route('maintenance-records.show',$r) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
                 </td>

@@ -24,7 +24,7 @@ $wo = $workOrder;
         </div>
         <div class="flex gap-2 flex-wrap">
             @if($wo->status !== 'closed')
-            <button @click="statusModal=true" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+            <button @click="statusModal=true" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Update Status
             </button>
             @endif
@@ -43,7 +43,7 @@ $wo = $workOrder;
             <div class="flex gap-1 -mb-px">
                 @foreach(['details'=>'Details','checklist'=>'Checklist ('.$wo->checklistItems->count().')', 'maintenance' => 'Maintenance Detail', 'activity'=>'Activity Log'] as $k=>$l)
                     @if($k === 'maintenance' && !$wo->maintenanceRecord) @continue @endif
-                    <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-blue-600 text-blue-600':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
+                    <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-brand text-brand':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
                 @endforeach
             </div>
         </div>
@@ -103,7 +103,7 @@ $wo = $workOrder;
                         <span class="text-gray-400 text-xs">— Registered on {{ $mr->maintenance_date->format('M d, Y') }}</span>
                     </div>
                 </div>
-                <a href="{{ route('maintenance-records.show', $mr) }}" class="text-blue-600 text-sm font-bold hover:underline">View Full Record →</a>
+                <a href="{{ route('maintenance-records.show', $mr) }}" class="text-brand text-sm font-bold hover:underline">View Full Record →</a>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -150,7 +150,7 @@ $wo = $workOrder;
                         <span class="text-xs font-medium text-gray-600">{{ ucwords(str_replace('_',' ',$log->from_status)) }}</span>
                         <span class="text-xs text-gray-400">→</span>
                         @endif
-                        <span class="text-xs font-medium text-blue-600">{{ ucwords(str_replace('_',' ',$log->to_status)) }}</span>
+                        <span class="text-xs font-medium text-brand">{{ ucwords(str_replace('_',' ',$log->to_status)) }}</span>
                         <span class="text-xs text-gray-400 ml-auto">{{ $log->created_at->diffForHumans() }}</span>
                     </div>
                     @if($log->notes)<p class="text-sm text-gray-600 mt-1">{{ $log->notes }}</p>@endif
@@ -169,17 +169,17 @@ $wo = $workOrder;
             <form action="{{ route('work-orders.update-status',$wo) }}" method="POST" class="space-y-4">
                 @csrf
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">New Status</label>
-                    <select name="status" x-model="newStatus" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="status" x-model="newStatus" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                         @if($wo->status === 'open')<option value="in_progress">In Progress</option>@endif
                         @if(in_array($wo->status,['open','in_progress']))<option value="pending_review">Pending Review</option>@endif
                         @if(!auth()->user()->isTechnician())<option value="closed">Closed</option>@endif
                         @if(!auth()->user()->isTechnician() && $wo->status !== 'open')<option value="open">Re-open</option>@endif
                     </select>
                 </div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="3" x-model="statusNotes" placeholder="Add notes about this status change..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="3" x-model="statusNotes" placeholder="Add notes about this status change..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"></textarea></div>
                 <div class="flex gap-3">
                     <button type="button" @click="statusModal=false" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Update Status</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">Update Status</button>
                 </div>
             </form>
         </div>
