@@ -58,6 +58,16 @@
             <p class="text-3xl font-bold text-gray-900">{{ $lowStockCount }}</p>
             <a href="{{ route('spare-parts.index', ['filter'=>'low_stock']) }}" class="text-xs text-orange-600 hover:underline mt-1 inline-block">View parts →</a>
         </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-medium text-gray-500">Pending Inspections</span>
+                <div class="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15L11 17L15 13"/></svg>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">{{ $pendingChecksheets }}</p>
+            <a href="{{ route('checksheet.index', ['status'=>'draft']) }}" class="text-xs text-purple-600 hover:underline mt-1 inline-block">View checksheets →</a>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -73,19 +83,34 @@
                 <h2 class="font-semibold text-gray-900">Upcoming (7 days)</h2>
                 <a href="{{ route('maintenance-schedules.index') }}" class="text-xs text-brand hover:underline">View all</a>
             </div>
-            @forelse($upcomingSchedules as $schedule)
-            <div class="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0">
-                <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {{ $schedule->type==='preventive' ? 'bg-blue-500' : 'bg-orange-500' }}"></div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-gray-900 truncate">{{ $schedule->title }}</p>
-                    <p class="text-xs text-gray-500">{{ $schedule->asset?->name ?? 'N/A' }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ $schedule->next_due_date->format('M d, Y') }}</p>
+            @forelse($upcomingSchedules as $session)
+            <div class="flex items-start gap-3 py-3.5 border-b border-gray-50 last:border-0 hover:bg-brand-50/20 transition-all rounded-xl px-2 -mx-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand/20 to-brand/10 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div class="min-w-0 flex-1 pr-2">
+                    <p class="text-sm font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 truncate uppercase tracking-tight">
+                        {{ $session->period_label }}
+                    </p>
+                    <p class="text-xs font-bold text-brand mt-0.5 truncate">{{ $session->schedule->trafo_name ?? $session->equipment_location }}</p>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <p class="text-[9px] text-emerald-600 font-black uppercase tracking-widest">{{ $session->schedule->location->name ?? 'N/A' }}</p>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('checksheet.fill', $session) }}" class="inline-flex items-center justify-center h-8 px-4 rounded-full bg-brand-dark text-white font-bold text-[10px] font-black text-gray-900 hover:bg-brand hover:scale-105 transition-all shadow-lg shadow-gray-200">
+                        MULAI
+                    </a>
                 </div>
             </div>
             @empty
-            <div class="py-8 text-center">
-                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                <p class="text-sm text-gray-400">No upcoming schedules</p>
+            <div class="py-10 text-center">
+                <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <p class="text-xs text-gray-400 font-medium">No upcoming draft schedules</p>
+                <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-tighter">Check Maint. Schedule to generate sessions</p>
             </div>
             @endforelse
         </div>
@@ -108,22 +133,22 @@
                     </tr></thead>
                     <tbody class="divide-y divide-gray-50">
                     @foreach($recentWorkOrders as $wo)
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-opacity-90 transition-colors">
                         @php $isFollowUp = str_contains(strtoupper($wo->title), '[FOLLOW-UP]'); @endphp
-                        <td class="px-5 py-3"><a href="{{ route('work-orders.show', $wo) }}" class="font-medium {{ $isFollowUp ? 'text-red-600' : 'text-brand' }} hover:underline">{{ $wo->wo_number }}</a></td>
+                        <td class="px-5 py-3"><a href="{{ route('work-orders.show', $wo) }}" class="font-medium {{ $isFollowUp ? 'text-red-600' : 'text-gray-900' }} hover:underline">{{ $wo->wo_number }}</a></td>
                         <td class="px-5 py-3 text-gray-600 truncate max-w-[150px]">
                             @if($wo->asset)
-                                {{ $wo->asset->name }}
+                                <span class="text-gray-900 font-bold">{{ $wo->asset->name }}</span>
                             @else
-                                <span class="text-brand font-medium">{{ $wo->client_name ?: 'External Client' }}</span>
+                                <span class="text-gray-900 font-bold">{{ $wo->client_name ?: 'External Client' }}</span>
                             @endif
                         </td>
                         <td class="px-5 py-3">
-                            @php $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-brand-50 text-brand','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700']; @endphp
+                            @php $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-yellow-100 text-yellow-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $pColors[$wo->priority] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($wo->priority) }}</span>
                         </td>
                         <td class="px-5 py-3">
-                            @php $sColors=['open'=>'bg-brand-50 text-brand','in_progress'=>'bg-yellow-50 text-yellow-700','pending_review'=>'bg-purple-50 text-purple-700','closed'=>'bg-emerald-50 text-emerald-700']; @endphp
+                            @php $sColors=['open'=>'bg-blue-50 text-blue-700','in_progress'=>'bg-yellow-50 text-yellow-700','pending_review'=>'bg-purple-50 text-purple-700','closed'=>'bg-emerald-50 text-emerald-700']; @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $sColors[$wo->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $wo->status_label }}</span>
                         </td>
                     </tr>
@@ -173,7 +198,6 @@ new Chart(ctx, {
         labels,
         datasets: [
             { label: 'Open', data: @json(array_column($chartData,'open')), backgroundColor: '#93c5fd' },
-            { label: 'In Progress', data: @json(array_column($chartData,'in_progress')), backgroundColor: '#fde68a' },
             { label: 'Closed', data: @json(array_column($chartData,'closed')), backgroundColor: '#6ee7b7' },
         ]
     },

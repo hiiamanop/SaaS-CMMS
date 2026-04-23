@@ -15,11 +15,11 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
         </div>
         <div class="flex gap-2">
             @if(!auth()->user()->isTechnician())
-            <a href="{{ route('work-orders.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-all shadow-sm">
+            <a href="{{ route('work-orders.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600 transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
                 New Work Order
             </a>
-            <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-sm">
+            <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                 New Record
             </a>
@@ -71,8 +71,8 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
             <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             
-            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-all shadow-sm">Filter</button>
-            <a href="{{ route('work-orders.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-sm">Reset</a>
+            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">Filter</button>
+            <a href="{{ route('work-orders.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">Reset</a>
         </form>
     </div>
 
@@ -89,7 +89,7 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
             <tbody class="divide-y divide-gray-50">
             @foreach($workOrders as $wo)
             @php $overdue = $wo->due_date->isPast() && $wo->status !== 'closed'; @endphp
-            <tr class="hover:bg-gray-50 transition-colors {{ $overdue?'bg-red-50/20':'' }}">
+            <tr class="hover:bg-opacity-90 transition-colors {{ $overdue?'bg-red-50/20':'' }}">
                 <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700"><a href="{{ route('work-orders.show',$wo) }}" class="text-brand hover:underline">{{ $wo->wo_number }}</a></td>
                 <td class="px-5 py-4">
                     @php $isFollowUp = str_contains(strtoupper($wo->title), '[FOLLOW-UP]'); @endphp
@@ -160,7 +160,7 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
             </thead>
             <tbody class="divide-y divide-gray-50">
             @foreach($records as $r)
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-opacity-90 transition-colors">
                 <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700">
                     <a href="{{ route('maintenance-records.show',$r) }}" class="text-brand hover:underline">{{ $r->record_number }}</a>
                 </td>

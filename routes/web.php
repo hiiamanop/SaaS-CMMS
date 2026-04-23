@@ -13,6 +13,8 @@ use App\Http\Controllers\KpiController;
 use App\Http\Controllers\ChecksheetController;
 use App\Http\Controllers\ScheduleReportController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ToolController;
+use App\Http\Controllers\ConsumableController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,9 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Assets
     Route::resource('assets', AssetController::class);
 
-    // Spare Parts
     Route::resource('spare-parts', SparePartController::class);
     Route::post('spare-parts/{sparePart}/adjust-stock', [SparePartController::class, 'adjustStock'])->name('spare-parts.adjust-stock');
+    Route::resource('tools', ToolController::class);
+    Route::resource('consumables', ConsumableController::class);
 
     // Maintenance Schedules
     Route::resource('maintenance-schedules', MaintenanceScheduleController::class);

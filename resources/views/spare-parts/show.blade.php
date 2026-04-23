@@ -29,8 +29,8 @@
         @if($sparePart->description)<div class="pt-4 border-t border-gray-100"><p class="text-xs font-medium text-gray-500 uppercase mb-1">Description</p><p class="text-sm text-gray-700">{{ $sparePart->description }}</p></div>@endif
         @if(!auth()->user()->isTechnician())
         <div class="flex gap-3 pt-4 border-t border-gray-100">
-            <a href="{{ route('spare-parts.edit', $sparePart) }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Edit</a>
-            <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$sparePart) }}',message:'Delete part {{ addslashes($sparePart->name) }}?'})" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
+            <a href="{{ route('spare-parts.edit', $sparePart) }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
+            <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$sparePart) }}',message:'Delete part {{ addslashes($sparePart->name) }}?'})" class="px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
         </div>
         @endif
     </div>

@@ -20,6 +20,7 @@ class SparePartController extends Controller
             });
         }
         if ($request->category) $query->where('category', $request->category);
+        if ($request->type) $query->where('category', $request->type);
         if ($request->filter === 'low_stock') $query->whereRaw('qty_actual <= qty_minimum');
 
         $parts = $query->latest()->paginate(15)->withQueryString();

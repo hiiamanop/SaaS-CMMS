@@ -26,10 +26,10 @@
                 <input type="date" name="date_to" value="{{ $dateTo->toDateString() }}"
                     class="border border-gray-300 rounded-lg text-sm px-3 py-2 focus:ring-2 focus:ring-brand focus:border-transparent">
             </div>
-            <button type="submit" class="px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-600">
+            <button type="submit" class="px-4 py-2 bg-brand text-gray-900 text-sm font-medium rounded-lg hover:bg-brand-600">
                 Apply
             </button>
-            <a href="{{ route('kpi.index') }}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50">
+            <a href="{{ route('kpi.index') }}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-opacity-90">
                 Reset
             </a>
         </form>

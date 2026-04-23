@@ -67,7 +67,7 @@ $now = \Carbon\Carbon::now();
                 $lastShutdownDate   = $submittedSessions->sortByDesc('submitted_at')->first()?->submitted_at;
             @endphp
             @foreach(['Renc.', 'Real.'] as $rowType)
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-opacity-90">
                 @if($loop->first)
                 <td rowspan="2" class="border border-gray-300 px-1 py-1 text-center">{{ $itemNo++ }}</td>
                 <td rowspan="2" class="border border-gray-300 px-2 py-1">{{ $sched->equipment_name }}</td>

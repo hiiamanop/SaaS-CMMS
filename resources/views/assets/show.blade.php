@@ -17,8 +17,8 @@
         </div>
         @if(!auth()->user()->isTechnician())
         <div class="flex gap-2">
-            <a href="{{ route('assets.edit', $asset) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</a>
-            <button @click="$dispatch('open-delete',{action:'{{ route('assets.destroy',$asset) }}',message:'Delete asset {{ addslashes($asset->name) }}?'})" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</button>
+            <a href="{{ route('assets.edit', $asset) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</a>
+            <button @click="$dispatch('open-delete',{action:'{{ route('assets.destroy',$asset) }}',message:'Delete asset {{ addslashes($asset->name) }}?'})" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</button>
         </div>
         @endif
     </div>
@@ -63,7 +63,7 @@
                 <tbody class="divide-y divide-gray-50">
                 @foreach($asset->workOrders as $wo)
                 @php $pc=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700'];$stc=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700']; @endphp
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-opacity-90">
                     <td class="px-5 py-3"><a href="{{ route('work-orders.show',$wo) }}" class="text-brand hover:underline font-medium">{{ $wo->wo_number }}</a></td>
                     <td class="px-5 py-3 text-gray-700">{{ $wo->title }}</td>
                     <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $pc[$wo->priority]??'' }}">{{ ucfirst($wo->priority) }}</span></td>
@@ -87,7 +87,7 @@
                 <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase"><th class="px-5 py-3 text-left">Record #</th><th class="px-5 py-3 text-left">Type</th><th class="px-5 py-3 text-left">Date</th><th class="px-5 py-3 text-left">Technician</th><th class="px-5 py-3 text-left">Duration</th></tr></thead>
                 <tbody class="divide-y divide-gray-50">
                 @foreach($asset->maintenanceRecords as $mr)
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-opacity-90">
                     <td class="px-5 py-3"><a href="{{ route('maintenance-records.show',$mr) }}" class="text-brand hover:underline font-medium">{{ $mr->record_number }}</a></td>
                     <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $mr->type==='preventive'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700' }}">{{ ucfirst($mr->type) }}</span></td>
                     <td class="px-5 py-3 text-gray-600">{{ $mr->maintenance_date->format('M d, Y') }}</td>

@@ -9,8 +9,8 @@
             <p class="text-sm text-gray-500 mt-0.5">Inventory management</p>
         </div>
         @if(!auth()->user()->isTechnician())
-        <a href="{{ route('spare-parts.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Part
+        <a href="{{ route('spare-parts.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-opacity-90 shadow-sm transition-all">
+            <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Part
         </a>
         @endif
     </div>
@@ -34,8 +34,8 @@
                 <option value="">All Stock</option>
                 <option value="low_stock" {{ request('filter')=='low_stock'?'selected':'' }}>Low Stock Only</option>
             </select>
-            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
-            <a href="{{ route('spare-parts.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
+            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
+            <a href="{{ route('spare-parts.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Reset</a>
         </form>
     </div>
 
@@ -50,7 +50,7 @@
             </tr></thead>
             <tbody class="divide-y divide-gray-50">
             @foreach($parts as $part)
-            <tr class="hover:bg-gray-50 transition-colors {{ $part->isLowStock() ? 'bg-orange-50/30' : '' }}">
+            <tr class="hover:bg-opacity-90 transition-colors {{ $part->isLowStock() ? 'bg-orange-50/30' : '' }}">
                 <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $part->part_code }}</td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
@@ -86,7 +86,7 @@
                                         <option value="reduce">Reduce Stock</option>
                                     </select>
                                     <input name="quantity" type="number" min="1" placeholder="Quantity" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand">
-                                    <button type="submit" class="w-full px-3 py-1.5 bg-brand text-white rounded-lg text-xs font-medium hover:bg-brand-600">Update</button>
+                                    <button type="submit" class="w-full px-3 py-1.5 bg-brand text-gray-900 rounded-lg text-xs font-medium hover:bg-brand-600">Update</button>
                                 </form>
                             </div>
                         </div>

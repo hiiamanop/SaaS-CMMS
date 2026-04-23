@@ -59,7 +59,7 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
             @endif
             @foreach($groupItems as $item)
             @php $itemName = is_array($item) ? ($item['name'] ?? '') : $item; @endphp
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-opacity-90">
                 <td class="border border-gray-300 px-2 py-1 font-medium">{{ $itemName }}</td>
                 @foreach($months as $month)
                     @foreach([1,2,3,4] as $week)

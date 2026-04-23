@@ -50,32 +50,60 @@
                     $nav = [
                         ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10', 'match' => 'dashboard', 'roles' => null],
                         ['route' => 'assets.index', 'label' => 'Assets', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => 'assets*', 'roles' => null],
-                        ['route' => 'spare-parts.index', 'label' => 'Spare Parts', 'icon' => 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6v6l4 2', 'match' => 'spare-parts*', 'roles' => null],
+                        ['label' => 'Items', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => 'spare-parts*', 'roles' => null, 'sub' => [
+                            ['route' => 'spare-parts.index', 'params' => ['type' => 'tool'], 'label' => 'Tools'],
+                            ['route' => 'spare-parts.index', 'params' => ['type' => 'sparepart'], 'label' => 'Sparepart'],
+                            ['route' => 'spare-parts.index', 'params' => ['type' => 'consumable'], 'label' => 'Consumable'],
+                        ]],
                         ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule', 'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'match' => 'maintenance-schedules*', 'roles' => null],
+                        ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
                         ['route' => 'schedule-report.index', 'label' => 'Schedule Report', 'icon' => 'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z', 'match' => 'schedule-report*', 'roles' => null],
                         ['route' => 'work-orders.index', 'label' => 'Work Orders & Records', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
-                        ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
-                        ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6', 'match' => 'timeline*', 'roles' => null],
+                        ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M5 2h14 M5 22h14 M12 12l7-7H5l7 7zm0 0l7 7H5l7-7z', 'match' => 'timeline*', 'roles' => null],
                         ['route' => 'kpi.index', 'label' => 'KPI Dashboard', 'icon' => 'M18 20V10 M12 20V4 M6 20v-6', 'match' => 'kpi*', 'roles' => null],
                     ];
                 @endphp
                 @foreach($nav as $item)
                     @if(!$item['roles'] || in_array($user->role, $item['roles']))
-                        <a href="{{ route($item['route']) }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all group
-                                                              {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path d="{{ $item['icon'] }}" />
-                            </svg>
-                            <span x-show="sidebarOpen" class="truncate">{{ $item['label'] }}</span>
-                        </a>
+                        @if(isset($item['sub']))
+                            <div x-data="{ open: {{ request()->routeIs($item['match']) ? 'true' : 'false' }} }">
+                                <button @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-all
+                                                  {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="{{ $item['icon'] }}" />
+                                        </svg>
+                                        <span x-show="sidebarOpen" class="truncate">{{ $item['label'] }}</span>
+                                    </div>
+                                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 9-7 7-7-7"/></svg>
+                                </button>
+                                <div x-show="open && sidebarOpen" x-transition class="mt-1 ml-9 space-y-1">
+                                    @foreach($item['sub'] as $sub)
+                                        <a href="{{ route($sub['route'], $sub['params'] ?? []) }}" 
+                                           class="block px-3 py-2 rounded-lg text-xs font-bold {{ (request('type') == ($sub['params']['type'] ?? '')) ? 'text-brand' : 'text-gray-500 hover:text-brand' }}">
+                                            {{ $sub['label'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ route($item['route']) }}"
+                                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all group
+                                                                          {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="{{ $item['icon'] }}" />
+                                </svg>
+                                <span x-show="sidebarOpen" class="truncate">{{ $item['label'] }}</span>
+                            </a>
+                        @endif
                     @endif
                 @endforeach
                 @if($user->role === 'technician')
                     <a href="{{ route('work-orders.my-jobs') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                          {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                              {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -87,7 +115,7 @@
                 @if($user->role === 'admin')
                     <a href="{{ route('settings.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                          {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                              {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path
@@ -102,10 +130,11 @@
             <div class="border-t border-gray-100 p-3 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
                     @if(auth()->user()->avatar)
-                        <img src="{{ asset('storage/'.auth()->user()->avatar) }}" 
-                             class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100">
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                            class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100">
                     @else
-                        <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand shadow-sm border border-brand/20">
+                        <div
+                            class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand shadow-sm border border-brand/20">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
@@ -150,16 +179,62 @@
             <nav class="flex-1 overflow-y-auto py-4 space-y-0.5 px-2">
                 @foreach($nav as $item)
                     @if(!$item['roles'] || in_array($user->role, $item['roles']))
-                        <a href="{{ route($item['route']) }}" @click="mobileOpen=false"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path d="{{ $item['icon'] }}" />
-                            </svg>
-                            {{ $item['label'] }}
-                        </a>
+                        @if(isset($item['sub']))
+                            <div x-data="{ open: false }">
+                                <button @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path d="{{ $item['icon'] }}" />
+                                        </svg>
+                                        {{ $item['label'] }}
+                                    </div>
+                                    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 9-7 7-7-7"/></svg>
+                                </button>
+                                <div x-show="open" x-transition class="mt-1 ml-9 space-y-1">
+                                    @foreach($item['sub'] as $sub)
+                                        <a href="{{ route($sub['route'], $sub['params'] ?? []) }}" @click="mobileOpen=false"
+                                           class="block px-3 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-brand">
+                                            {{ $sub['label'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ route($item['route']) }}" @click="mobileOpen=false"
+                                class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="{{ $item['icon'] }}" />
+                                </svg>
+                                {{ $item['label'] }}
+                            </a>
+                        @endif
                     @endif
                 @endforeach
+                @if($user->role === 'technician')
+                    <a href="{{ route('work-orders.my-jobs') }}" @click="mobileOpen=false"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <rect width="18" height="18" x="3" y="3" rx="2" />
+                            <path d="M3 9h18M9 21V9" />
+                        </svg>
+                        My Jobs
+                    </a>
+                @endif
+                @if($user->role === 'admin')
+                    <a href="{{ route('settings.index') }}" @click="mobileOpen=false"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Settings
+                    </a>
+                @endif
             </nav>
         </aside>
 
@@ -188,7 +263,7 @@
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                             </svg>
                             <span x-show="count>0" x-text="count>9?'9+':count"
-                                class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium leading-none"></span>
+                                class="absolute -top-0.5 -right-0.5 bg-red-500 text-gray-900 text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium leading-none"></span>
                         </button>
                         <div x-show="open" @click.outside="open=false" x-transition
                             class="absolute right-0 top-full mt-1 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
@@ -207,7 +282,7 @@
                                 </template>
                                 <template x-for="n in items" :key="n.id">
                                     <a :href="n.url||'#'"
-                                        class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                        class="flex gap-3 px-4 py-3 hover:bg-opacity-90 transition-colors">
                                         <span class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full"
                                             :class="n.is_read?'bg-gray-200':'bg-blue-500'"></span>
                                         <div class="min-w-0">
@@ -228,7 +303,7 @@
                         <button @click="open=!open"
                             class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
                             <div
-                                class="w-7 h-7 rounded-full bg-brand text-white text-xs font-semibold flex items-center justify-center uppercase">
+                                class="w-7 h-7 rounded-full bg-brand text-gray-900 text-xs font-semibold flex items-center justify-center uppercase">
                                 {{ substr(auth()->user()->name, 0, 1) }}
                             </div>
                             <span
@@ -246,7 +321,7 @@
                                 <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
                             </div>
                             <a href="{{ route('profile.edit') }}"
-                                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-opacity-90">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -355,11 +430,11 @@
             </div>
             <div class="flex gap-3">
                 <button @click="show=false"
-                    class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-opacity-90">Cancel</button>
                 <form :action="action" method="POST" class="flex-1">
                     @csrf @method('DELETE')
                     <button type="submit"
-                        class="w-full px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
+                        class="w-full px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
                 </form>
             </div>
         </div>

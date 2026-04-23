@@ -21,7 +21,7 @@
             <p class="text-sm text-gray-500 mt-1">Kelola pengguna dan konfigurasi sistem</p>
         </div>
         <div x-show="tab === 'users'">
-            <a href="{{ route('settings.users.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+            <a href="{{ route('settings.users.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-dark text-white font-bold text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 Tambah User
             </a>
@@ -74,7 +74,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($users as $user)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-opacity-90">
                         <td class="px-5 py-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-semibold uppercase">
@@ -104,7 +104,7 @@
                         <td class="px-5 py-3 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('settings.users.edit', $user) }}"
-                                   class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                   class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
                                 </a>
                                 @if($user->id !== auth()->id())
@@ -148,7 +148,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($roles as $role)
-                    <tr class="hover:bg-gray-50" x-data="{ editing: false }">
+                    <tr class="hover:bg-opacity-90" x-data="{ editing: false }">
                         {{-- View row --}}
                         <template x-if="!editing">
                             <td class="px-5 py-3">
@@ -203,12 +203,12 @@
                                 @csrf @method('PUT')
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="submit" class="text-sm text-green-700 hover:text-green-900 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50">Simpan</button>
-                                    <button type="button" @click="editing=false" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Batal</button>
+                                    <button type="button" @click="editing=false" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">Batal</button>
                                 </div>
                             </form>
                             <div class="flex items-center justify-end gap-2" x-show="!editing">
                                 <button type="button" @click="editing=true"
-                                        class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                        class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
                                 </button>
                                 @if(!$role->isProtected())
@@ -249,7 +249,7 @@
                     <input name="description" value="{{ old('description') }}" placeholder="Opsional" maxlength="255"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
+                <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold text-sm font-medium rounded-lg hover:bg-gray-700">
                     Tambah
                 </button>
             </form>
@@ -274,7 +274,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($locations as $loc)
-                    <tr class="hover:bg-gray-50" x-data="{ editing: false }">
+                    <tr class="hover:bg-opacity-90" x-data="{ editing: false }">
                         {{-- Name --}}
                         <template x-if="!editing">
                             <td class="px-5 py-3 font-medium text-gray-900">{{ $loc->name }}</td>
@@ -333,12 +333,12 @@
                                 @csrf @method('PUT')
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="submit" class="text-sm text-green-700 hover:text-green-900 px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50">Simpan</button>
-                                    <button type="button" @click="editing=false" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Batal</button>
+                                    <button type="button" @click="editing=false" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">Batal</button>
                                 </div>
                             </form>
                             <div class="flex items-center justify-end gap-2" x-show="!editing">
                                 <button type="button" @click="editing=true"
-                                        class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">
+                                        class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
                                 </button>
                                 <button @click="$dispatch('open-delete', {action: '{{ route('settings.locations.destroy', $loc) }}', message: 'Hapus lokasi PLTS {{ addslashes($loc->name) }}?'})"
@@ -376,7 +376,7 @@
                     <input type="number" step="0.01" name="capacity_kwp" value="{{ old('capacity_kwp') }}" placeholder="cth: 50.5"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700">
+                <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold text-sm font-medium rounded-lg hover:bg-gray-700">
                     Tambah
                 </button>
             </form>

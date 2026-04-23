@@ -40,7 +40,7 @@
         </div>
         @if(!auth()->user()->isTechnician())
         <div class="flex items-center gap-2">
-            <a href="{{ route('maintenance-schedules.edit', $s) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 shadow-sm transition-all">
+            <a href="{{ route('maintenance-schedules.edit', $s) }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-opacity-90 shadow-sm transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit Schedule
             </a>
@@ -127,7 +127,7 @@
                                         $metode  = is_array($item) ? ($item['metode']  ?? '—') : '—';
                                         $standar = is_array($item) ? ($item['standar'] ?? '—') : '—';
                                     @endphp
-                                    <tr class="hover:bg-gray-50 transition-colors">
+                                    <tr class="hover:bg-opacity-90 transition-colors">
                                         <td class="px-6 py-4 font-medium text-gray-800">{{ $name }}</td>
                                         <td class="px-6 py-4 text-gray-500 text-xs">{{ $metode }}</td>
                                         <td class="px-6 py-4 text-gray-500 text-xs italic">{{ $standar }}</td>
@@ -156,7 +156,7 @@
                     @else
                         <div class="divide-y divide-gray-100">
                             @foreach($s->checksheetSessions->where('status','submitted')->sortByDesc('submitted_at')->take(5) as $session)
-                            <a href="{{ route('checksheet.show', $session) }}" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors group">
+                            <a href="{{ route('checksheet.show', $session) }}" class="flex items-center gap-3 p-4 hover:bg-opacity-90 transition-colors group">
                                 <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600 group-hover:bg-teal-100 transition-colors flex-shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                                 </div>
@@ -176,7 +176,7 @@
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 class="text-xs font-bold text-gray-900 uppercase tracking-widest">Recent Work Orders</h2>
-                    <span class="px-1.5 py-0.5 bg-brand text-white text-[8px] font-bold rounded">{{ $s->workOrders->count() }}</span>
+                    <span class="px-1.5 py-0.5 bg-brand text-gray-900 text-[8px] font-bold rounded">{{ $s->workOrders->count() }}</span>
                 </div>
                 <div class="p-0">
                     @if($s->workOrders->isEmpty())
@@ -185,7 +185,7 @@
                         <div class="divide-y divide-gray-100 border-b border-gray-100">
                             @foreach($s->workOrders->sortByDesc('created_at')->take(3) as $wo)
                             @php $stc=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700']; @endphp
-                            <a href="{{ route('work-orders.show', $wo) }}" class="block p-4 hover:bg-gray-50 transition-colors">
+                            <a href="{{ route('work-orders.show', $wo) }}" class="block p-4 hover:bg-opacity-90 transition-colors">
                                 <div class="flex justify-between items-start mb-1">
                                     <span class="text-[10px] font-bold text-brand">{{ $wo->wo_number }}</span>
                                     <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase {{ $stc[$wo->status] ?? '' }}">{{ $wo->status }}</span>

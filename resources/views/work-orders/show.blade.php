@@ -24,15 +24,15 @@ $wo = $workOrder;
         </div>
         <div class="flex gap-2 flex-wrap">
             @if($wo->status !== 'closed')
-            <button @click="statusModal=true" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
+            <button @click="statusModal=true" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Update Status
             </button>
             @endif
             @if(!auth()->user()->isTechnician())
-            <a href="{{ route('work-orders.edit',$wo) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Edit</a>
+            <a href="{{ route('work-orders.edit',$wo) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
             @endif
             @if($wo->status==='closed' && !$wo->maintenanceRecord)
-            <a href="{{ route('maintenance-records.create', ['work_order_id'=>$wo->id]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">Create Record</a>
+            <a href="{{ route('maintenance-records.create', ['work_order_id'=>$wo->id]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-green-700">Create Record</a>
             @endif
         </div>
     </div>
@@ -68,7 +68,7 @@ $wo = $workOrder;
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
                 <div class="flex-1 flex items-center gap-3">
                     <div class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 {{ $item->is_checked ? 'border-green-500 bg-green-500' : 'border-gray-300' }}">
-                        @if($item->is_checked)<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>@endif
+                        @if($item->is_checked)<svg class="w-3 h-3 text-gray-900" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>@endif
                     </div>
                     <span class="text-sm font-medium {{ $item->is_checked ? 'text-gray-900' : 'text-gray-500' }}">{{ $item->description }}</span>
                 </div>
@@ -178,8 +178,8 @@ $wo = $workOrder;
                 </div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="3" x-model="statusNotes" placeholder="Add notes about this status change..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"></textarea></div>
                 <div class="flex gap-3">
-                    <button type="button" @click="statusModal=false" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="flex-1 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">Update Status</button>
+                    <button type="button" @click="statusModal=false" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">Update Status</button>
                 </div>
             </form>
         </div>

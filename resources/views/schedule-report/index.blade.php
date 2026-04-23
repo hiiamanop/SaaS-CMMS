@@ -69,12 +69,12 @@
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="px-4 py-1.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700">
+            <button type="submit" class="px-4 py-1.5 bg-brand-dark text-white font-bold text-sm rounded-lg hover:bg-gray-700">
                 Filter
             </button>
             <a :href="'/schedule-report/pdf/' + tab + '?year={{ $year }}&plts_location={{ urlencode($pltsLocation ?? '') }}'"
                target="_blank"
-               class="px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">
+               class="px-4 py-1.5 bg-red-600 text-gray-900 text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 Export PDF
             </a>

@@ -46,7 +46,7 @@
             <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase"><th class="px-5 py-3 text-left">Part</th><th class="px-5 py-3 text-left">Qty Used</th><th class="px-5 py-3 text-left">Unit Price</th><th class="px-5 py-3 text-left">Total</th></tr></thead>
             <tbody class="divide-y divide-gray-50">
             @foreach($mr->parts as $p)
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-opacity-90">
                 <td class="px-5 py-3 font-medium text-gray-900">{{ $p->sparePart->name }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $p->qty_used }} {{ $p->sparePart->unit }}</td>
                 <td class="px-5 py-3 text-gray-600">{{ $p->unit_price ? 'IDR '.number_format($p->unit_price) : '—' }}</td>

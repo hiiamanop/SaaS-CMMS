@@ -22,7 +22,7 @@
         {{-- View Toggle --}}
         <div class="inline-flex rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm">
             <button @click="view='list'"
-                :class="view==='list' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50'"
+                :class="view==='list' ? 'bg-brand-dark text-white font-bold' : 'text-gray-600 hover:bg-opacity-90'"
                 class="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/>
@@ -32,7 +32,7 @@
                 List
             </button>
             <button @click="view='calendar'; $nextTick(()=>window.dispatchEvent(new Event('fc-render')))"
-                :class="view==='calendar' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50'"
+                :class="view==='calendar' ? 'bg-brand-dark text-white font-bold' : 'text-gray-600 hover:bg-opacity-90'"
                 class="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/>
@@ -50,8 +50,8 @@
                 class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <input name="date_to" type="date" value="{{ request('date_to') }}"
                 class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">Filter</button>
-            <a href="{{ route('timeline.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
+            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium">Filter</button>
+            <a href="{{ route('timeline.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Reset</a>
         </form>
     </div>
 

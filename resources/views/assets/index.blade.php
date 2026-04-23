@@ -6,8 +6,8 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div><h1 class="text-2xl font-bold text-gray-900">Assets</h1><p class="text-sm text-gray-500 mt-0.5">Manage your equipment and machinery</p></div>
         @if(!auth()->user()->isTechnician())
-        <a href="{{ route('assets.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Asset
+        <a href="{{ route('assets.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-opacity-90 shadow-sm transition-all">
+            <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Asset
         </a>
         @endif
     </div>
@@ -26,8 +26,8 @@
                 <option value="under_maintenance" {{ request('status')=='under_maintenance'?'selected':'' }}>Under Maintenance</option>
                 <option value="retired" {{ request('status')=='retired'?'selected':'' }}>Retired</option>
             </select>
-            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
-            <a href="{{ route('assets.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
+            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
+            <a href="{{ route('assets.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Reset</a>
         </form>
     </div>
     {{-- Table --}}
@@ -43,7 +43,7 @@
             <tbody class="divide-y divide-gray-50">
             @foreach($assets as $asset)
             @php $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','under_maintenance'=>'bg-yellow-100 text-yellow-700','retired'=>'bg-red-100 text-red-600']; @endphp
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-opacity-90 transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-gray-600">{{ $asset->asset_code }}</td>
                 <td class="px-5 py-3"><a href="{{ route('assets.show', $asset) }}" class="font-medium text-gray-900 hover:text-brand">{{ $asset->name }}</a></td>
                 <td class="px-5 py-3 text-gray-500">{{ $asset->category }}</td>

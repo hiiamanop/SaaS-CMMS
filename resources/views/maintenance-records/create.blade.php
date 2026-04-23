@@ -90,21 +90,21 @@
             <div class="pt-4 pb-2 border-t border-gray-100">
                 <label class="block text-sm font-bold text-gray-700 mb-3">Finish Status <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-green-50 has-[:checked]:border-green-300">
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-green-50 has-[:checked]:border-green-300">
                         <input type="radio" name="status_after" value="solved" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300" {{ old('status_after', 'solved') == 'solved' ? 'checked' : '' }}>
                         <div>
                             <p class="text-sm font-bold text-green-800">SOLVED</p>
                             <p class="text-[10px] text-green-600">Pekerjaan selesai & aman.</p>
                         </div>
                     </label>
-                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-yellow-50 has-[:checked]:border-yellow-300">
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-yellow-50 has-[:checked]:border-yellow-300">
                         <input type="radio" name="status_after" value="pending" class="w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300" {{ old('status_after') == 'pending' ? 'checked' : '' }}>
                         <div>
                             <p class="text-sm font-bold text-yellow-800">PENDING</p>
                             <p class="text-[10px] text-yellow-600">Butuh pengecekan lanjut.</p>
                         </div>
                     </label>
-                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors has-[:checked]:bg-red-50 has-[:checked]:border-red-300">
+                    <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-red-50 has-[:checked]:border-red-300">
                         <input type="radio" name="status_after" value="failure" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300" {{ old('status_after') == 'failure' ? 'checked' : '' }}>
                         <div>
                             <p class="text-sm font-bold text-red-800">FAILURE</p>
@@ -142,8 +142,8 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">Save Record</button>
-                <a href="{{ route('work-orders.index', ['tab' => 'records']) }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
+                <button type="submit" class="px-5 py-2.5 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">Save Record</button>
+                <a href="{{ route('work-orders.index', ['tab' => 'records']) }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Cancel</a>
             </div>
         </form>
     </div>

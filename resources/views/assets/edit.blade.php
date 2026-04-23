@@ -91,8 +91,8 @@
             </div>
 
             <div class="flex gap-3 pt-6 border-t border-gray-100">
-                <button type="submit" class="px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-bold hover:bg-brand-600 transition-all shadow-sm">Update Asset</button>
-                <a href="{{ route('assets.show', $asset) }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">Cancel</a>
+                <button type="submit" class="px-6 py-2.5 bg-brand text-gray-900 rounded-lg text-sm font-bold hover:bg-brand-600 transition-all shadow-sm">Update Asset</button>
+                <a href="{{ route('assets.show', $asset) }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all">Cancel</a>
             </div>
         </form>
     </div>

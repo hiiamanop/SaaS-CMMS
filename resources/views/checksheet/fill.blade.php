@@ -93,13 +93,13 @@
                 <div class="flex gap-3 mb-3">
                     <button type="button"
                             @click="result = 'P'; saveItem('{{ addslashes($itemKey) }}', 'P', notes)"
-                            :class="result === 'P' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-green-50'"
+                            :class="result === 'P' ? 'bg-green-600 text-gray-900 border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-green-50'"
                             class="flex-1 min-h-[48px] text-base font-bold rounded-lg border-2 transition-colors">
                         ✓ P (Normal)
                     </button>
                     <button type="button"
                             @click="result = 'X'; saveItem('{{ addslashes($itemKey) }}', 'X', notes)"
-                            :class="result === 'X' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
+                            :class="result === 'X' ? 'bg-red-600 text-gray-900 border-red-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-red-50'"
                             class="flex-1 min-h-[48px] text-base font-bold rounded-lg border-2 transition-colors">
                         ✗ X (Anomali)
                     </button>
@@ -123,7 +123,7 @@
                         </label>
                         <input type="file" accept=".jpg,.jpeg,.png,.heic"
                                @change="uploadPhoto($event, '{{ addslashes($itemKey) }}')"
-                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-900 file:text-white hover:file:bg-gray-700">
+                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-dark text-white font-bold file:text-gray-900 hover:file:bg-gray-700">
 
                         {{-- Existing photos --}}
                         @if($existing && $existing->photos)
@@ -215,12 +215,12 @@
                         :disabled="filled < {{ $total }}"
                         :title="filled < {{ $total }} ? 'Lengkapi semua item terlebih dahulu (' + filled + '/{{ $total }})' : 'Submit Checksheet'"
                         :class="filled >= {{ $total }}
-                            ? 'bg-gray-900 hover:bg-gray-700 text-white cursor-pointer'
+                            ? 'bg-brand-dark text-white font-bold hover:bg-gray-700 text-gray-900 cursor-pointer'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
                         class="flex-1 text-sm font-medium py-3 rounded-lg min-h-[48px] transition-colors">
                     <span x-text="filled >= {{ $total }} ? 'Submit Checksheet' : 'Submit (' + filled + '/{{ $total }} terisi)'"></span>
                 </button>
-                <a href="{{ url()->previous() }}" class="px-6 flex items-center justify-center bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 min-h-[48px]">
+                <a href="{{ url()->previous() }}" class="px-6 flex items-center justify-center bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-opacity-90 min-h-[48px]">
                     Kembali
                 </a>
             </div>

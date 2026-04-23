@@ -31,7 +31,7 @@
         <div class="flex gap-2">
             @if($session->status === 'submitted')
             <a href="{{ route('checksheet.pdf', $session) }}" target="_blank"
-               class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">
+               class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-900 text-sm font-medium rounded-lg hover:bg-red-700">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 Export PDF
             </a>
@@ -94,7 +94,7 @@
                     $itemStandar= is_array($item) ? ($item['standar'] ?? '') : '';
                     $res = $results[$itemKey] ?? null;
                 @endphp
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-opacity-90">
                     <td class="px-4 py-3 text-gray-900 font-medium">{{ $itemKey }}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">{{ $itemMetode ?: '—' }}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">{{ $itemStandar ?: '—' }}</td>

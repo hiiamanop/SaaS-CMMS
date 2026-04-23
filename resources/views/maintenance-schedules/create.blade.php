@@ -233,10 +233,10 @@ $oldWeeks   = old('planned_weeks', []);
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
+            <button type="submit" class="px-6 py-2.5 bg-brand-dark text-white font-bold rounded-lg text-sm font-bold hover:bg-opacity-90 shadow-md transition-all">
                 Simpan Jadwal
             </button>
-            <a href="{{ route('maintenance-schedules.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+            <a href="{{ route('maintenance-schedules.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all">
                 Batal
             </a>
         </div>

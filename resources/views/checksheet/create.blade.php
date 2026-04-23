@@ -103,10 +103,10 @@
         </div>
 
         <div class="flex gap-3 pt-2">
-            <button type="submit" class="flex-1 bg-gray-900 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-700 transition-colors">
+            <button type="submit" class="flex-1 bg-brand-dark text-white font-bold text-sm font-medium py-2.5 rounded-lg hover:bg-gray-700 transition-colors">
                 Buat & Mulai Isi
             </button>
-            <a href="{{ url()->previous() }}" class="flex-1 text-center bg-white border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+            <a href="{{ url()->previous() }}" class="flex-1 text-center bg-white border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-opacity-90 transition-colors">
                 Batal
             </a>
         </div>

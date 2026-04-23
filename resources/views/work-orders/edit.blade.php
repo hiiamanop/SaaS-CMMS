@@ -74,8 +74,8 @@
             </div>
 
             <div class="flex gap-3 pt-6 border-t border-gray-100">
-                <button type="submit" class="px-6 py-2.5 bg-brand text-white rounded-lg text-sm font-bold hover:bg-brand-600 shadow-sm transition-all">Update Order</button>
-                <a href="{{ route('work-orders.show', $workOrder) }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
+                <button type="submit" class="px-6 py-2.5 bg-brand text-gray-900 rounded-lg text-sm font-bold hover:bg-brand-600 shadow-sm transition-all">Update Order</button>
+                <a href="{{ route('work-orders.show', $workOrder) }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Cancel</a>
             </div>
             
             <input type="hidden" name="type" value="corrective">

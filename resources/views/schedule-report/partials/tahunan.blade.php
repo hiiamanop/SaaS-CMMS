@@ -51,7 +51,7 @@ $annualSchedules = \App\Models\MaintenanceSchedule::where('frequency', 'annually
                 $itemName = is_array($item) ? ($item['name'] ?? '') : $item;
                 $result = $annSession ? $annSession->results->firstWhere('item_name', $itemName) : null;
             @endphp
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-opacity-90">
                 <td class="border border-gray-300 px-2 py-1 font-medium">{{ $itemName }}</td>
                 <td class="border border-gray-300 px-1 py-1 text-center">
                     @if($result?->result === 'P')

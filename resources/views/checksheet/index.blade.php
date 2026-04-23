@@ -22,7 +22,7 @@
                 <a href="{{ route('checksheet.index', array_merge(request()->except('schedule_filter'), ['schedule_filter' => $val])) }}"
                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap
                           {{ $scheduleFilter === $val
-                              ? ($val === 'overdue' ? 'bg-red-500 shadow-sm text-white' : 'bg-white shadow-sm text-gray-900')
+                              ? ($val === 'overdue' ? 'bg-red-500 shadow-sm text-gray-900' : 'bg-white shadow-sm text-gray-900')
                               : ($val === 'overdue' ? 'text-red-500 hover:text-red-600' : 'text-gray-500 hover:text-gray-700') }}">
                     {{ $label }}
                 </a>
@@ -44,8 +44,8 @@
                     <option value="{{ $y }}" {{ $sessionYear == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700">Terapkan</button>
-                <a href="{{ route('checksheet.index') }}" class="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50">Reset</a>
+                <button type="submit" class="px-3 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium hover:bg-gray-700">Terapkan</button>
+                <a href="{{ route('checksheet.index') }}" class="px-3 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-opacity-90">Reset</a>
             </form>
         </div>
     </div>
@@ -126,7 +126,7 @@
                     <span class="text-xs text-orange-400">Belum ada item pekerjaan</span>
                     @endif
                     <button onclick="openNewSession({{ $schedule->id }}, '{{ addslashes($schedule->equipment_name) }}', '{{ $schedule->frequency }}', {{ $plannedWeeksJson }})"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-white text-xs font-medium rounded-lg hover:bg-brand-600">
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-gray-900 text-xs font-medium rounded-lg hover:bg-brand-600">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Buat Sesi
                     </button>
@@ -170,7 +170,7 @@
                     @endphp
                     <a href="{{ $session->status === 'submitted' ? route('checksheet.show', $session) : route('checksheet.fill', $session) }}"
                        x-show="expanded || {{ $si }} < 5"
-                       class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+                       class="flex items-center justify-between px-5 py-3 hover:bg-opacity-90 transition-colors">
                         <div class="flex items-center gap-4 min-w-0">
                             <div class="min-w-0">
                                 <p class="text-sm font-medium text-gray-800 truncate">{{ $session->period_label }} {{ $session->year }}</p>
@@ -318,10 +318,10 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="flex-1 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-600">
+                <button type="submit" class="flex-1 px-4 py-2.5 bg-brand text-gray-900 text-sm font-medium rounded-lg hover:bg-brand-600">
                     Buat Sesi & Mulai Isi
                 </button>
-                <button type="button" onclick="closeNewSession()" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50">
+                <button type="button" onclick="closeNewSession()" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-opacity-90">
                     Batal
                 </button>
             </div>

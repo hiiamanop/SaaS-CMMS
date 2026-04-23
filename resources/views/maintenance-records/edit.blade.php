@@ -35,8 +35,8 @@
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actions Taken</label><textarea name="actions_taken" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('actions_taken',$maintenanceRecord->actions_taken) }}</textarea></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('notes',$maintenanceRecord->notes) }}</textarea></div>
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="px-5 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">Update Record</button>
-                <a href="{{ route('maintenance-records.show',$maintenanceRecord) }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</a>
+                <button type="submit" class="px-5 py-2.5 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">Update Record</button>
+                <a href="{{ route('maintenance-records.show',$maintenanceRecord) }}" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Cancel</a>
             </div>
         </form>
     </div>

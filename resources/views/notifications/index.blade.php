@@ -34,7 +34,7 @@
     @else
     <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
         @foreach($notifications as $notification)
-        <div class="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors {{ $notification->is_read ? '' : 'bg-blue-50/40' }}">
+        <div class="flex items-start gap-4 px-5 py-4 hover:bg-opacity-90 transition-colors {{ $notification->is_read ? '' : 'bg-blue-50/40' }}">
             {{-- Type icon --}}
             <div class="flex-shrink-0 mt-0.5">
                 @php

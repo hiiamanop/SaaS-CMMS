@@ -5,7 +5,7 @@
 <div class="space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div><h1 class="text-2xl font-bold text-gray-900">Maintenance Records</h1><p class="text-sm text-gray-500 mt-0.5">History of all maintenance activities</p></div>
-        <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600">
+        <a href="{{ route('maintenance-records.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>New Record
         </a>
     </div>
@@ -27,8 +27,8 @@
             </select>
             <input name="date_from" type="date" value="{{ request('date_from') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <input name="date_to" type="date" value="{{ request('date_to') }}" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-            <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">Filter</button>
-            <a href="{{ route('maintenance-records.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
+            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium">Filter</button>
+            <a href="{{ route('maintenance-records.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Reset</a>
         </form>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -52,7 +52,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
             @foreach($records as $r)
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-opacity-90">
                 <td class="px-5 py-3">
                     <a href="{{ route('maintenance-records.show',$r) }}" class="font-mono text-xs font-semibold text-brand hover:underline">
                         {{ $r->record_number }}
