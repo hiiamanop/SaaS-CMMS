@@ -212,6 +212,34 @@ $freqLabels = [
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+    .fc-day-add-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 5;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+    .fc-day-add-btn:hover {
+        transform: scale(1.1);
+        background: #2563eb;
+    }
+    .fc-day:hover .fc-day-add-btn {
+        display: flex;
+    }
+</style>
 @endpush
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -222,6 +250,26 @@ document.addEventListener('DOMContentLoaded', function () {
         initialView: 'dayGridMonth',
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listWeek' },
         events: @json($calendarEvents),
+        dateClick: function(info) {
+            if (confirm('Buat Jadwal Maintenance baru pada ' + info.dateStr + '?')) {
+                window.location.href = "{{ route('maintenance-schedules.create') }}?start_date=" + info.dateStr;
+            }
+        },
+        dayCellDidMount(info) {
+            const btn = document.createElement('div');
+            btn.className = 'fc-day-add-btn';
+            btn.innerHTML = '+';
+            info.el.style.position = 'relative';
+            info.el.appendChild(btn);
+            
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (confirm('Buat Jadwal Maintenance baru pada ' + info.dateStr + '?')) {
+                    window.location.href = "{{ route('maintenance-schedules.create') }}?start_date=" + info.dateStr;
+                }
+            });
+        },
         eventClick: function (info) { if (info.event.url) { window.location.href = info.event.url; info.jsEvent.preventDefault(); } },
         contentHeight: 540,
         expandRows: true,

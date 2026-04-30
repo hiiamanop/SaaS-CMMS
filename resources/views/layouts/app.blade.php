@@ -8,6 +8,7 @@
     <title>{{ config('app.name', 'CMMS') }} — @yield('title', 'Dashboard')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
@@ -50,10 +51,10 @@
                     $nav = [
                         ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10', 'match' => 'dashboard', 'roles' => null],
                         ['route' => 'assets.index', 'label' => 'Assets', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => 'assets*', 'roles' => null],
-                        ['label' => 'Items', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => 'spare-parts*', 'roles' => null, 'sub' => [
-                            ['route' => 'spare-parts.index', 'params' => ['type' => 'tool'], 'label' => 'Tools'],
-                            ['route' => 'spare-parts.index', 'params' => ['type' => 'sparepart'], 'label' => 'Sparepart'],
-                            ['route' => 'spare-parts.index', 'params' => ['type' => 'consumable'], 'label' => 'Consumable'],
+                        ['label' => 'Items', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => ['spare-parts*', 'tools*', 'consumables*'], 'roles' => null, 'sub' => [
+                            ['route' => 'tools.index', 'label' => 'Tools'],
+                            ['route' => 'spare-parts.index', 'label' => 'Sparepart'],
+                            ['route' => 'consumables.index', 'label' => 'Consumable'],
                         ]],
                         ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule', 'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'match' => 'maintenance-schedules*', 'roles' => null],
                         ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
@@ -82,7 +83,7 @@
                                 <div x-show="open && sidebarOpen" x-transition class="mt-1 ml-9 space-y-1">
                                     @foreach($item['sub'] as $sub)
                                         <a href="{{ route($sub['route'], $sub['params'] ?? []) }}" 
-                                           class="block px-3 py-2 rounded-lg text-xs font-bold {{ (request('type') == ($sub['params']['type'] ?? '')) ? 'text-brand' : 'text-gray-500 hover:text-brand' }}">
+                                           class="block px-3 py-2 rounded-lg text-xs font-bold {{ request()->routeIs($sub['route']) ? 'text-brand' : 'text-gray-500 hover:text-brand' }}">
                                             {{ $sub['label'] }}
                                         </a>
                                     @endforeach

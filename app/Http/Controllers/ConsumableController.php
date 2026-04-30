@@ -2,63 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consumable;
 use Illuminate\Http\Request;
 
 class ConsumableController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Consumable::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('item_code', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        if ($request->filter === 'low_stock') {
+            $query->whereRaw('qty_actual <= qty_minimum');
+        }
+
+        $items = $query->latest()->paginate(15)->withQueryString();
+        $lowStockCount = Consumable::whereRaw('qty_actual <= qty_minimum')->count();
+
+        return view('consumables.index', compact('items', 'lowStockCount'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function destroy(Consumable $consumable)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $consumable->delete();
+        return redirect()->route('consumables.index')->with('success', 'Consumable deleted successfully.');
     }
 }

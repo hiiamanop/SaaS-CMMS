@@ -45,7 +45,10 @@ class MaintenanceRecordController extends Controller
             $workOrder = WorkOrder::with(['asset', 'assignedTo', 'checklistItems'])->find($request->work_order_id);
         }
 
-        $workOrders = WorkOrder::with(['asset', 'assignedTo'])->latest()->get();
+        $workOrders = WorkOrder::with(['asset', 'assignedTo'])
+            ->where('status', 'in_progress')
+            ->latest()
+            ->get();
         $technicians = User::where('role', 'technician')->get();
         $spareParts = SparePart::orderBy('name')->get();
 
@@ -60,9 +63,15 @@ class MaintenanceRecordController extends Controller
             $request->merge(['asset_id' => $wo?->asset_id]);
         }
 
+        // Filter out empty parts to avoid validation errors if user didn't select anything
+        if ($request->has('parts')) {
+            $parts = collect($request->parts)->filter(fn($p) => !empty($p['spare_part_id']))->values()->all();
+            $request->merge(['parts' => $parts]);
+        }
+
         $validated = $request->validate([
             'work_order_id' => 'nullable|exists:work_orders,id',
-            'asset_id' => 'required|exists:assets,id',
+            'asset_id' => 'nullable|exists:assets,id',
             'technician_id' => 'required|exists:users,id',
             'type' => 'nullable|in:preventive,corrective',
             'maintenance_date' => 'required|date',
@@ -77,7 +86,7 @@ class MaintenanceRecordController extends Controller
             'parts.*.spare_part_id' => 'required|exists:spare_parts,id',
             'parts.*.qty_used' => 'required|integer|min:1',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|max:5120',
+            'photos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
         ]);
 
         DB::transaction(function() use ($validated, $request) {

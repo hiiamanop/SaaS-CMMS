@@ -211,14 +211,15 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="submit"
-                        :disabled="filled < {{ $total }}"
+                <button type="button"
+                        @click="submitChecksheet($event)"
+                        :disabled="filled < {{ $total }} || saveStatus === 'Menyimpan...'"
                         :title="filled < {{ $total }} ? 'Lengkapi semua item terlebih dahulu (' + filled + '/{{ $total }})' : 'Submit Checksheet'"
-                        :class="filled >= {{ $total }}
+                        :class="(filled >= {{ $total }} && saveStatus !== 'Menyimpan...')
                             ? 'bg-brand-dark text-white font-bold hover:bg-gray-700 text-gray-900 cursor-pointer'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
                         class="flex-1 text-sm font-medium py-3 rounded-lg min-h-[48px] transition-colors">
-                    <span x-text="filled >= {{ $total }} ? 'Submit Checksheet' : 'Submit (' + filled + '/{{ $total }} terisi)'"></span>
+                    <span x-text="saveStatus === 'Menyimpan...' ? 'Menyimpan data...' : (filled >= {{ $total }} ? 'Submit Checksheet' : 'Submit (' + filled + '/{{ $total }} terisi)')"></span>
                 </button>
                 <a href="{{ url()->previous() }}" class="px-6 flex items-center justify-center bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-opacity-90 min-h-[48px]">
                     Kembali
@@ -264,6 +265,18 @@ function checksheetFill(sessionId, totalItems) {
                 else delete effective[key];
             });
             this.filled = Math.min(Object.keys(effective).length, totalItems);
+        },
+
+        async submitChecksheet(e) {
+            if (Object.keys(this.pendingItems).length > 0) {
+                this.saveStatus = 'Menyimpan...';
+                await this.autosave();
+            }
+            if (this.filled < totalItems) {
+                alert('Terdapat item yang belum terisi. Silakan lengkapi semua item.');
+                return;
+            }
+            document.getElementById('submitForm').submit();
         },
 
         async autosave() {

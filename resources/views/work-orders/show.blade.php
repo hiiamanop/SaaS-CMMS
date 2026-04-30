@@ -148,13 +148,22 @@ $wo = $workOrder;
                 @csrf
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">New Status</label>
                     <select name="status" x-model="newStatus" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                        @if($wo->status === 'open')<option value="in_progress">In Progress</option>@endif
-                        @if(in_array($wo->status,['open','in_progress']))<option value="pending_review">Pending Review</option>@endif
-                        @if(!auth()->user()->isTechnician())<option value="closed">Closed</option>@endif
-                        @if(!auth()->user()->isTechnician() && $wo->status !== 'open')<option value="open">Re-open</option>@endif
+                        <option value="">Pilih Status...</option>
+                        @if($wo->status === 'open') <option value="in_progress">In Progress</option> @endif
+                        @if($wo->status === 'in_progress') <option value="open">Re-open (Set to Open)</option> @endif
+                        @if($wo->status !== 'canceled') <option value="canceled">Cancel Work Order</option> @endif
+                        @if(!auth()->user()->isTechnician()) <option value="closed">Closed (Manual)</option> @endif
                     </select>
                 </div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="3" x-model="statusNotes" placeholder="Add notes about this status change..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"></textarea></div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Notes <span x-show="newStatus === 'canceled'" class="text-red-500">*</span>
+                    </label>
+                    <textarea name="notes" rows="3" x-model="statusNotes" 
+                              :required="newStatus === 'canceled'"
+                              placeholder="Add notes about this status change..." 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"></textarea>
+                </div>
                 <div class="flex gap-3">
                     <button type="button" @click="statusModal=false" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Cancel</button>
                     <button type="submit" class="flex-1 px-4 py-2 bg-brand text-gray-900 rounded-lg text-sm font-medium hover:bg-brand-600">Update Status</button>

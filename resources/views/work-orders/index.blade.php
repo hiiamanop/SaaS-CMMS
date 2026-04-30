@@ -7,7 +7,7 @@ $pColors=['low'=>'bg-gray-100 text-gray-600','medium'=>'bg-blue-100 text-blue-70
 $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text-yellow-700','pending_review'=>'bg-purple-100 text-purple-700','closed'=>'bg-green-100 text-green-700'];
 @endphp
 
-<div class="space-y-5" x-data="{ tab: '{{ request('records_page') ? 'records' : 'work_orders' }}' }">
+<div class="space-y-5" x-data="{ tab: '{{ (request('tab') === 'records' || request('records_page')) ? 'records' : 'work_orders' }}' }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Work Orders & Records</h1>
@@ -127,7 +127,14 @@ $sColors=['open'=>'bg-blue-100 text-blue-700','in_progress'=>'bg-yellow-100 text
                 <td class="px-5 py-4 text-xs {{ $overdue ? 'text-red-600 font-bold' : 'text-gray-500' }}">{{ $wo->due_date->format('d M Y') }}</td>
                 <td class="px-5 py-4 text-right">
                     <div class="flex items-center justify-end gap-1">
-                        <a href="{{ route('work-orders.show',$wo) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                        <a href="{{ route('work-orders.show',$wo) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all" title="View"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                        @if(!auth()->user()->isTechnician())
+                        <a href="{{ route('work-orders.edit',$wo) }}" class="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all" title="Edit"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
+                        <button @click="$dispatch('open-delete',{action:'{{ route('work-orders.destroy',$wo) }}',message:'Hapus Work Order {{ addslashes($wo->wo_number) }}?'})"
+                                class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                        @endif
                     </div>
                 </td>
             </tr>

@@ -7,6 +7,7 @@ use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class MaintenanceScheduleController extends Controller
 {
@@ -75,7 +76,8 @@ class MaintenanceScheduleController extends Controller
             'item_pekerjaan.*.name'     => 'required|string|max:500',
             'item_pekerjaan.*.metode'   => 'nullable|string|max:500',
             'item_pekerjaan.*.standar'  => 'nullable|string|max:500',
-            'frequency'                 => 'required|in:weekly,monthly,quarterly,annually',
+            'frequency'                 => 'required|in:weekly,monthly,triwulan,quarterly,annually',
+            'start_date'                => 'required|date',
             'shutdown_required'         => 'nullable|boolean',
             'shutdown_duration_hours'   => 'nullable|integer|min:1',
             'notes'                     => 'nullable|string',
@@ -97,8 +99,7 @@ class MaintenanceScheduleController extends Controller
         
         $validated['title']             = \Illuminate\Support\Str::limit($titleString, 250);
         $validated['status']            = 'active';
-        $validated['start_date']        = now()->toDateString();
-        $validated['next_due_date']     = now()->toDateString();
+        $validated['next_due_date']     = $validated['start_date'];
         $validated['shutdown_required'] = $request->boolean('shutdown_required');
         $validated['item_pekerjaan']    = array_values($validated['item_pekerjaan']);
 
@@ -110,10 +111,10 @@ class MaintenanceScheduleController extends Controller
         $validated['planned_weeks'] = $planned ?: null;
 
         $schedule = MaintenanceSchedule::create($validated);
-        $count = $schedule->generateYearSessions();
+        $count = $schedule->generateYearSessions(Carbon::parse($validated['start_date'])->year);
 
         return redirect()->route('maintenance-schedules.show', $schedule)
-            ->with('success', "Jadwal berhasil dibuat. {$count} sesi auto-generated.");
+            ->with('success', "Jadwal berhasil dibuat. {$count} sesi checksheet otomatis dibuat berdasarkan Tanggal Mulai dan Siklus Mingguan.");
     }
 
     public function show(MaintenanceSchedule $maintenanceSchedule)
@@ -144,7 +145,8 @@ class MaintenanceScheduleController extends Controller
             'item_pekerjaan.*.name'     => 'required|string|max:500',
             'item_pekerjaan.*.metode'   => 'nullable|string|max:500',
             'item_pekerjaan.*.standar'  => 'nullable|string|max:500',
-            'frequency'                 => 'required|in:weekly,monthly,quarterly,annually',
+            'frequency'                 => 'required|in:weekly,monthly,triwulan,quarterly,annually',
+            'start_date'                => 'required|date',
             'status'                    => 'required|in:active,inactive',
             'shutdown_required'         => 'nullable|boolean',
             'shutdown_duration_hours'   => 'nullable|integer|min:1',

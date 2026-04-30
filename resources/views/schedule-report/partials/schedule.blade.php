@@ -94,6 +94,7 @@ $now = \Carbon\Carbon::now();
                         // isPast = true only when the ENTIRE week has already ended
                         $weekEnd   = \Carbon\Carbon::createFromDate($year, $month, 1)->addWeeks($week)->subDay()->endOfDay();
                         $isPast    = $weekEnd->isPast();
+                        $isStarted = !$sched->start_date || $weekEnd->gte($sched->start_date->startOfDay());
 
                         // Check completed WO (by month)
                         $completedWO = $workOrders->where('maintenance_schedule_id', $sched->id)
@@ -125,8 +126,10 @@ $now = \Carbon\Carbon::now();
                                 <span class="text-green-600 font-bold" title="Selesai tepat waktu">✓</span>
                             @elseif($isPlanned && $isDone && !$isOnTime)
                                 <span class="text-orange-500 font-bold" title="Selesai terlambat">✓</span>
-                            @elseif($isPlanned && !$isDone && $isPast)
+                            @elseif($isPlanned && !$isDone && $isPast && $isStarted)
                                 <span class="text-red-600 font-bold" title="Terlewat / belum dikerjakan">✗</span>
+                            @elseif($isPlanned && !$isDone && !$isStarted)
+                                <span class="text-gray-300">—</span>
                             @endif
                         @endif
                     </td>
@@ -173,6 +176,9 @@ $now = \Carbon\Carbon::now();
         </span>
         <span class="flex items-center gap-1.5">
             <span class="text-red-600 font-bold text-sm">✗</span> Terlewat / belum dikerjakan
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="text-gray-300 font-bold text-sm">—</span> Belum dimulai / pendaftaran alat
         </span>
     </div>
 </div>

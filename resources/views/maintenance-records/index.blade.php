@@ -58,7 +58,9 @@
                         {{ $r->record_number }}
                     </a>
                 </td>
-                <td class="px-5 py-3 text-gray-700">{{ $r->asset->name }}</td>
+                <td class="px-5 py-3 text-gray-700">
+                    {{ $r->asset ? $r->asset->name : ($r->workOrder && $r->workOrder->is_external_client ? $r->workOrder->client_name : '—') }}
+                </td>
                 <td class="px-5 py-3">
                     <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $r->type === 'preventive' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700' }}">
                         {{ ucfirst($r->type) }}

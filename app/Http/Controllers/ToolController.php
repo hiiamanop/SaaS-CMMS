@@ -2,63 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tool;
 use Illuminate\Http\Request;
 
 class ToolController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Tool::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('tool_code', 'like', '%'.$request->search.'%')
+                  ->orWhere('brand', 'like', '%'.$request->search.'%');
+            });
+        }
+        
+        if ($request->condition) {
+            $query->where('condition', $request->condition);
+        }
+
+        $tools = $query->latest()->paginate(15)->withQueryString();
+        $conditions = ['good', 'damaged', 'lost'];
+
+        return view('tools.index', compact('tools', 'conditions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function destroy(Tool $tool)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $tool->delete();
+        return redirect()->route('tools.index')->with('success', 'Tool deleted successfully.');
     }
 }

@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title','New Maintenance Record')
+@section('title','New Work Order Record')
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('maintenance-records.index') }}" class="hover:text-gray-800">Records</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">New Record</span>@endsection
 @section('content')
 <div class="max-w-none mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('work-orders.index', ['tab' => 'records']) }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
-        <h1 class="text-2xl font-bold text-gray-900">New Maintenance Record</h1>
+        <h1 class="text-2xl font-bold text-gray-900">New Work Order Record</h1>
     </div>
     @if($workOrder)
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-800">
@@ -14,21 +14,27 @@
     @endif
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <form action="{{ route('maintenance-records.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5"
-              x-data="{ parts: {{ old('parts') ? json_encode(old('parts')) : '[{spare_part_id:\'\',qty_used:1}]' }}, statusAfter: '{{ old('status_after', 'solved') }}' }">
+              x-data="{ 
+                parts: {{ old('parts') ? json_encode(old('parts')) : '[{spare_part_id:\'\',qty_used:1}]' }}, 
+                statusAfter: '{{ old('status_after', 'solved') }}',
+                showShutdown: {{ old('work_order_id', $workOrder?->id) ? ($workOrder?->shutdown_required ? 'true' : 'false') : 'false' }}
+              }">
             @csrf
             {{-- Work Order picker --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Work Order <span class="text-red-500">*</span></label>
-                <select name="work_order_id" id="woSelect" onchange="onWoChange(this)"
+                <select name="work_order_id" id="woSelect" 
+                        @change="onWoChange($event.target); showShutdown = ($event.target.options[$event.target.selectedIndex].dataset.shutdown === '1')"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('work_order_id') border-red-400 @enderror">
                     <option value="">Pilih Work Order...</option>
                     @foreach($workOrders as $wo)
                     <option value="{{ $wo->id }}"
                             data-asset-id="{{ $wo->asset_id }}"
-                            data-asset-name="{{ $wo->asset?->name }}"
+                            data-asset-name="{{ $wo->is_external_client ? $wo->client_name : $wo->asset?->name }}"
                             data-technician-id="{{ $wo->assigned_to }}"
+                            data-shutdown="{{ $wo->shutdown_required ? '1' : '0' }}"
                             {{ old('work_order_id', $workOrder?->id) == $wo->id ? 'selected' : '' }}>
-                        {{ $wo->wo_number }} — {{ $wo->title }} ({{ $wo->asset?->name }})
+                        {{ $wo->wo_number }} — {{ $wo->title }} ({{ $wo->is_external_client ? $wo->client_name : ($wo->asset?->name ?? 'No Asset') }})
                     </option>
                     @endforeach
                 </select>
@@ -55,7 +61,10 @@
                 </div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Maintenance Date <span class="text-red-500">*</span></label><input name="maintenance_date" type="date" value="{{ old('maintenance_date', now()->format('Y-m-d')) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Duration (minutes) <span class="text-red-500">*</span></label><input name="duration_minutes" type="number" min="0" value="{{ old('duration_minutes',0) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Shutdown (minutes)</label><input name="shutdown_minutes" type="number" min="0" value="{{ old('shutdown_minutes',0) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                <div x-show="showShutdown" x-transition x-cloak>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Shutdown (minutes)</label>
+                    <input name="shutdown_minutes" type="number" min="0" value="{{ old('shutdown_minutes',0) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                </div>
             </div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Findings</label><textarea name="findings" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none" placeholder="Describe what was found...">{{ old('findings') }}</textarea></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actions Taken</label><textarea name="actions_taken" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none" placeholder="Describe what was done...">{{ old('actions_taken') }}</textarea></div>
@@ -161,6 +170,21 @@ function onWoChange(sel) {
 window.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('woSelect');
     if (sel && sel.value) onWoChange(sel);
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menyimpan',
+            html: `
+                <ul class="text-left text-sm space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>• {{ $error }}</li>
+                    @endforeach
+                </ul>
+            `,
+            confirmButtonText: 'Ok'
+        });
+    @endif
 });
 </script>
 @endpush

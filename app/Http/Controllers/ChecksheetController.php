@@ -147,10 +147,17 @@ class ChecksheetController extends Controller
 
         $items = $request->get('items', []);
         foreach ($items as $itemName => $data) {
-            $result = ChecksheetResult::firstOrNew([
-                'session_id' => $session->id,
-                'item_name'  => $itemName,
-            ]);
+            $result = ChecksheetResult::where('session_id', $session->id)
+                ->whereRaw('BINARY item_name = ?', [$itemName])
+                ->first();
+                
+            if (!$result) {
+                $result = new ChecksheetResult([
+                    'session_id' => $session->id,
+                    'item_name'  => $itemName,
+                ]);
+            }
+            
             $result->result = $data['result'] ?? null;
             $result->notes  = $data['notes'] ?? null;
             $result->save();
@@ -186,10 +193,17 @@ class ChecksheetController extends Controller
             'public'
         );
 
-        $result = ChecksheetResult::firstOrNew([
-            'session_id' => $session->id,
-            'item_name'  => $templateId, // using templateId param as itemName
-        ]);
+        $result = ChecksheetResult::where('session_id', $session->id)
+            ->whereRaw('BINARY item_name = ?', [$templateId])
+            ->first();
+            
+        if (!$result) {
+            $result = new ChecksheetResult([
+                'session_id' => $session->id,
+                'item_name'  => $templateId,
+            ]);
+        }
+        
         $photos   = $result->photos ?? [];
         $photos[] = $path;
         $result->photos = $photos;

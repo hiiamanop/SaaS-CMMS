@@ -169,8 +169,10 @@ class WorkOrderController extends Controller
     public function updateStatus(Request $request, WorkOrder $workOrder)
     {
         $request->validate([
-            'status' => 'required|in:open,in_progress,pending_review,closed',
-            'notes' => 'nullable|string',
+            'status' => 'required|in:open,in_progress,canceled,closed',
+            'notes' => 'required_if:status,canceled|nullable|string',
+        ], [
+            'notes.required_if' => 'Catatan wajib diisi jika membatalkan Work Order.'
         ]);
 
         $oldStatus = $workOrder->status;

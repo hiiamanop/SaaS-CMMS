@@ -167,6 +167,12 @@ class MaintenanceSchedule extends Model
             if ($q->exists()) continue;
 
             $allParams = array_merge(['year' => $year], $params);
+            
+            // Filter by start_date: only create if period end is >= start_date
+            $periodEnd = $this->estimatePeriodDate($allParams);
+            if ($this->start_date && $periodEnd->lt($this->start_date->startOfDay())) {
+                continue;
+            }
 
             ChecksheetSession::create([
                 'maintenance_schedule_id' => $this->id,
@@ -176,6 +182,7 @@ class MaintenanceSchedule extends Model
                 'year'                    => $year,
                 'week_number'             => $params['week_number'] ?? null,
                 'month'                   => $params['month'] ?? null,
+                'quarter'                 => $params['quarter'] ?? null,
                 'semester'                => $params['semester'] ?? null,
                 'status'                  => 'draft',
             ]);
@@ -183,5 +190,17 @@ class MaintenanceSchedule extends Model
         }
 
         return $created;
+    }
+    public function estimatePeriodDate(array $params): Carbon
+    {
+        $year = $params['year'] ?? now()->year;
+        return match($this->frequency) {
+            'weekly'    => Carbon::createFromDate($year, $params['month'] ?? 1, 1)->addWeeks($params['week_number'] ?? 1)->subDay()->endOfDay(),
+            'monthly'   => Carbon::createFromDate($year, $params['month'] ?? 1, 1)->endOfMonth(),
+            'triwulan'  => Carbon::createFromDate($year, ($params['quarter'] ?? 1) * 3, 1)->endOfMonth(),
+            'quarterly' => Carbon::createFromDate($year, ($params['semester'] ?? 1) * 6, 1)->endOfMonth(),
+            'annually'  => Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            default     => Carbon::createFromDate($year, 12, 31)->endOfDay(),
+        };
     }
 }

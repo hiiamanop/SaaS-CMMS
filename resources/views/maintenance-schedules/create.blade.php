@@ -11,7 +11,7 @@
 $months     = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 $oldWeeks   = old('planned_weeks', []);
 @endphp
-<div class="max-w-4xl">
+<div class="max-w-none">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('maintenance-schedules.index') }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
@@ -70,6 +70,12 @@ $oldWeeks   = old('planned_weeks', []);
                         <option value="annually"  {{ old('frequency')=='annually'  ? 'selected' : '' }}>Tahunan</option>
                     </select>
                     @error('frequency')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
+                    <input type="date" name="start_date" value="{{ old('start_date', request('start_date', now()->toDateString())) }}" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('start_date') border-red-400 @enderror">
+                    @error('start_date')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div class="sm:col-span-2"
                      x-data="{
@@ -249,6 +255,26 @@ function toggleWeekCol(month) {
     const allChecked = [...cbs].every(cb => cb.checked);
     cbs.forEach(cb => cb.checked = !allChecked);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const startDate = params.get('start_date');
+    if (startDate) {
+        const date = new Date(startDate);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        let week = Math.ceil(day / 7);
+        if (week > 4) week = 4;
+        
+        const key = month + '_' + week;
+        const cb = document.querySelector(`input[name="planned_weeks[${key}]"]`);
+        if (cb) {
+            cb.checked = true;
+            cb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cb.parentElement.classList.add('bg-blue-100');
+        }
+    }
+});
 </script>
 @endpush
 @endsection

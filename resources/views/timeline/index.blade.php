@@ -4,6 +4,34 @@
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<style>
+    .fc-day-add-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 5;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+    .fc-day-add-btn:hover {
+        transform: scale(1.1);
+        background: #2563eb;
+    }
+    .fc-day:hover .fc-day-add-btn {
+        display: flex;
+    }
+</style>
 @endpush
 
 @section('breadcrumb')
@@ -165,6 +193,19 @@
         </div>
     </div>
 
+    {{-- Selection Menu for Calendar --}}
+    <div id="calendar-menu" class="hidden fixed z-[100] bg-white rounded-xl shadow-2xl border border-gray-200 p-2 w-48 overflow-hidden">
+        <div class="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50 mb-1">Create New Event</div>
+        <button onclick="calendarMenuAction('wo')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand rounded-lg flex items-center gap-2 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Work Order
+        </button>
+        <button onclick="calendarMenuAction('sched')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand rounded-lg flex items-center gap-2 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Maint. Schedule
+        </button>
+    </div>
+
 </div>
 @endsection
 
@@ -188,9 +229,46 @@ window.addEventListener('fc-render', () => {
         },
         selectable: true,
         dateClick(info) {
-            if(confirm('Create new Work Order on ' + info.dateStr + '?')) {
-                window.location.href = "{{ route('work-orders.create') }}?due_date=" + info.dateStr;
-            }
+            const menu = document.getElementById('calendar-menu');
+            menu.style.left = info.jsEvent.clientX + 'px';
+            menu.style.top = info.jsEvent.clientY + 'px';
+            menu.classList.remove('hidden');
+            window.selectedCalendarDate = info.dateStr;
+            
+            // Close menu on click outside
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    document.removeEventListener('mousedown', closeMenu);
+                }
+            };
+            setTimeout(() => document.addEventListener('mousedown', closeMenu), 10);
+        },
+        dayCellDidMount(info) {
+            const btn = document.createElement('div');
+            btn.className = 'fc-day-add-btn';
+            btn.innerHTML = '+';
+            info.el.style.position = 'relative';
+            info.el.appendChild(btn);
+            
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const menu = document.getElementById('calendar-menu');
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+                menu.classList.remove('hidden');
+                window.selectedCalendarDate = info.date.toISOString().split('T')[0];
+                
+                const closeMenu = (ev) => {
+                    if (!menu.contains(ev.target)) {
+                        menu.classList.add('hidden');
+                        document.removeEventListener('mousedown', closeMenu);
+                    }
+                };
+                setTimeout(() => document.addEventListener('mousedown', closeMenu), 10);
+            });
         },
         events: calendarEvents,
         eventClick(info) {
@@ -224,5 +302,17 @@ window.addEventListener('fc-render', () => {
 
     cal.render();
 });
+
+function calendarMenuAction(type) {
+    const date = window.selectedCalendarDate;
+    const menu = document.getElementById('calendar-menu');
+    menu.classList.add('hidden');
+    
+    if (type === 'wo') {
+        window.location.href = "{{ route('work-orders.create') }}?due_date=" + date;
+    } else {
+        window.location.href = "{{ route('maintenance-schedules.create') }}?start_date=" + date;
+    }
+}
 </script>
 @endpush

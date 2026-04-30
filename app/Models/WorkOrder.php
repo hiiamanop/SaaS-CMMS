@@ -86,7 +86,7 @@ class WorkOrder extends Model
         return match($this->status) {
             'open' => 'blue',
             'in_progress' => 'yellow',
-            'pending_review' => 'purple',
+            'canceled' => 'red',
             'closed', 'solved' => 'green',
             default => 'gray',
         };
@@ -97,7 +97,7 @@ class WorkOrder extends Model
         return match($this->status) {
             'open' => 'Open',
             'in_progress' => 'In Progress',
-            'pending_review' => 'Pending Review',
+            'canceled' => 'Canceled',
             'closed' => 'Closed',
             'solved' => 'Solved',
             default => ucfirst($this->status),

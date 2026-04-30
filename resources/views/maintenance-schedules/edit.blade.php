@@ -18,7 +18,7 @@ if ($oldWeeks !== null) {
     $plannedSet = $oldWeeks; // old() returns the checkbox array
 }
 @endphp
-<div class="max-w-4xl">
+<div class="max-w-none">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('maintenance-schedules.show', $s) }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
@@ -80,6 +80,12 @@ if ($oldWeeks !== null) {
                         <option value="quarterly" {{ old('frequency', $s->frequency) == 'quarterly' ? 'selected' : '' }}>Semesteran</option>
                         <option value="annually"  {{ old('frequency', $s->frequency) == 'annually'  ? 'selected' : '' }}>Tahunan</option>
                     </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
+                    <input type="date" name="start_date" value="{{ old('start_date', optional($s->start_date)->format('Y-m-d') ?? now()->toDateString()) }}" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('start_date') border-red-400 @enderror">
+                    @error('start_date')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 @php
                     $rawItems = old('item_pekerjaan', $s->item_pekerjaan ?? []);
