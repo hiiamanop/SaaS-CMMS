@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        DB::statement("ALTER TABLE work_orders MODIFY COLUMN status ENUM('open', 'in_progress', 'pending_review', 'closed', 'solved') DEFAULT 'open'");
+        Schema::table('work_orders', function (Blueprint $table) {
+            $table->string('status')->default('open')->change();
+        });
     }
 
     /**
@@ -20,6 +19,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE work_orders MODIFY COLUMN status ENUM('open', 'in_progress', 'pending_review', 'closed') DEFAULT 'open'");
+        Schema::table('work_orders', function (Blueprint $table) {
+            $table->string('status')->default('open')->change();
+        });
     }
 };
