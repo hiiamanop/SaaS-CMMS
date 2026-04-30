@@ -92,9 +92,8 @@ class MaintenanceScheduleController extends Controller
         $validated['type']              = 'preventive';
         
         $locationName   = \App\Models\Location::find($validated['location_id'])?->name ?? 'Unknown Location';
-        $technicianName = \App\Models\User::find($validated['technician_id'] ?? null)?->name ?? 'Unassigned';
         $freqTitle      = ucfirst($validated['frequency']);
-        $titleString    = "{$locationName} - {$trafoName} - {$technicianName} - {$freqTitle}";
+        $titleString    = "{$locationName} - {$trafoName} - {$freqTitle}";
         
         $validated['title']             = \Illuminate\Support\Str::limit($titleString, 250);
         $validated['status']            = 'active';
@@ -162,9 +161,8 @@ class MaintenanceScheduleController extends Controller
         $validated['type']              = 'preventive';
         
         $locationName   = \App\Models\Location::find($validated['location_id'] ?? $maintenanceSchedule->location_id)?->name ?? 'Unknown Location';
-        $technicianName = \App\Models\User::find($validated['technician_id'] ?? null)?->name ?? 'Unassigned';
         $freqTitle      = ucfirst($validated['frequency']);
-        $titleString    = "{$locationName} - {$trafoName} - {$technicianName} - {$freqTitle}";
+        $titleString    = "{$locationName} - {$trafoName} - {$freqTitle}";
         
         $validated['title']             = \Illuminate\Support\Str::limit($titleString, 250);
         $validated['shutdown_required'] = $request->boolean('shutdown_required');

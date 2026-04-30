@@ -51,4 +51,26 @@ class ChecksheetSession extends Model
         $filled = $this->results()->whereNotNull('result')->count();
         return ['total' => $total, 'filled' => $filled];
     }
+
+    public function getDueDateAttribute(): \Carbon\Carbon
+    {
+        $year = $this->year ?? now()->year;
+        $freq = $this->schedule->frequency ?? 'monthly';
+        
+        return match($freq) {
+            'weekly'    => \Carbon\Carbon::createFromDate($year, $this->month ?? 1, 1)->addWeeks($this->week_number ?? 1)->subDay()->endOfDay(),
+            'monthly'   => \Carbon\Carbon::createFromDate($year, $this->month ?? 1, 1)->endOfMonth(),
+            'triwulan'  => match((int)($this->quarter ?? 1)) {
+                1 => \Carbon\Carbon::createFromDate($year, 3, 31)->endOfDay(),
+                2 => \Carbon\Carbon::createFromDate($year, 6, 30)->endOfDay(),
+                3 => \Carbon\Carbon::createFromDate($year, 9, 30)->endOfDay(),
+                default => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            },
+            'quarterly' => ($this->semester == 1)
+                ? \Carbon\Carbon::createFromDate($year, 6, 30)->endOfDay()
+                : \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            'annually'  => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            default     => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
+        };
+    }
 }

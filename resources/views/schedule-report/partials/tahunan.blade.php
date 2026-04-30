@@ -59,7 +59,20 @@ $annualSchedules = \App\Models\MaintenanceSchedule::where('frequency', 'annually
                     @elseif($result?->result === 'X')
                         <span class="inline-flex items-center px-1 rounded text-xs font-bold bg-red-100 text-red-800" title="{{ $result->notes }}">X</span>
                     @else
-                        <span class="text-gray-300">—</span>
+                        @php
+                            $isAutoX = false;
+                            if ($annSession && $annSession->status !== 'submitted') {
+                                $due = $annSession->due_date;
+                                if ($due && now()->gt($due->copy()->addWeek())) {
+                                    $isAutoX = true;
+                                }
+                            }
+                        @endphp
+                        @if($isAutoX)
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800" title="Overdue > 1 Week">X</span>
+                        @else
+                            <span class="text-gray-300">—</span>
+                        @endif
                     @endif
                 </td>
             </tr>

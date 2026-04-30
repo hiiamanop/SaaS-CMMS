@@ -124,9 +124,14 @@
                                 @endif
                             </div>
                         </div>
-                        <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                            {{ \Carbon\Carbon::parse($item['date'])->format('M d, Y') }}
-                        </span>
+                        <div class="text-right flex-shrink-0">
+                            <span class="block text-sm font-bold text-gray-900 whitespace-nowrap">
+                                {{ \Carbon\Carbon::parse($item['date'])->format('M d, Y') }}
+                            </span>
+                            <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                                {{ \Carbon\Carbon::parse($item['date'])->format('H:i') }}
+                            </span>
+                        </div>
                     </div>
                 @if($item['url'])
                 </a>
@@ -180,6 +185,12 @@ window.addEventListener('fc-render', () => {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,listMonth'
+        },
+        selectable: true,
+        dateClick(info) {
+            if(confirm('Create new Work Order on ' + info.dateStr + '?')) {
+                window.location.href = "{{ route('work-orders.create') }}?due_date=" + info.dateStr;
+            }
         },
         events: calendarEvents,
         eventClick(info) {

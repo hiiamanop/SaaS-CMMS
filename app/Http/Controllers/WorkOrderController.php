@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOrder;
 use App\Models\WorkOrderActivityLog;
-use App\Models\WorkOrderChecklistItem;
+
 use App\Models\Asset;
 use App\Models\User;
 use App\Models\Notification;
@@ -55,7 +55,7 @@ class WorkOrderController extends Controller
         return view('work-orders.index', compact('workOrders', 'records', 'assets', 'technicians'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $assets = Asset::where('status', 'active')->orderBy('name')->get();
         $technicians = User::where('role', 'technician')->get();
@@ -66,25 +66,25 @@ class WorkOrderController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'asset_id' => 'required|exists:assets,id',
+            'asset_id' => 'required_if:is_external_client,0|nullable|exists:assets,id',
             'assigned_to' => 'nullable|exists:users,id',
-            'type' => 'required|in:corrective',
+            'type' => 'required|in:corrective,preventive',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
             'is_external_client' => 'nullable|boolean',
             'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
             'shutdown_required' => 'nullable|boolean',
-            'checklist' => 'nullable|array',
-            'checklist.*' => 'nullable|string',
         ]);
 
         $validated['wo_number'] = WorkOrder::generateNumber();
         $validated['created_by'] = auth()->id();
         $validated['order_date'] = now();
         $validated['is_external_client'] = $request->boolean('is_external_client');
+        if ($validated['is_external_client']) {
+            $validated['asset_id'] = null;
+        }
         $validated['shutdown_required'] = $request->boolean('shutdown_required');
-        unset($validated['checklist']);
 
         $workOrder = WorkOrder::create($validated);
 
@@ -95,16 +95,6 @@ class WorkOrderController extends Controller
             'to_status' => 'open',
             'notes' => 'Work order created',
         ]);
-
-        if ($request->checklist) {
-            foreach (array_filter($request->checklist) as $i => $item) {
-                WorkOrderChecklistItem::create([
-                    'work_order_id' => $workOrder->id,
-                    'description' => $item,
-                    'order' => $i + 1,
-                ]);
-            }
-        }
 
         if ($workOrder->assigned_to) {
             Notification::create([
@@ -137,9 +127,9 @@ class WorkOrderController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'asset_id' => 'required|exists:assets,id',
+            'asset_id' => 'required_if:is_external_client,0|nullable|exists:assets,id',
             'assigned_to' => 'nullable|exists:users,id',
-            'type' => 'required|in:corrective',
+            'type' => 'required|in:corrective,preventive',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
             'is_external_client' => 'nullable|boolean',
@@ -148,7 +138,11 @@ class WorkOrderController extends Controller
         ]);
 
         $validated['is_external_client'] = $request->boolean('is_external_client');
-        if (!$validated['is_external_client']) $validated['client_name'] = null;
+        if ($validated['is_external_client']) {
+            $validated['asset_id'] = null;
+        } else {
+            $validated['client_name'] = null;
+        }
 
         $oldAssignee = $workOrder->assigned_to;
         $workOrder->update($validated);
@@ -218,15 +212,7 @@ class WorkOrderController extends Controller
         return back()->with('success', 'Status updated successfully.');
     }
 
-    public function toggleChecklist(WorkOrder $workOrder, WorkOrderChecklistItem $item)
-    {
-        $item->update([
-            'is_checked' => !$item->is_checked,
-            'checked_by' => auth()->id(),
-            'checked_at' => now(),
-        ]);
-        return back()->with('success', 'Checklist updated.');
-    }
+
 
     public function myJobs()
     {

@@ -14,7 +14,7 @@
     @endif
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <form action="{{ route('maintenance-records.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5"
-              x-data="{parts:[{spare_part_id:'',qty_used:1}]}">
+              x-data="{ parts: {{ old('parts') ? json_encode(old('parts')) : '[{spare_part_id:\'\',qty_used:1}]' }}, statusAfter: '{{ old('status_after', 'solved') }}' }">
             @csrf
             {{-- Work Order picker --}}
             <div>
@@ -61,56 +61,47 @@
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actions Taken</label><textarea name="actions_taken" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none" placeholder="Describe what was done...">{{ old('actions_taken') }}</textarea></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Notes</label><textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('notes') }}</textarea></div>
 
-            {{-- Checklist Tasks (if WO exists) --}}
-            @if($workOrder && $workOrder->checklistItems->isNotEmpty())
-            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
-                    Checklist Task Completion
-                </h3>
-                <div class="space-y-3">
-                    @foreach($workOrder->checklistItems as $item)
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">{{ $item->description }}</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <select name="checklist[{{ $item->id }}][result]" class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-brand focus:outline-none">
-                                <option value="ok" {{ old("checklist.{$item->id}.result") == 'ok' ? 'selected' : '' }}>OK</option>
-                                <option value="not_ok" {{ old("checklist.{$item->id}.result") == 'not_ok' ? 'selected' : '' }}>NOT OK</option>
-                                <option value="repaired" {{ old("checklist.{$item->id}.result") == 'repaired' ? 'selected' : '' }}>REPAIRED</option>
-                            </select>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
+
 
             <div class="pt-4 pb-2 border-t border-gray-100">
                 <label class="block text-sm font-bold text-gray-700 mb-3">Finish Status <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-green-50 has-[:checked]:border-green-300">
-                        <input type="radio" name="status_after" value="solved" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300" {{ old('status_after', 'solved') == 'solved' ? 'checked' : '' }}>
+                        <input type="radio" name="status_after" value="solved" x-model="statusAfter" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300">
                         <div>
                             <p class="text-sm font-bold text-green-800">SOLVED</p>
                             <p class="text-[10px] text-green-600">Pekerjaan selesai & aman.</p>
                         </div>
                     </label>
                     <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-yellow-50 has-[:checked]:border-yellow-300">
-                        <input type="radio" name="status_after" value="pending" class="w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300" {{ old('status_after') == 'pending' ? 'checked' : '' }}>
+                        <input type="radio" name="status_after" value="pending" x-model="statusAfter" class="w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
                         <div>
                             <p class="text-sm font-bold text-yellow-800">PENDING</p>
                             <p class="text-[10px] text-yellow-600">Butuh pengecekan lanjut.</p>
                         </div>
                     </label>
                     <label class="relative flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-opacity-90 transition-colors has-[:checked]:bg-red-50 has-[:checked]:border-red-300">
-                        <input type="radio" name="status_after" value="failure" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300" {{ old('status_after') == 'failure' ? 'checked' : '' }}>
+                        <input type="radio" name="status_after" value="failure" x-model="statusAfter" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
                         <div>
                             <p class="text-sm font-bold text-red-800">FAILURE</p>
                             <p class="text-[10px] text-red-600">Gagal diperbaiki.</p>
                         </div>
                     </label>
+                </div>
+            </div>
+
+            {{-- Conditional Follow Up Field --}}
+            <div x-show="statusAfter === 'pending' || statusAfter === 'failure'" x-transition x-cloak class="pt-4 border-t border-gray-100">
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <h3 class="font-bold text-gray-900 mb-1 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Follow-Up Action Required
+                    </h3>
+                    <p class="text-[11px] text-gray-500 mb-3">Since the status is not Solved, a new Follow-up Work Order will be automatically created. Please choose its deadline.</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">New Due Date <span class="text-red-500">*</span></label>
+                    <input type="date" name="followup_due_date" 
+                           :required="statusAfter === 'pending' || statusAfter === 'failure'"
+                           class="w-full sm:w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
             </div>
 

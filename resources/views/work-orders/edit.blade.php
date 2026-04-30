@@ -38,8 +38,6 @@
                         <div x-show="isExternal" class="sm:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Client / Lokasi Luar <span class="text-red-500">*</span></label>
                             <input name="client_name" value="{{ old('client_name', $workOrder->client_name) }}" :required="isExternal" class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                            {{-- Asset placeholder --}}
-                            <input type="hidden" name="asset_id" value="1">
                         </div>
 
                         <div>

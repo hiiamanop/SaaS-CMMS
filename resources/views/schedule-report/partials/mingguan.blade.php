@@ -74,7 +74,22 @@ $monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov'
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800"
                                   title="{{ $result->notes }}">X</span>
                         @else
-                            <span class="text-gray-300">—</span>
+                            @php
+                                $isAutoX = false;
+                                if ($session && $session->status !== 'submitted') {
+                                    $due = $session->due_date;
+                                    // Indikator X muncul otomatis jika belum isi dan sudah lewat 1 minggu (7 hari) dari due date
+                                    if ($due && now()->gt($due->copy()->addWeek())) {
+                                        $isAutoX = true;
+                                    }
+                                }
+                            @endphp
+
+                            @if($isAutoX)
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800" title="Overdue > 1 Week">X</span>
+                            @else
+                                <span class="text-gray-300">—</span>
+                            @endif
                         @endif
                     </td>
                     @endforeach

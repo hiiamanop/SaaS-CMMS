@@ -41,7 +41,7 @@ $wo = $workOrder;
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="border-b border-gray-200 px-2">
             <div class="flex gap-1 -mb-px">
-                @foreach(['details'=>'Details','checklist'=>'Checklist ('.$wo->checklistItems->count().')', 'maintenance' => 'Maintenance Detail', 'activity'=>'Activity Log'] as $k=>$l)
+                @foreach(['details'=>'Details', 'maintenance' => 'Maintenance Detail', 'activity'=>'Activity Log'] as $k=>$l)
                     @if($k === 'maintenance' && !$wo->maintenanceRecord) @continue @endif
                     <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-brand text-brand':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
                 @endforeach
@@ -51,45 +51,23 @@ $wo = $workOrder;
         {{-- Details tab --}}
         <div x-show="tab==='details'" class="p-6">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
-                @foreach([['Asset',$wo->asset->name],['Type',ucfirst($wo->type)],['Due Date',$wo->due_date->format('M d, Y')],['Assigned To',$wo->assignedTo?->name??'Unassigned'],['Created By',$wo->createdBy->name],['Started At',$wo->started_at?$wo->started_at->format('M d, Y H:i'):'—'],['Completed At',$wo->completed_at?$wo->completed_at->format('M d, Y H:i'):'—'],['Created At',$wo->created_at->format('M d, Y')]] as [$l,$v])
+                @foreach([
+                    [$wo->is_external_client ? 'Client Location' : 'Internal Asset', $wo->is_external_client ? ($wo->client_name ?: 'Unknown Client') : ($wo->asset?->name ?: '—')],
+                    ['Type', ucfirst($wo->type)],
+                    ['Due Date', $wo->due_date->format('M d, Y')],
+                    ['Assigned To', $wo->assignedTo?->name ?? 'Unassigned'],
+                    ['Created By', $wo->createdBy->name],
+                    ['Started At', $wo->started_at ? $wo->started_at->format('M d, Y H:i') : '—'],
+                    ['Completed At', $wo->completed_at ? $wo->completed_at->format('M d, Y H:i') : '—'],
+                    ['Created At', $wo->created_at->format('M d, Y')]
+                ] as [$l, $v])
                 <div><dt class="text-xs font-medium text-gray-500 uppercase">{{ $l }}</dt><dd class="mt-1 text-sm text-gray-900">{{ $v }}</dd></div>
                 @endforeach
             </div>
             @if($wo->description)<div class="mt-5 pt-5 border-t border-gray-100"><p class="text-xs font-medium text-gray-500 uppercase mb-2">Description</p><p class="text-sm text-gray-700">{{ $wo->description }}</p></div>@endif
         </div>
 
-        {{-- Checklist tab --}}
-        <div x-show="tab==='checklist'" class="p-6">
-            @if($wo->checklistItems->isEmpty())
-            <p class="text-sm text-gray-400 text-center py-8">No checklist items</p>
-            @else
-            <div class="space-y-4">
-            @foreach($wo->checklistItems as $item)
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
-                <div class="flex-1 flex items-center gap-3">
-                    <div class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 {{ $item->is_checked ? 'border-green-500 bg-green-500' : 'border-gray-300' }}">
-                        @if($item->is_checked)<svg class="w-3 h-3 text-gray-900" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>@endif
-                    </div>
-                    <span class="text-sm font-medium {{ $item->is_checked ? 'text-gray-900' : 'text-gray-500' }}">{{ $item->description }}</span>
-                </div>
-                @if($item->is_checked)
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $item->result === 'ok' ? 'bg-green-100 text-green-700' : ($item->result === 'repaired' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700') }}">
-                        {{ $item->result ?: 'N/A' }}
-                    </span>
-                    <span class="text-[10px] text-gray-400 font-medium">Checked by {{ $item->checkedBy?->name }}</span>
-                </div>
-                @endif
-            </div>
-            @endforeach
-            </div>
-            @php $done = $wo->checklistItems->where('is_checked',true)->count(); $total = $wo->checklistItems->count(); @endphp
-            <div class="mt-4 flex items-center gap-3">
-                <div class="flex-1 bg-gray-200 rounded-full h-2"><div class="h-2 bg-green-500 rounded-full" style="width:{{ $total>0?round(($done/$total)*100):0 }}%"></div></div>
-                <span class="text-xs text-gray-500 font-medium">{{ $done }}/{{ $total }}</span>
-            </div>
-            @endif
-        </div>
+
 
         {{-- Maintenance Details tab --}}
         @if($mr = $wo->maintenanceRecord)

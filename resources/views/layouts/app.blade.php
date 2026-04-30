@@ -60,6 +60,7 @@
                         ['route' => 'schedule-report.index', 'label' => 'Schedule Report', 'icon' => 'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z', 'match' => 'schedule-report*', 'roles' => null],
                         ['route' => 'work-orders.index', 'label' => 'Work Orders & Records', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
                         ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M5 2h14 M5 22h14 M12 12l7-7H5l7 7zm0 0l7 7H5l7-7z', 'match' => 'timeline*', 'roles' => null],
+                        ['route' => 'daily-reports.index', 'label' => 'Daily Report', 'icon' => 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', 'match' => 'daily-reports*', 'roles' => null],
                         ['route' => 'kpi.index', 'label' => 'KPI Dashboard', 'icon' => 'M18 20V10 M12 20V4 M6 20v-6', 'match' => 'kpi*', 'roles' => null],
                     ];
                 @endphp

@@ -15,6 +15,7 @@ use App\Http\Controllers\ScheduleReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ConsumableController;
+use App\Http\Controllers\DailyReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -92,6 +93,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
     Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
+
+    // Daily Reports
+    Route::resource('daily-reports', DailyReportController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__.'/auth.php';

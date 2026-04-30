@@ -62,15 +62,7 @@ if ($oldWeeks !== null) {
                     <input type="hidden" name="location_id" value="{{ $userLocation?->id ?? $s->location_id }}">
                 </div>
                 @endif
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Teknisi / PIC</label>
-                    <select name="technician_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                        <option value="">Pilih teknisi...</option>
-                        @foreach($technicians as $t)
-                        <option value="{{ $t->id }}" {{ old('technician_id', $s->technician_id) == $t->id ? 'selected' : '' }}>{{ $t->name }} ({{ ucfirst($t->role) }})</option>
-                        @endforeach
-                    </select>
-                </div>
+
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Alat / Trafo <span class="text-red-500">*</span></label>
