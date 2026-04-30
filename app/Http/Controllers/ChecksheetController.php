@@ -148,7 +148,7 @@ class ChecksheetController extends Controller
         $items = $request->get('items', []);
         foreach ($items as $itemName => $data) {
             $result = ChecksheetResult::where('session_id', $session->id)
-                ->whereRaw('BINARY item_name = ?', [$itemName])
+                ->where('item_name', $itemName)
                 ->first();
                 
             if (!$result) {
@@ -194,7 +194,7 @@ class ChecksheetController extends Controller
         );
 
         $result = ChecksheetResult::where('session_id', $session->id)
-            ->whereRaw('BINARY item_name = ?', [$templateId])
+            ->where('item_name', $templateId)
             ->first();
             
         if (!$result) {
