@@ -1,58 +1,55 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aruna CMMS (Computerized Maintenance Management System)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+CMMS Aruna adalah platform manajemen pemeliharaan terpadu yang dirancang khusus untuk operasional **PT Aruna Hijau Power**. Sistem ini membantu dalam mengelola aset, menjadwalkan perawatan rutin, dan mendokumentasikan setiap aktivitas teknis secara digital dan terstruktur.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Manajemen Aset & Lokasi
+- Pelacakan aset internal dan lokasi inspeksi.
+- Dukungan untuk **Klien Eksternal**, memungkinkan pencatatan pengerjaan di lokasi luar tanpa harus terdaftar sebagai aset internal.
+- Hierarki lokasi yang jelas untuk mempermudah identifikasi unit.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. Penjadwalan Pemeliharaan (Preventive Maintenance)
+- Pembuatan jadwal otomatis berdasarkan frekuensi (Mingguan, Bulanan, Triwulan, Semesteran, Tahunan).
+- **Start Date Logic**: Jadwal hanya akan aktif dan menghasilkan checksheet setelah tanggal mulai yang ditentukan.
+- Kalender pengerjaan (Timeline) untuk visualisasi beban kerja tim.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Sistem Work Order (Perintah Kerja)
+- Manajemen alur kerja dari status **Open**, **In Progress**, hingga **Closed** atau **Canceled**.
+- Penugasan teknisi secara spesifik untuk setiap pekerjaan.
+- Fitur pembatalan (Cancel) dengan kewajiban mengisi alasan pembatalan.
 
-## Learning Laravel
+### 4. Record & Dokumentasi (Maintenance Records)
+- Dokumentasi hasil pengerjaan (Corrective & Preventive).
+- Upload foto bukti pengerjaan (mendukung file hingga 10MB).
+- Pencatatan penggunaan suku cadang (Spare Parts) secara otomatis yang memotong stok inventaris.
+- Otomatisasi pengerjaan lanjutan (**Follow-up**) jika status akhir pengerjaan dinyatakan "Pending" atau "Failure".
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 5. Inventaris & Logistik
+- Pengelolaan stok **Spare Parts**, **Tools** (Peralatan), dan **Consumables**.
+- Riwayat penggunaan item untuk setiap aktivitas pemeliharaan.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 6. Laporan & KPI Dashboard
+- Dashboard KPI real-time (Maintenance Compliance, MTTR, MTBF).
+- **Schedule Report**: Rekapitulasi tahunan pengerjaan dalam format grid minggu-bulan (W1-W4).
+- Export laporan ke format PDF.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🛠️ Teknologi yang Digunakan
 
-## Agentic Development
+- **Framework**: [Laravel 11](https://laravel.com)
+- **Frontend**: [Tailwind CSS](https://tailwindcss.com) & [Alpine.js](https://alpinejs.dev)
+- **Database**: MySQL
+- **Icons & UI Components**: Heroicons & SweetAlert2
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 📦 Instalasi & Persiapan
 
-```bash
-composer require laravel/boost --dev
+1. Clone repository ini.
+2. Jalankan `composer install` dan `npm install`.
+3. Salin `.env.example` menjadi `.env` dan sesuaikan konfigurasi database.
+4. Jalankan `php artisan key:generate`.
+5. Jalankan migrasi: `php artisan migrate`.
+6. (Opsional) Jalankan seeder untuk data awal: `php artisan db:seed`.
+7. Jalankan server: `php artisan serve` dan `npm run dev`.
 
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+Dikembangkan untuk efisiensi operasional **PT Aruna Hijau Power**.
