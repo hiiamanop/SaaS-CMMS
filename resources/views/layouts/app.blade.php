@@ -62,9 +62,10 @@
                         ['route' => 'work-orders.index', 'label' => 'Work Orders & Records', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
                         ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M5 2h14 M5 22h14 M12 12l7-7H5l7 7zm0 0l7 7H5l7-7z', 'match' => 'timeline*', 'roles' => null],
                         ['route' => 'daily-reports.index', 'label' => 'Personal Notes', 'icon' => 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', 'match' => 'daily-reports*', 'roles' => null],
-                        ['label' => 'Production Report', 'icon' => 'M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M13 2v7h7 M9 13h6 M9 17h4', 'match' => 'production-reports*', 'roles' => null, 'sub' => [
+                        ['label' => 'Production Report', 'icon' => 'M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M13 2v7h7 M9 13h6 M9 17h4', 'match' => ['production-reports*', 'production-losses*'], 'roles' => null, 'sub' => [
                             ['route' => 'production-reports.index', 'label' => 'Daily Report'],
                             ['route' => 'production-reports.performance', 'label' => 'Performance & Target'],
+                            ['route' => 'production-losses.index', 'label' => 'Loss of Production'],
                         ]],
                         ['route' => 'kpi.index', 'label' => 'KPI Dashboard', 'icon' => 'M18 20V10 M12 20V4 M6 20v-6', 'match' => 'kpi*', 'roles' => null],
                     ];

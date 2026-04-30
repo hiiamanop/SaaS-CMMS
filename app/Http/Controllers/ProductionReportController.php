@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Location;
 use App\Models\ProductionEntry;
+use App\Models\ProductionLoss;
 use App\Models\ProductionReport;
 use App\Models\ProductionSector;
 use App\Models\ProductionTarget;
@@ -317,10 +318,28 @@ class ProductionReportController extends Controller
             ];
         }
 
+        // LOP summary this month
+        $lossData = ProductionLoss::where('location_id', $locationId)
+            ->whereYear('started_at', $year)
+            ->whereMonth('started_at', $month)
+            ->with('sector')
+            ->get();
+
+        $lopSummary = [
+            'total_kwh'     => $lossData->sum('lop_kwh'),
+            'total_events'  => $lossData->count(),
+            'total_minutes' => $lossData->sum('duration_minutes'),
+            'by_category'   => $lossData->groupBy('category')->map(fn($g) => [
+                'count'    => $g->count(),
+                'lop_kwh'  => $g->sum('lop_kwh'),
+                'duration' => $g->sum('duration_minutes'),
+            ]),
+        ];
+
         return view('production-reports.performance', compact(
             'reports', 'sectors', 'targets', 'locations', 'locationId',
             'month', 'year', 'sectorSummary', 'chartLabels', 'chartKwh', 'chartPr',
-            'daysInMonth'
+            'daysInMonth', 'lopSummary', 'lossData'
         ));
     }
 

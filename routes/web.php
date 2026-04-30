@@ -18,6 +18,7 @@ use App\Http\Controllers\ConsumableController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ItemImportController;
 use App\Http\Controllers\ProductionReportController;
+use App\Http\Controllers\ProductionLossController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -108,6 +109,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('production-reports/sectors', [ProductionReportController::class, 'getSectors'])->name('production-reports.sectors');
     Route::get('production-reports/performance', [ProductionReportController::class, 'performance'])->name('production-reports.performance');
     Route::resource('production-reports', ProductionReportController::class);
+
+    // Production Losses (LOP)
+    Route::resource('production-losses', ProductionLossController::class)->except(['show']);
 
     // Production Targets (Settings)
     Route::post('settings/targets', [SettingsController::class, 'storeTarget'])->name('settings.targets.store');

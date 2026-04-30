@@ -252,6 +252,63 @@
         </div>
     </div>
 
+    {{-- LOP Summary --}}
+    <div class="bg-white border border-red-100 rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-red-100 flex items-center justify-between">
+            <div>
+                <h2 class="font-bold text-red-700">Loss of Production (LOP)</h2>
+                <p class="text-xs text-gray-400 mt-0.5">{{ \Carbon\Carbon::create($year, $month, 1)->translatedFormat('F Y') }}</p>
+            </div>
+            <a href="{{ route('production-losses.index', ['month' => $month, 'year' => $year]) }}"
+                class="text-xs font-semibold text-red-500 hover:underline">Lihat Detail →</a>
+        </div>
+
+        @if($lopSummary['total_events'] === 0)
+            <div class="px-5 py-8 text-center text-sm text-gray-400">Tidak ada data LOP bulan ini</div>
+        @else
+            <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
+                <div class="px-5 py-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total LOP</p>
+                    <p class="text-2xl font-black text-red-600 mt-1">{{ number_format($lopSummary['total_kwh'], 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-400">kWh</p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Events</p>
+                    <p class="text-2xl font-black text-gray-900 mt-1">{{ $lopSummary['total_events'] }}</p>
+                    <p class="text-xs text-gray-400">gangguan</p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Durasi</p>
+                    @php $th = intdiv($lopSummary['total_minutes'], 60); $tm = $lopSummary['total_minutes'] % 60; @endphp
+                    <p class="text-2xl font-black text-gray-900 mt-1">{{ $th }}<span class="text-sm font-normal">j</span></p>
+                    <p class="text-xs text-gray-400">{{ $tm }} menit</p>
+                </div>
+                <div class="px-5 py-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Hari OFF (÷12j)</p>
+                    <p class="text-2xl font-black text-yellow-600 mt-1">{{ number_format($lopSummary['total_minutes'] / 60 / 12, 2) }}</p>
+                    <p class="text-xs text-gray-400">hari operasional</p>
+                </div>
+            </div>
+
+            @if($lopSummary['by_category']->isNotEmpty())
+            <div class="px-5 py-3 bg-red-50 border-t border-red-100">
+                <div class="flex flex-wrap gap-3">
+                    @foreach(\App\Models\ProductionLoss::$categories as $key => $label)
+                        @if($lopSummary['by_category']->has($key))
+                        @php $cat = $lopSummary['by_category'][$key]; @endphp
+                        <div class="text-xs bg-white border border-red-200 rounded-lg px-3 py-1.5">
+                            <span class="font-semibold text-gray-600">{{ $label }}</span>:
+                            <span class="font-black text-red-600">{{ number_format($cat['lop_kwh'], 0, ',', '.') }} kWh</span>
+                            <span class="text-gray-400">({{ $cat['count'] }}x)</span>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        @endif
+    </div>
+
     @endif
 
 </div>
