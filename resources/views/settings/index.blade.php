@@ -53,6 +53,16 @@
                 class="py-3 text-sm transition-colors">
                 Lokasi PLTS
             </button>
+            <button @click="tab='sectors'"
+                :class="tab==='sectors' ? 'border-b-2 border-gray-900 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'"
+                class="py-3 text-sm transition-colors">
+                Sektor Produksi
+            </button>
+            <button @click="tab='targets'"
+                :class="tab==='targets' ? 'border-b-2 border-gray-900 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'"
+                class="py-3 text-sm transition-colors">
+                Target Produksi
+            </button>
         </nav>
     </div>
 
@@ -380,6 +390,289 @@
                     Tambah
                 </button>
             </form>
+        </div>
+    </div>
+
+    {{-- ── Tab: Sectors ────────────────────────────────────────────────── --}}
+    <div x-show="tab==='sectors'" x-transition>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="font-bold text-gray-800">Sektor Produksi PLTS</h2>
+                <span class="text-xs text-gray-400">Konfigurasi sektor per lokasi untuk laporan produksi harian</span>
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Lokasi</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Nama Sektor</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">kWp</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">kWAC</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-500">Urutan</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-500">Status</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($sectors as $sector)
+                    <tr class="hover:bg-gray-50" x-data="{ editing: false }">
+                        <td class="px-4 py-3 text-gray-600 text-xs">{{ $sector->location->name ?? '-' }}</td>
+                        <td class="px-4 py-3 font-semibold text-gray-800" x-show="!editing">{{ $sector->name }}</td>
+                        <td class="px-4 py-3 text-right font-mono text-gray-600 text-xs" x-show="!editing">
+                            {{ $sector->capacity_kwp ? number_format($sector->capacity_kwp, 2, ',', '.') : '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-right font-mono text-gray-600 text-xs" x-show="!editing">
+                            {{ $sector->capacity_kwac ? number_format($sector->capacity_kwac, 2, ',', '.') : '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-center text-gray-500 text-xs" x-show="!editing">{{ $sector->sort_order }}</td>
+                        <td class="px-4 py-3 text-center" x-show="!editing">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $sector->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                                {{ $sector->is_active ? 'Aktif' : 'Nonaktif' }}
+                            </span>
+                        </td>
+
+                        {{-- Inline edit form --}}
+                        <form x-show="editing" action="{{ route('settings.sectors.update', $sector) }}" method="POST" class="contents">
+                            @csrf @method('PUT')
+                            <td class="px-4 py-2" colspan="2">
+                                <input name="name" value="{{ $sector->name }}" required
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" name="capacity_kwp" step="0.01" value="{{ $sector->capacity_kwp }}"
+                                    class="w-28 px-2 py-1 border border-gray-300 rounded text-sm text-right">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" name="capacity_kwac" step="0.01" value="{{ $sector->capacity_kwac }}"
+                                    class="w-28 px-2 py-1 border border-gray-300 rounded text-sm text-right">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" name="sort_order" value="{{ $sector->sort_order }}"
+                                    class="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center">
+                            </td>
+                            <td class="px-4 py-2">
+                                <select name="is_active" class="px-2 py-1 border border-gray-300 rounded text-sm">
+                                    <option value="1" {{ $sector->is_active ? 'selected' : '' }}>Aktif</option>
+                                    <option value="0" {{ !$sector->is_active ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            </td>
+                            <td class="px-4 py-2">
+                                <div class="flex gap-2">
+                                    <button type="submit" class="text-xs text-green-600 font-semibold hover:underline">Simpan</button>
+                                    <button type="button" @click="editing=false" class="text-xs text-gray-500 hover:underline">Batal</button>
+                                </div>
+                            </td>
+                        </form>
+
+                        <td class="px-4 py-3" x-show="!editing">
+                            <div class="flex items-center justify-end gap-2">
+                                <button @click="editing=true" class="text-gray-400 hover:text-brand transition-colors p-1" title="Edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button type="button"
+                                    @click="$dispatch('open-delete', {
+                                        action: '{{ route('settings.sectors.destroy', $sector) }}',
+                                        message: 'Hapus sektor {{ addslashes($sector->name) }}?'
+                                    })"
+                                    class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada sektor. Tambahkan di bawah.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            {{-- Add sector form --}}
+            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tambah Sektor Baru</p>
+                <form action="{{ route('settings.sectors.store') }}" method="POST" class="flex flex-wrap gap-3 items-end">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Lokasi PLTS</label>
+                        <select name="location_id" required class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <option value="">Pilih Lokasi</option>
+                            @foreach(\App\Models\Location::orderBy('name')->get() as $loc)
+                                <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nama Sektor</label>
+                        <input name="name" required placeholder="cth: DISM H201 A" maxlength="255"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas kWp</label>
+                        <input type="number" step="0.01" name="capacity_kwp" placeholder="20030.08"
+                            class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas kWAC</label>
+                        <input type="number" step="0.01" name="capacity_kwac" placeholder="15840"
+                            class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Urutan</label>
+                        <input type="number" name="sort_order" value="0" min="0"
+                            class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold text-sm rounded-lg hover:bg-gray-700">
+                        Tambah
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Tab: Targets ────────────────────────────────────────────────── --}}
+    <div x-show="tab==='targets'" x-transition>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="font-bold text-gray-800">Target Produksi Bulanan</h2>
+                <span class="text-xs text-gray-400">Target kWh harian & PR per sektor per bulan</span>
+            </div>
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Lokasi</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Sektor</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Periode</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">Target kWh/hari</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">Target PR</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($targets as $target)
+                    <tr class="hover:bg-gray-50" x-data="{ editing: false }">
+                        <td class="px-4 py-3 text-gray-600 text-xs">{{ $target->location->name ?? '-' }}</td>
+                        <td class="px-4 py-3 font-semibold text-gray-800">{{ $target->sector?->name ?? 'Total Lokasi' }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ $target->month_name }}</td>
+                        <td class="px-4 py-3 text-right font-mono text-gray-700" x-show="!editing">
+                            {{ $target->target_kwh_daily ? number_format($target->target_kwh_daily, 0, ',', '.') : '-' }}
+                        </td>
+                        <td class="px-4 py-3 text-right font-mono text-gray-700" x-show="!editing">
+                            {{ $target->target_pr ? number_format($target->target_pr * 100, 1) . '%' : '-' }}
+                        </td>
+
+                        <form x-show="editing" action="{{ route('settings.targets.update', $target) }}" method="POST" class="contents">
+                            @csrf @method('PUT')
+                            <td class="px-4 py-2" colspan="2">
+                                <input type="number" step="0.01" name="target_kwh_daily" value="{{ $target->target_kwh_daily }}"
+                                    placeholder="kWh/hari"
+                                    class="w-32 px-2 py-1 border border-gray-300 rounded text-sm text-right">
+                            </td>
+                            <td class="px-4 py-2">
+                                <input type="number" step="0.001" name="target_pr" value="{{ $target->target_pr }}"
+                                    min="0" max="1" placeholder="0.75"
+                                    class="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-right">
+                                <span class="text-xs text-gray-400">(0–1)</span>
+                            </td>
+                            <td class="px-4 py-2">
+                                <div class="flex gap-2">
+                                    <button type="submit" class="text-xs text-green-600 font-semibold hover:underline">Simpan</button>
+                                    <button type="button" @click="editing=false" class="text-xs text-gray-500 hover:underline">Batal</button>
+                                </div>
+                            </td>
+                        </form>
+
+                        <td class="px-4 py-3" x-show="!editing">
+                            <div class="flex items-center justify-end gap-2">
+                                <button @click="editing=true" class="text-gray-400 hover:text-brand transition-colors p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </button>
+                                <button type="button"
+                                    @click="$dispatch('open-delete', {
+                                        action: '{{ route('settings.targets.destroy', $target) }}',
+                                        message: 'Hapus target {{ addslashes($target->month_name) }}?'
+                                    })"
+                                    class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">Belum ada target. Tambahkan di bawah.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            {{-- Add target form --}}
+            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tambah Target Baru</p>
+                <form action="{{ route('settings.targets.store') }}" method="POST" class="flex flex-wrap gap-3 items-end">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Lokasi PLTS</label>
+                        <select name="location_id" required class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <option value="">Pilih Lokasi</option>
+                            @foreach(\App\Models\Location::orderBy('name')->get() as $loc)
+                                <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Sektor</label>
+                        <select name="sector_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <option value="">Semua Sektor (Total)</option>
+                            @foreach(\App\Models\ProductionSector::with('location')->orderBy('location_id')->orderBy('name')->get() as $sec)
+                                <option value="{{ $sec->id }}">{{ $sec->location->name ?? '' }} — {{ $sec->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Bulan</label>
+                        <select name="month" required class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            @foreach(range(1,12) as $m)
+                                <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Tahun</label>
+                        <select name="year" required class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            @foreach(range(now()->year - 1, now()->year + 1) as $y)
+                                <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Target kWh/hari</label>
+                        <input type="number" step="0.01" name="target_kwh_daily" placeholder="cth: 74000"
+                            class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Target PR (0–1)</label>
+                        <input type="number" step="0.001" name="target_pr" placeholder="0.75" min="0" max="1"
+                            class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold text-sm rounded-lg hover:bg-gray-700">
+                        Tambah
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

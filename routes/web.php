@@ -17,6 +17,7 @@ use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ConsumableController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ItemImportController;
+use App\Http\Controllers\ProductionReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -96,9 +97,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
     Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
+    Route::post('settings/sectors', [SettingsController::class, 'storeSector'])->name('settings.sectors.store');
+    Route::put('settings/sectors/{sector}', [SettingsController::class, 'updateSector'])->name('settings.sectors.update');
+    Route::delete('settings/sectors/{sector}', [SettingsController::class, 'destroySector'])->name('settings.sectors.destroy');
 
     // Daily Reports
     Route::resource('daily-reports', DailyReportController::class)->only(['index', 'store', 'destroy']);
+
+    // Production Reports
+    Route::get('production-reports/sectors', [ProductionReportController::class, 'getSectors'])->name('production-reports.sectors');
+    Route::get('production-reports/performance', [ProductionReportController::class, 'performance'])->name('production-reports.performance');
+    Route::resource('production-reports', ProductionReportController::class);
+
+    // Production Targets (Settings)
+    Route::post('settings/targets', [SettingsController::class, 'storeTarget'])->name('settings.targets.store');
+    Route::put('settings/targets/{target}', [SettingsController::class, 'updateTarget'])->name('settings.targets.update');
+    Route::delete('settings/targets/{target}', [SettingsController::class, 'destroyTarget'])->name('settings.targets.destroy');
 });
 
 require __DIR__.'/auth.php';

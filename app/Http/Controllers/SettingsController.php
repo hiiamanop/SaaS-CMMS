@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\ProductionSector;
+use App\Models\ProductionTarget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -20,10 +22,16 @@ class SettingsController extends Controller
     public function index()
     {
         $this->authorizeAdmin();
-        $users = User::orderBy('name')->get();
-        $roles = Role::orderBy('label')->get();
+        $users     = User::orderBy('name')->get();
+        $roles     = Role::orderBy('label')->get();
         $locations = \App\Models\Location::orderBy('name')->get();
-        return view('settings.index', compact('users', 'roles', 'locations'));
+        $sectors   = ProductionSector::with('location')->orderBy('location_id')->orderBy('sort_order')->orderBy('name')->get();
+        $targets   = ProductionTarget::with(['location', 'sector'])
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->orderBy('location_id')
+            ->get();
+        return view('settings.index', compact('users', 'roles', 'locations', 'sectors', 'targets'));
     }
 
     public function createUser()
@@ -222,14 +230,134 @@ class SettingsController extends Controller
     public function destroyLocation(\App\Models\Location $location)
     {
         $this->authorizeAdmin();
-        
+
         if ($location->users()->exists() || $location->maintenanceSchedules()->exists()) {
             return back()->with('error', 'Lokasi PLTS sedang digunakan dan tidak dapat dihapus.');
         }
 
         $location->delete();
-        
+
         return redirect()->route('settings.index', ['tab' => 'locations'])
             ->with('success', 'Lokasi PLTS berhasil dihapus.');
+    }
+
+    // ─── Production Sectors CRUD ────────────────────────────────────────────
+
+    public function storeSector(Request $request)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'location_id'   => 'required|exists:locations,id',
+            'name'          => 'required|string|max:255',
+            'capacity_kwp'  => 'nullable|numeric|min:0',
+            'capacity_kwac' => 'nullable|numeric|min:0',
+            'sort_order'    => 'nullable|integer|min:0',
+        ]);
+
+        ProductionSector::create([
+            'location_id'   => $request->location_id,
+            'name'          => $request->name,
+            'capacity_kwp'  => $request->capacity_kwp,
+            'capacity_kwac' => $request->capacity_kwac,
+            'sort_order'    => $request->sort_order ?? 0,
+            'is_active'     => true,
+        ]);
+
+        return redirect()->route('settings.index', ['tab' => 'sectors'])
+            ->with('success', 'Sektor berhasil ditambahkan.');
+    }
+
+    public function updateSector(Request $request, ProductionSector $sector)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'capacity_kwp'  => 'nullable|numeric|min:0',
+            'capacity_kwac' => 'nullable|numeric|min:0',
+            'sort_order'    => 'nullable|integer|min:0',
+            'is_active'     => 'boolean',
+        ]);
+
+        $sector->update([
+            'name'          => $request->name,
+            'capacity_kwp'  => $request->capacity_kwp,
+            'capacity_kwac' => $request->capacity_kwac,
+            'sort_order'    => $request->sort_order ?? 0,
+            'is_active'     => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('settings.index', ['tab' => 'sectors'])
+            ->with('success', 'Sektor berhasil diperbarui.');
+    }
+
+    public function destroySector(ProductionSector $sector)
+    {
+        $this->authorizeAdmin();
+
+        if ($sector->entries()->exists()) {
+            return back()->with('error', 'Sektor memiliki data produksi dan tidak dapat dihapus.');
+        }
+
+        $sector->delete();
+
+        return redirect()->route('settings.index', ['tab' => 'sectors'])
+            ->with('success', 'Sektor berhasil dihapus.');
+    }
+
+    // ─── Production Targets CRUD ────────────────────────────────────────────
+
+    public function storeTarget(Request $request)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'location_id'      => 'required|exists:locations,id',
+            'sector_id'        => 'nullable|exists:production_sectors,id',
+            'year'             => 'required|integer|min:2020|max:2100',
+            'month'            => 'required|integer|min:1|max:12',
+            'target_kwh_daily' => 'nullable|numeric|min:0',
+            'target_pr'        => 'nullable|numeric|min:0|max:1',
+            'notes'            => 'nullable|string|max:500',
+        ]);
+
+        ProductionTarget::updateOrCreate(
+            [
+                'location_id' => $request->location_id,
+                'sector_id'   => $request->sector_id ?: null,
+                'year'        => $request->year,
+                'month'       => $request->month,
+            ],
+            [
+                'target_kwh_daily' => $request->target_kwh_daily,
+                'target_pr'        => $request->target_pr,
+                'notes'            => $request->notes,
+            ]
+        );
+
+        return redirect()->route('settings.index', ['tab' => 'targets'])
+            ->with('success', 'Target produksi berhasil disimpan.');
+    }
+
+    public function updateTarget(Request $request, ProductionTarget $target)
+    {
+        $this->authorizeAdmin();
+        $request->validate([
+            'target_kwh_daily' => 'nullable|numeric|min:0',
+            'target_pr'        => 'nullable|numeric|min:0|max:1',
+            'notes'            => 'nullable|string|max:500',
+        ]);
+
+        $target->update($request->only('target_kwh_daily', 'target_pr', 'notes'));
+
+        return redirect()->route('settings.index', ['tab' => 'targets'])
+            ->with('success', 'Target produksi berhasil diperbarui.');
+    }
+
+    public function destroyTarget(ProductionTarget $target)
+    {
+        $this->authorizeAdmin();
+        $target->delete();
+
+        return redirect()->route('settings.index', ['tab' => 'targets'])
+            ->with('success', 'Target produksi berhasil dihapus.');
     }
 }
