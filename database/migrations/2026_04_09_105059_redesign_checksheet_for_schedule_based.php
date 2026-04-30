@@ -9,13 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Bersihkan data lama (child dulu baru parent)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // Bersihkan data lama secara agnostik
+        Schema::disableForeignKeyConstraints();
         DB::table('checksheet_results')->truncate();
         DB::table('checksheet_abnormals')->truncate();
         DB::table('checksheet_sessions')->truncate();
         DB::table('checksheet_templates')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        Schema::enableForeignKeyConstraints();
 
         // 1. Tambah technician_id ke maintenance_schedules
         Schema::table('maintenance_schedules', function (Blueprint $table) {
