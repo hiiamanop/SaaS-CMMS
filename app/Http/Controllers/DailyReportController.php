@@ -27,21 +27,27 @@ class DailyReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'id'          => 'nullable|integer',
             'report_date' => 'required|date',
             'title'       => 'nullable|string|max:255',
             'content'     => 'nullable|string',
         ]);
 
-        $report = DailyReport::updateOrCreate(
-            [
+        if ($request->id) {
+            $report = DailyReport::where('user_id', auth()->id())->findOrFail($request->id);
+            $report->update([
+                'title'       => $validated['title'] ?? 'Untitled Note',
+                'content'     => $validated['content'],
+                'report_date' => $validated['report_date'],
+            ]);
+        } else {
+            $report = DailyReport::create([
                 'user_id'     => auth()->id(),
                 'report_date' => $validated['report_date'],
-            ],
-            [
-                'title'   => $validated['title'] ?? 'Untitled Report',
-                'content' => $validated['content'],
-            ]
-        );
+                'title'       => $validated['title'] ?? 'Untitled Note',
+                'content'     => $validated['content'],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

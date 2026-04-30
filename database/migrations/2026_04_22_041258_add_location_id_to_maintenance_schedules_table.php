@@ -16,7 +16,7 @@ return new class extends Migration
             Schema::table('maintenance_schedules', function (Blueprint $table) {
                 $table->foreignId('location_id')
                       ->nullable()
-                      ->after('asset_id')
+                      ->after('id')
                       ->constrained('locations')
                       ->nullOnDelete();
             });
