@@ -13,15 +13,18 @@ class AssetController extends Controller
         $query = Asset::query();
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%'.$request->search.'%')
-                  ->orWhere('asset_code', 'like', '%'.$request->search.'%')
-                  ->orWhere('serial_number', 'like', '%'.$request->search.'%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('asset_code', 'like', '%' . $request->search . '%')
+                    ->orWhere('serial_number', 'like', '%' . $request->search . '%');
             });
         }
-        if ($request->category) $query->where('category', $request->category);
-        if ($request->status) $query->where('status', $request->status);
-        if ($request->location) $query->where('location', 'like', '%'.$request->location.'%');
+        if ($request->category)
+            $query->where('category', $request->category);
+        if ($request->status)
+            $query->where('status', $request->status);
+        if ($request->location)
+            $query->where('location', 'like', '%' . $request->location . '%');
 
         $assets = $query->latest()->paginate(15)->withQueryString();
         $categories = Asset::distinct()->pluck('category');
@@ -39,7 +42,7 @@ class AssetController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'asset_code' => 'required|string|unique:assets',
+            'asset_code' => 'nullable|string|unique:assets',
             'name' => 'required|string|max:255',
             'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
@@ -82,7 +85,7 @@ class AssetController extends Controller
     public function update(Request $request, Asset $asset)
     {
         $validated = $request->validate([
-            'asset_code' => 'required|string|unique:assets,asset_code,'.$asset->id,
+            'asset_code' => 'nullable|string|unique:assets,asset_code,' . $asset->id,
             'name' => 'required|string|max:255',
             'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
@@ -99,7 +102,8 @@ class AssetController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            if ($asset->photo) Storage::disk('public')->delete($asset->photo);
+            if ($asset->photo)
+                Storage::disk('public')->delete($asset->photo);
             $validated['photo'] = $request->file('photo')->store('assets', 'public');
         }
 
@@ -109,7 +113,8 @@ class AssetController extends Controller
 
     public function destroy(Asset $asset)
     {
-        if ($asset->photo) Storage::disk('public')->delete($asset->photo);
+        if ($asset->photo)
+            Storage::disk('public')->delete($asset->photo);
         $asset->delete();
         return redirect()->route('assets.index')->with('success', 'Asset deleted successfully.');
     }

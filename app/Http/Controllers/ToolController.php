@@ -29,6 +29,54 @@ class ToolController extends Controller
         return view('tools.index', compact('tools', 'conditions'));
     }
 
+    public function create()
+    {
+        return view('tools.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'tool_code'     => 'required|string|unique:tools',
+            'name'          => 'required|string|max:255',
+            'category'      => 'nullable|string',
+            'brand'         => 'nullable|string',
+            'condition'     => 'required|in:good,damaged,lost',
+            'qty_total'     => 'required|integer|min:1',
+            'qty_available' => 'required|integer|min:0|lte:qty_total',
+            'location'      => 'nullable|string',
+            'description'   => 'nullable|string',
+        ]);
+
+        Tool::create($validated);
+
+        return redirect()->route('tools.index')->with('success', 'Tool created successfully.');
+    }
+
+    public function edit(Tool $tool)
+    {
+        return view('tools.edit', compact('tool'));
+    }
+
+    public function update(Request $request, Tool $tool)
+    {
+        $validated = $request->validate([
+            'tool_code'     => 'required|string|unique:tools,tool_code,' . $tool->id,
+            'name'          => 'required|string|max:255',
+            'category'      => 'nullable|string',
+            'brand'         => 'nullable|string',
+            'condition'     => 'required|in:good,damaged,lost',
+            'qty_total'     => 'required|integer|min:1',
+            'qty_available' => 'required|integer|min:0|lte:qty_total',
+            'location'      => 'nullable|string',
+            'description'   => 'nullable|string',
+        ]);
+
+        $tool->update($validated);
+
+        return redirect()->route('tools.index')->with('success', 'Tool updated successfully.');
+    }
+
     public function destroy(Tool $tool)
     {
         $tool->delete();
