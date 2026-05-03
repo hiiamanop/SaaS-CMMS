@@ -183,14 +183,12 @@ class SettingsController extends Controller
         $this->authorizeAdmin();
         $request->validate([
             'name'         => 'required|string|max:255|unique:locations,name',
-            'code'         => 'nullable|string|max:50',
-            'capacity_kwp' => 'nullable|numeric|min:0',
+            'capacity_mwp' => 'nullable|numeric|min:0',
         ]);
 
         \App\Models\Location::create([
             'name'         => $request->name,
-            'code'         => $request->code,
-            'capacity_kwp' => $request->capacity_kwp,
+            'capacity_mwp' => $request->capacity_mwp,
             'is_active'    => true,
         ]);
 
@@ -202,16 +200,14 @@ class SettingsController extends Controller
     {
         $this->authorizeAdmin();
         $request->validate([
-            'name'         => 'required|string|max:255|unique:locations,name,' . $location->id,
-            'code'         => 'nullable|string|max:50',
-            'capacity_kwp' => 'nullable|numeric|min:0',
+            'name'         => ['required', 'string', 'max:255', Rule::unique('locations')->ignore($location->id)],
+            'capacity_mwp' => 'nullable|numeric|min:0',
             'is_active'    => 'boolean',
         ]);
 
         $location->update([
             'name'         => $request->name,
-            'code'         => $request->code,
-            'capacity_kwp' => $request->capacity_kwp,
+            'capacity_mwp' => $request->capacity_mwp,
             'is_active'    => $request->boolean('is_active', true),
         ]);
 

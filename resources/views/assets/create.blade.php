@@ -30,7 +30,7 @@
                             <select name="location_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 <option value="">— Select PLTS —</option>
                                 @foreach($pltsList as $p)
-                                <option value="{{ $p->id }}" {{ old('location_id') == $p->id ? 'selected' : '' }}>{{ $p->name }} ({{ $p->code }})</option>
+                                <option value="{{ $p->id }}" {{ old('location_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
                                 @endforeach
                             </select>
                         </div>

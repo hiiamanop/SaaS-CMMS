@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Location extends Model
 {
-    protected $fillable = ['name', 'code', 'capacity_kwp', 'address', 'is_active'];
+    protected $fillable = ['name', 'capacity_mwp', 'address', 'is_active'];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'capacity_kwp' => 'decimal:2'];
+        return ['is_active' => 'boolean', 'capacity_mwp' => 'decimal:2'];
     }
 
     public function users()                { return $this->hasMany(User::class); }

@@ -45,7 +45,7 @@ if ($oldWeeks !== null) {
                         <option value="">Pilih lokasi PLTS...</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('location_id', $s->location_id) == $loc->id ? 'selected' : '' }}>
-                            {{ $loc->name }} ({{ $loc->code }})
+                            {{ $loc->name }}
                         </option>
                         @endforeach
                     </select>
@@ -57,7 +57,7 @@ if ($oldWeeks !== null) {
                     <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
                         {{ $userLocation?->name ?? $s->location?->name ?? '—' }}
                         @php $displayLoc = $userLocation ?? $s->location; @endphp
-                        @if($displayLoc)<span class="text-gray-400 text-xs ml-1">({{ $displayLoc->code }})</span>@endif
+                        @if($displayLoc)@endif
                     </div>
                     <input type="hidden" name="location_id" value="{{ $userLocation?->id ?? $s->location_id }}">
                 </div>

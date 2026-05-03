@@ -266,8 +266,7 @@
                 <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
                         <th class="px-5 py-3 text-left font-medium text-gray-600">Nama Lokasi</th>
-                        <th class="px-5 py-3 text-left font-medium text-gray-600">Kode</th>
-                        <th class="px-5 py-3 text-left font-medium text-gray-600">Kapasitas (kWp)</th>
+                        <th class="px-5 py-3 text-left font-medium text-gray-600">Kapasitas (MWp)</th>
                         <th class="px-5 py-3 text-center font-medium text-gray-600">Status</th>
                         <th class="px-5 py-3 text-right font-medium text-gray-600">Aksi</th>
                     </tr>
@@ -286,24 +285,13 @@
                             </td>
                         </template>
 
-                        {{-- Code --}}
-                        <template x-if="!editing">
-                            <td class="px-5 py-3 text-gray-600">{{ $loc->code ?: '—' }}</td>
-                        </template>
-                        <template x-if="editing">
-                            <td class="px-5 py-3">
-                                <input form="form-loc-{{ $loc->id }}" name="code" value="{{ $loc->code }}"
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
-                            </td>
-                        </template>
-
                         {{-- Capacity --}}
                         <template x-if="!editing">
-                            <td class="px-5 py-3 text-gray-600">{{ $loc->capacity_kwp ? number_format((float)$loc->capacity_kwp, 2) : '—' }}</td>
+                            <td class="px-5 py-3 text-gray-600">{{ $loc->capacity_mwp ? number_format((float)$loc->capacity_mwp, 2) : '—' }}</td>
                         </template>
                         <template x-if="editing">
                             <td class="px-5 py-3">
-                                <input type="number" step="0.01" form="form-loc-{{ $loc->id }}" name="capacity_kwp" value="{{ $loc->capacity_kwp }}"
+                                <input type="number" step="0.01" form="form-loc-{{ $loc->id }}" name="capacity_mwp" value="{{ $loc->capacity_mwp }}"
                                     class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-brand">
                             </td>
                         </template>
@@ -367,13 +355,8 @@
                     @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Kode / ID</label>
-                    <input name="code" value="{{ old('code') }}" placeholder="cth: GDA-01" maxlength="50"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas (kWp)</label>
-                    <input type="number" step="0.01" name="capacity_kwp" value="{{ old('capacity_kwp') }}" placeholder="cth: 50.5"
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Kapasitas (MWp)</label>
+                    <input type="number" step="0.01" name="capacity_mwp" value="{{ old('capacity_mwp') }}" placeholder="cth: 0.5"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold text-sm font-medium rounded-lg hover:bg-gray-700">
