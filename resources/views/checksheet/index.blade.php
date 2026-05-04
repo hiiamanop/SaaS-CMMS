@@ -74,7 +74,7 @@
 
     @php
         $freqLabels = ['weekly'=>'Mingguan','monthly'=>'Bulanan','triwulan'=>'Triwulan','quarterly'=>'Semesteran','annually'=>'Tahunan'];
-        $freqColors = ['weekly'=>'blue','monthly'=>'purple','triwulan'=>'indigo','quarterly'=>'orange','annually'=>'green'];
+        $freqColors = ['weekly'=>'emerald','monthly'=>'purple','triwulan'=>'teal','quarterly'=>'cyan','annually'=>'green'];
         $grouped = $schedules->groupBy('category');
     @endphp
 
@@ -100,10 +100,10 @@
                 <div class="flex items-center gap-4 min-w-0">
                     <div class="flex-shrink-0">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                            @if($color==='blue') bg-blue-100 text-blue-700
+                            @if($color==='emerald') bg-emerald-100 text-emerald-700
                             @elseif($color==='purple') bg-purple-100 text-purple-700
-                            @elseif($color==='indigo') bg-indigo-100 text-indigo-700
-                            @elseif($color==='orange') bg-orange-100 text-orange-700
+                            @elseif($color==='teal') bg-teal-100 text-teal-700
+                            @elseif($color==='cyan') bg-cyan-100 text-cyan-700
                             @else bg-green-100 text-green-700 @endif">
                             {{ $freqLabels[$freq] ?? $freq }}
                         </span>
@@ -126,7 +126,7 @@
                     <span class="text-xs text-orange-400">Belum ada item pekerjaan</span>
                     @endif
                     <button onclick="openNewSession({{ $schedule->id }}, '{{ addslashes($schedule->equipment_name) }}', '{{ $schedule->frequency }}', {{ $plannedWeeksJson }})"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-gray-900 text-xs font-medium rounded-lg hover:bg-brand-600">
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand text-white text-xs font-medium rounded-lg hover:bg-brand-600">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Buat Sesi
                     </button>
@@ -170,7 +170,7 @@
                     @endphp
                     <a href="{{ $session->status === 'submitted' ? route('checksheet.show', $session) : route('checksheet.fill', $session) }}"
                        x-show="expanded || {{ $si }} < 5"
-                       class="flex items-center justify-between px-5 py-3 hover:bg-opacity-90 transition-colors">
+                       class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
                         <div class="flex items-center gap-4 min-w-0">
                             <div class="min-w-0">
                                 <p class="text-sm font-medium text-gray-800 truncate">{{ $session->period_label }} {{ $session->year }}</p>
@@ -193,11 +193,11 @@
                             @else
                             <div class="flex items-center gap-2">
                                 <div class="w-20 bg-gray-200 rounded-full h-1.5">
-                                    <div class="h-1.5 rounded-full {{ $pct > 0 ? 'bg-blue-500' : 'bg-gray-300' }}" style="width: {{ $pct }}%"></div>
+                                    <div class="h-1.5 rounded-full {{ $pct > 0 ? 'bg-emerald-500' : 'bg-gray-300' }}" style="width: {{ $pct }}%"></div>
                                 </div>
                                 <span class="text-xs text-gray-500">{{ $filled }}/{{ $total }}</span>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                                    {{ $isOverdue ? 'bg-red-100 text-red-600' : ($pct > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600') }}">
+                                    {{ $isOverdue ? 'bg-red-100 text-red-600' : ($pct > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600') }}">
                                     {{ $isOverdue ? 'Overdue' : ($pct > 0 ? 'Draft' : 'Baru') }}
                                 </span>
                             </div>

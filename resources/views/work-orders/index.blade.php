@@ -4,8 +4,8 @@
 Records</span>@endsection
 @section('content')
     @php
-        $pColors = ['low' => 'bg-gray-100 text-gray-600', 'medium' => 'bg-blue-100 text-blue-700', 'high' => 'bg-orange-100 text-orange-700', 'critical' => 'bg-red-100 text-red-700'];
-        $sColors = ['open' => 'bg-blue-100 text-blue-700', 'in_progress' => 'bg-yellow-100 text-yellow-700', 'pending_review' => 'bg-purple-100 text-purple-700', 'closed' => 'bg-green-100 text-green-700'];
+        $pColors = ['low' => 'bg-gray-100 text-gray-600', 'medium' => 'bg-emerald-100 text-emerald-700', 'high' => 'bg-orange-100 text-orange-700', 'critical' => 'bg-red-100 text-red-700'];
+        $sColors = ['open' => 'bg-emerald-100 text-emerald-700', 'in_progress' => 'bg-yellow-100 text-yellow-700', 'pending_review' => 'bg-purple-100 text-purple-700', 'closed' => 'bg-green-100 text-green-700'];
     @endphp
 
     <div class="space-y-5"
@@ -183,7 +183,7 @@ Records</span>@endsection
 
                                                                                 <td class="px-5 py-4 text-right">
                                                 <div class="flex items-center justify-end gap-1">
-                                                    <a href="{{ route('work-orders.show', $wo) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all" title="View"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
+                                                    <a href="{{ route('work-orders.show', $wo) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-emerald-50 rounded-lg transition-all" title="View"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></a>
                                                     @if(!auth()->user()->isTechnician())
                                                                 <a href="{{ route('work-orders.edit', $wo) }}" class="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-all" title="Edit"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
                                                                 <button @click="$dispatch('open-delete',{action:'{{ route('work-orders.destroy', $wo) }}',message:'Hapus Work Order {{ addslashes($wo->wo_number) }}?'})"
@@ -244,7 +244,7 @@ Records</span>@endsection
 
 
 
-                                                                                                                       <span class="{{ $r->type === 'preventive' ? 'text-brand bg-blue-50 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded' }}">
+                                                                                                                       <span class="{{ $r->type === 'preventive' ? 'text-brand bg-emerald-50 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded' }}">
                                                         {{ $r->type }}
                                                         </span>
                                                 </td>
@@ -275,7 +275,7 @@ Records</span>@endsection
                                                         </div>
                                                 </td>
                                                 <td class="px-5 py-4 text-right">
-                                                <a href="{{ route('maintenance-records.show', $r) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-blue-50 rounded-lg transition-all">
+                                                <a href="{{ route('maintenance-records.show', $r) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-emerald-50 rounded-lg transition-all">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
                                                 </a>
                                             </td>

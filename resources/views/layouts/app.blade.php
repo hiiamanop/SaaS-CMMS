@@ -7,10 +7,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'CMMS') }} — @yield('title', 'Dashboard')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+    </style>
     @stack('styles')
 </head>
 
@@ -288,7 +291,7 @@
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                             </svg>
                             <span x-show="count>0" x-text="count>9?'9+':count"
-                                class="absolute -top-0.5 -right-0.5 bg-red-500 text-gray-900 text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium leading-none"></span>
+                                class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-medium leading-none"></span>
                         </button>
                         <div x-show="open" @click.outside="open=false" x-transition
                             class="absolute right-0 top-full mt-1 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden"
@@ -309,7 +312,7 @@
                                     <a :href="n.url||'#'"
                                         class="flex gap-3 px-4 py-3 hover:bg-opacity-90 transition-colors">
                                         <span class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full"
-                                            :class="n.is_read?'bg-gray-200':'bg-blue-500'"></span>
+                                            :class="n.is_read?'bg-gray-200':'bg-emerald-500'"></span>
                                         <div class="min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate" x-text="n.title"></p>
                                             <p class="text-xs text-gray-500 mt-0.5 line-clamp-2" x-text="n.message"></p>

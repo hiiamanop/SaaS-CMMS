@@ -13,14 +13,14 @@ export default {
         extend: {
             colors: {
                 brand: {
-                    DEFAULT: '#22c55e',
-                    50: '#f0fdf4',
-                    600: '#16a34a',
-                    dark: '#064e3b',
+                    DEFAULT: '#10b981', // emerald-500
+                    50: '#ecfdf5', // emerald-50
+                    600: '#059669', // emerald-600
+                    dark: '#064e3b', // emerald-900
                 }
             },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Outfit', ...defaultTheme.fontFamily.sans],
             },
         },
     },

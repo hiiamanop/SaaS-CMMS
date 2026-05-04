@@ -10,14 +10,13 @@
     <style>
         body { font-family: 'Outfit', sans-serif; }
         .login-bg {
-            background-image: linear-gradient(rgba(17, 24, 39, 0.6), rgba(17, 24, 39, 0.6)), url('{{ asset('login-bg.png') }}');
+            background-image: linear-gradient(rgba(6, 78, 59, 0.7), rgba(6, 78, 59, 0.7)), url('{{ asset('login-bg.png') }}');
             background-size: cover;
             background-position: center;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
+        .text-brand-green { color: #10b981; }
+        .bg-brand-green { background-color: #10b981; }
+        .hover-bg-brand-green:hover { background-color: #059669; }
     </style>
 </head>
 <body class="h-full overflow-hidden">
@@ -30,33 +29,33 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">CMMS AHP</h2>
-                    <p class="text-xs font-medium text-gray-300 uppercase tracking-widest">Aruna Hijau Power</p>
+                    <p class="text-xs font-medium text-emerald-300 uppercase tracking-widest">Aruna Hijau Power</p>
                 </div>
             </div>
             
             <div class="max-w-md">
-                <h1 class="text-5xl font-bold leading-tight mb-6">Efficient Maintenance, <span class="text-blue-400">Powered by Data.</span></h1>
-                <p class="text-lg text-gray-300">Manage your assets, schedules, and operations in one unified platform designed for the future of renewable energy.</p>
+                <h1 class="text-5xl font-bold leading-tight mb-6">Sustainable Energy, <span class="text-emerald-400">Smartly Managed.</span></h1>
+                <p class="text-lg text-emerald-50">Optimize your renewable energy assets with Aruna's unified maintenance platform.</p>
             </div>
 
-            <div class="text-sm text-gray-400">
+            <div class="text-sm text-emerald-300/60">
                 &copy; {{ date('Y') }} PT Aruna Hijau Power. All rights reserved.
             </div>
         </div>
 
         <!-- Right Side: Login Form -->
-        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
             <div class="w-full max-w-md space-y-8">
                 <div class="text-center lg:text-left">
                     <div class="lg:hidden flex justify-center mb-6">
-                        <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-20 h-20 rounded-2xl shadow-xl">
+                        <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-24 h-24 rounded-2xl shadow-xl border border-gray-100">
                     </div>
-                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
-                    <p class="mt-2 text-gray-500">Please enter your credentials to access your account.</p>
+                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Sign In</h2>
+                    <p class="mt-2 text-gray-500">Access the Aruna Hijau Power Maintenance System.</p>
                 </div>
 
                 @if (session('status'))
-                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm animate-pulse">
+                    <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-xl text-sm">
                         {{ session('status') }}
                     </div>
                 @endif
@@ -73,8 +72,8 @@
                                 </svg>
                             </div>
                             <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="name@company.com">
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                                placeholder="name@arunahijaupower.com">
                         </div>
                         @error('email')
                             <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
@@ -85,7 +84,7 @@
                         <div class="flex items-center justify-between">
                             <label for="password" class="text-sm font-semibold text-gray-700">Password</label>
                             @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-xs font-bold text-blue-600 hover:text-blue-500 transition-colors">Forgot password?</a>
+                                <a href="{{ route('password.request') }}" class="text-xs font-bold text-emerald-600 hover:text-emerald-500 transition-colors">Forgot password?</a>
                             @endif
                         </div>
                         <div class="relative">
@@ -95,7 +94,7 @@
                                 </svg>
                             </div>
                             <input id="password" x-bind:type="show ? 'text' : 'password'" name="password" required
-                                class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                 placeholder="••••••••">
                             <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
                                 <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,17 +112,17 @@
                     </div>
 
                     <div class="flex items-center">
-                        <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
                         <label for="remember_me" class="ml-2 block text-sm text-gray-600">Keep me signed in</label>
                     </div>
 
-                    <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all">
+                    <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
                         Sign In
                     </button>
                 </form>
 
                 <div class="pt-8 text-center border-t border-gray-100">
-                    <p class="text-sm text-gray-500">Authorized personnel only.</p>
+                    <p class="text-sm text-gray-500 font-medium italic">Authorized Access Only</p>
                 </div>
             </div>
         </div>
