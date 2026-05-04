@@ -12,8 +12,15 @@ class SettingsController extends Controller
 {
     private function authorizeAdmin(): void
     {
-        if (auth()->user()->role !== 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'developer'])) {
             abort(403, 'Unauthorized.');
+        }
+    }
+
+    private function authorizeDeveloper(): void
+    {
+        if (auth()->user()->role !== 'developer') {
+            abort(403, 'Unauthorized. Developer access required.');
         }
     }
 
@@ -23,7 +30,39 @@ class SettingsController extends Controller
         $users = User::orderBy('name')->get();
         $roles = Role::orderBy('label')->get();
         $locations = \App\Models\Location::orderBy('name')->get();
-        return view('settings.index', compact('users', 'roles', 'locations'));
+        
+        $fieldConfigs = [];
+        if (auth()->user()->role === 'developer') {
+            $fieldConfigs = \App\Models\FieldConfiguration::orderBy('module')->orderBy('label')->get()->groupBy('module');
+        }
+
+        return view('settings.index', compact('users', 'roles', 'locations', 'fieldConfigs'));
+    }
+
+    public function updateFieldSettings(Request $request)
+    {
+        $this->authorizeDeveloper();
+        
+        $settings = $request->input('fields', []);
+        
+        // Get all configs to handle unchecked boxes (missing from request)
+        $allConfigs = \App\Models\FieldConfiguration::all();
+        
+        foreach ($allConfigs as $config) {
+            $data = $settings[$config->id] ?? [];
+            
+            $config->update([
+                'is_disabled' => isset($data['is_disabled']),
+                'is_hidden'   => isset($data['is_hidden']),
+                'is_required' => isset($data['is_required']),
+            ]);
+        }
+        
+        // Clear cache
+        \Illuminate\Support\Facades\Cache::forget("field_configs_all");
+
+        return redirect()->route('settings.index', ['tab' => 'fields'])
+            ->with('success', 'Konfigurasi field berhasil diperbarui.');
     }
 
     public function createUser()

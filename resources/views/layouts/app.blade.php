@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     @stack('styles')
 </head>
 
@@ -51,15 +52,21 @@
                     $nav = [
                         ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10', 'match' => 'dashboard', 'roles' => null],
                         ['route' => 'assets.index', 'label' => 'Assets', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => 'assets*', 'roles' => null],
-                        ['label' => 'Items', 'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7', 'match' => ['spare-parts*', 'tools*', 'consumables*'], 'roles' => null, 'sub' => [
-                            ['route' => 'tools.index', 'label' => 'Tools'],
-                            ['route' => 'spare-parts.index', 'label' => 'Sparepart'],
-                            ['route' => 'consumables.index', 'label' => 'Consumable'],
-                        ]],
+                        [
+                            'label' => 'Items',
+                            'icon' => 'M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm-9 5H7',
+                            'match' => ['spare-parts*', 'tools*', 'consumables*'],
+                            'roles' => null,
+                            'sub' => [
+                                ['route' => 'tools.index', 'label' => 'Tools'],
+                                ['route' => 'spare-parts.index', 'label' => 'Sparepart'],
+                                ['route' => 'consumables.index', 'label' => 'Consumable'],
+                            ]
+                        ],
                         ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule', 'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'match' => 'maintenance-schedules*', 'roles' => null],
                         ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
                         ['route' => 'schedule-report.index', 'label' => 'Schedule Report', 'icon' => 'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z', 'match' => 'schedule-report*', 'roles' => null],
-                        ['route' => 'work-orders.index', 'label' => 'Work Orders & Records', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
+                        ['route' => 'work-orders.index', 'label' => 'Work Orders & Report', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
                         ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M5 2h14 M5 22h14 M12 12l7-7H5l7 7zm0 0l7 7H5l7-7z', 'match' => 'timeline*', 'roles' => null],
                         ['route' => 'daily-reports.index', 'label' => 'Personal Notes', 'icon' => 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', 'match' => 'daily-reports*', 'roles' => null],
                         ['route' => 'kpi.index', 'label' => 'KPI Dashboard', 'icon' => 'M18 20V10 M12 20V4 M6 20v-6', 'match' => 'kpi*', 'roles' => null],
@@ -71,19 +78,23 @@
                             <div x-data="{ open: {{ request()->routeIs($item['match']) ? 'true' : 'false' }} }">
                                 <button @click="open = !open"
                                     class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                                  {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                                              {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                                     <div class="flex items-center gap-3">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
                                             <path d="{{ $item['icon'] }}" />
                                         </svg>
                                         <span x-show="sidebarOpen" class="truncate">{{ $item['label'] }}</span>
                                     </div>
-                                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 9-7 7-7-7"/></svg>
+                                    <svg x-show="sidebarOpen" class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''"
+                                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="m19 9-7 7-7-7" />
+                                    </svg>
                                 </button>
                                 <div x-show="open && sidebarOpen" x-transition class="mt-1 ml-9 space-y-1">
                                     @foreach($item['sub'] as $sub)
-                                        <a href="{{ route($sub['route'], $sub['params'] ?? []) }}" 
-                                           class="block px-3 py-2 rounded-lg text-xs font-bold {{ request()->routeIs($sub['route']) ? 'text-brand' : 'text-gray-500 hover:text-brand' }}">
+                                        <a href="{{ route($sub['route'], $sub['params'] ?? []) }}"
+                                            class="block px-3 py-2 rounded-lg text-xs font-bold {{ request()->routeIs($sub['route']) ? 'text-brand' : 'text-gray-500 hover:text-brand' }}">
                                             {{ $sub['label'] }}
                                         </a>
                                     @endforeach
@@ -92,7 +103,7 @@
                         @else
                             <a href="{{ route($item['route']) }}"
                                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all group
-                                                                          {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                                                                      {{ request()->routeIs($item['match']) ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path d="{{ $item['icon'] }}" />
@@ -105,7 +116,7 @@
                 @if($user->role === 'technician')
                     <a href="{{ route('work-orders.my-jobs') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                              {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                                  {{ request()->routeIs('work-orders.my-jobs') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -114,10 +125,10 @@
                         <span x-show="sidebarOpen" class="truncate">My Jobs</span>
                     </a>
                 @endif
-                @if($user->role === 'admin')
+                @if(in_array($user->role, ['admin', 'developer']))
                     <a href="{{ route('settings.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
-                                              {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
+                                                  {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path
@@ -186,17 +197,21 @@
                                 <button @click="open = !open"
                                     class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
                                     <div class="flex items-center gap-3">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
                                             <path d="{{ $item['icon'] }}" />
                                         </svg>
                                         {{ $item['label'] }}
                                     </div>
-                                    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m19 9-7 7-7-7"/></svg>
+                                    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none"
+                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="m19 9-7 7-7-7" />
+                                    </svg>
                                 </button>
                                 <div x-show="open" x-transition class="mt-1 ml-9 space-y-1">
                                     @foreach($item['sub'] as $sub)
                                         <a href="{{ route($sub['route'], $sub['params'] ?? []) }}" @click="mobileOpen=false"
-                                           class="block px-3 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-brand">
+                                            class="block px-3 py-2 rounded-lg text-xs font-bold text-gray-500 hover:text-brand">
                                             {{ $sub['label'] }}
                                         </a>
                                     @endforeach
@@ -225,7 +240,7 @@
                         My Jobs
                     </a>
                 @endif
-                @if($user->role === 'admin')
+                @if(in_array($user->role, ['admin', 'developer']))
                     <a href="{{ route('settings.index') }}" @click="mobileOpen=false"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
@@ -443,6 +458,7 @@
     </div>
 
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     <script>
         function notifBell() { return { open: false, count: 0, items: [], async load() { try { const r = await fetch('{{ route("notifications.unread") }}'); const d = await r.json(); this.items = d.notifications; this.count = d.count; } catch (e) { } } } }
         function delModal() { return { show: false, action: '', message: 'Are you sure you want to delete this item?', open(a, m) { this.action = a; this.message = m || this.message; this.show = true; } } }

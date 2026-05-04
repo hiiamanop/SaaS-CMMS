@@ -81,6 +81,17 @@ if ($oldWeeks !== null) {
                         <option value="annually"  {{ old('frequency', $s->frequency) == 'annually'  ? 'selected' : '' }}>Tahunan</option>
                     </select>
                 </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign Technicians (Multiple)</label>
+                    @php $currentTechs = $s->technicians->pluck('id')->toArray(); @endphp
+                    <select name="technicians[]" id="techSelect" multiple placeholder="Pilih teknisi..." class="w-full">
+                        @foreach($technicians as $t)
+                        <option value="{{ $t->id }}" {{ in_array($t->id, old('technicians', $currentTechs)) ? 'selected' : '' }}>
+                            {{ $t->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
                     <input type="date" name="start_date" value="{{ old('start_date', optional($s->start_date)->format('Y-m-d') ?? now()->toDateString()) }}" required
@@ -259,6 +270,12 @@ if ($oldWeeks !== null) {
 </div>
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#techSelect', {
+        plugins: ['remove_button'],
+        maxItems: null,
+    });
+});
 function toggleAllWeeks(btn) {
     const cbs = document.querySelectorAll('#weekGrid .week-cb');
     const allChecked = [...cbs].every(cb => cb.checked);

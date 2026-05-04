@@ -71,6 +71,16 @@ $oldWeeks   = old('planned_weeks', []);
                     </select>
                     @error('frequency')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign Technicians (Multiple)</label>
+                    <select name="technicians[]" id="techSelect" multiple placeholder="Pilih teknisi..." class="w-full">
+                        @foreach($technicians as $t)
+                        <option value="{{ $t->id }}" {{ collect(old('technicians'))->contains($t->id) ? 'selected' : '' }}>
+                            {{ $t->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
                     <input type="date" name="start_date" value="{{ old('start_date', request('start_date', now()->toDateString())) }}" required
@@ -239,6 +249,12 @@ $oldWeeks   = old('planned_weeks', []);
 </div>
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#techSelect', {
+        plugins: ['remove_button'],
+        maxItems: null,
+    });
+});
 function toggleAllWeeks(btn) {
     const cbs = document.querySelectorAll('#weekGrid .week-cb');
     const allChecked = [...cbs].every(cb => cb.checked);

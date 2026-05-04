@@ -41,10 +41,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign To</label>
-                            <select name="assigned_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                                <option value="">Unassigned</option>
-                                @foreach($technicians as $t)<option value="{{ $t->id }}" {{ old('assigned_to', $workOrder->assigned_to)==$t->id?'selected':'' }}>{{ $t->name }}</option>@endforeach
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign To (Multiple)</label>
+                            @php $currentAssignees = $workOrder->assignees->pluck('id')->toArray(); @endphp
+                            <select name="assigned_to[]" id="assigneeSelect" multiple placeholder="Select technicians..." class="w-full">
+                                @foreach($technicians as $t)<option value="{{ $t->id }}" {{ in_array($t->id, old('assigned_to', $currentAssignees))?'selected':'' }}>{{ $t->name }}</option>@endforeach
                             </select>
                         </div>
 
@@ -81,3 +81,14 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        new TomSelect('#assigneeSelect', {
+            plugins: ['remove_button'],
+            maxItems: null,
+        });
+    });
+</script>
+@endpush

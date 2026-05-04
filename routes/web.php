@@ -85,6 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Settings (admin only)
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('settings/fields', [SettingsController::class, 'updateFieldSettings'])->name('settings.fields.update');
     Route::get('settings/users/create', [SettingsController::class, 'createUser'])->name('settings.users.create');
     Route::post('settings/users', [SettingsController::class, 'storeUser'])->name('settings.users.store');
     Route::get('settings/users/{user}/edit', [SettingsController::class, 'editUser'])->name('settings.users.edit');
@@ -97,8 +98,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
     Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
 
-    // Daily Reports
+    // Daily Reports (Personal Notes)
     Route::resource('daily-reports', DailyReportController::class)->only(['index', 'store', 'destroy']);
+    Route::post('daily-reports/{dailyReport}/upload-photo', [DailyReportController::class, 'uploadPhoto'])->name('daily-reports.upload-photo');
+    Route::delete('daily-reports/{dailyReport}/photos/{photo}', [DailyReportController::class, 'deletePhoto'])->name('daily-reports.delete-photo');
 });
 
 require __DIR__.'/auth.php';

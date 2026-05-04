@@ -11,12 +11,31 @@
         <form action="{{ route('consumables.update', $consumable) }}" method="POST" class="space-y-5">
             @csrf @method('PUT')
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Item Code <span class="text-red-500">*</span></label><input name="item_code" value="{{ old('item_code', $consumable->item_code) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('item_code') border-red-400 @enderror">@error('item_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Name <span class="text-red-500">*</span></label><input name="name" value="{{ old('name', $consumable->name) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">@error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Category</label><input name="category" value="{{ old('category', $consumable->category) }}" placeholder="e.g. Lubrication, Cleaning" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Unit <span class="text-red-500">*</span></label><input name="unit" value="{{ old('unit', $consumable->unit) }}" required placeholder="pcs, kg, liter..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actual Qty <span class="text-red-500">*</span></label><input name="qty_actual" type="number" min="0" value="{{ old('qty_actual', $consumable->qty_actual) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Minimum Qty <span class="text-red-500">*</span></label><input name="qty_minimum" type="number" min="0" value="{{ old('qty_minimum', $consumable->qty_minimum) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                @if(!field_is_hidden('consumables', 'item_code'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Item Code @if(field_is_required('consumables', 'item_code'))<span class="text-red-500">*</span>@endif</label><input name="item_code" value="{{ old('item_code', $consumable->item_code) }}" {{ field_attributes('consumables', 'item_code') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('item_code') border-red-400 @enderror">@error('item_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
+                @endif
+
+                @if(!field_is_hidden('consumables', 'name'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Name @if(field_is_required('consumables', 'name'))<span class="text-red-500">*</span>@endif</label><input name="name" value="{{ old('name', $consumable->name) }}" {{ field_attributes('consumables', 'name') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">@error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror</div>
+                @endif
+
+                @if(!field_is_hidden('consumables', 'category'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Category @if(field_is_required('consumables', 'category'))<span class="text-red-500">*</span>@endif</label><input name="category" value="{{ old('category', $consumable->category) }}" {{ field_attributes('consumables', 'category') }} placeholder="e.g. Lubrication, Cleaning" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                @endif
+
+                @if(!field_is_hidden('consumables', 'unit'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Unit @if(field_is_required('consumables', 'unit'))<span class="text-red-500">*</span>@endif</label><input name="unit" value="{{ old('unit', $consumable->unit) }}" {{ field_attributes('consumables', 'unit') }} placeholder="pcs, kg, liter..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                @endif
+
+                @if(!field_is_hidden('consumables', 'stock'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Actual Qty @if(field_is_required('consumables', 'stock'))<span class="text-red-500">*</span>@endif</label><input name="qty_actual" type="number" min="0" value="{{ old('qty_actual', $consumable->qty_actual) }}" {{ field_attributes('consumables', 'stock') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                @endif
+
+                @if(!field_is_hidden('consumables', 'min_stock'))
+                <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Minimum Qty @if(field_is_required('consumables', 'min_stock'))<span class="text-red-500">*</span>@endif</label><input name="qty_minimum" type="number" min="0" value="{{ old('qty_minimum', $consumable->qty_minimum) }}" {{ field_attributes('consumables', 'min_stock') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                @endif
+
+                {{-- Additional fields --}}
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Unit Price (IDR)</label><input name="unit_price" type="number" step="0.01" value="{{ old('unit_price', $consumable->unit_price) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                 <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Supplier</label><input name="supplier" value="{{ old('supplier', $consumable->supplier) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                 <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1.5">Storage Location</label><input name="location" value="{{ old('location', $consumable->location) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>

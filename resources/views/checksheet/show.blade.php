@@ -159,9 +159,9 @@
     {{-- Signatures --}}
     <div class="bg-white rounded-lg border border-gray-200 p-5">
         <h3 class="font-bold text-gray-900 mb-4">Tanda Tangan</h3>
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 gap-6">
             <div class="text-center border border-gray-200 rounded-lg p-4">
-                <p class="text-xs text-gray-500 mb-2">Dibuat oleh (Teknisi ONM)</p>
+                <p class="text-xs text-gray-500 mb-2">Diinspeksi oleh (Teknisi ONM)</p>
                 <p class="font-medium text-gray-900">{{ $session->signed_by_teknisi ?? '—' }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $session->signed_date_teknisi?->format('d M Y') ?? '' }}</p>
             </div>
@@ -169,11 +169,6 @@
                 <p class="text-xs text-gray-500 mb-2">Diperiksa oleh (SPV ONM)</p>
                 <p class="font-medium text-gray-900">{{ $session->signed_by_spv ?? '—' }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $session->signed_date_spv?->format('d M Y') ?? '' }}</p>
-            </div>
-            <div class="text-center border border-gray-200 rounded-lg p-4">
-                <p class="text-xs text-gray-500 mb-2">Disetujui oleh (PM)</p>
-                <p class="font-medium text-gray-900">{{ $session->signed_by_pm ?? '—' }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ $session->signed_date_pm?->format('d M Y') ?? '' }}</p>
             </div>
         </div>
     </div>

@@ -23,7 +23,11 @@ class WorkOrderController extends Controller
         }
         if ($request->priority) $query->where('priority', $request->priority);
         if ($request->asset_id) $query->where('asset_id', $request->asset_id);
-        if ($request->assigned_to) $query->where('assigned_to', $request->assigned_to);
+        if ($request->assigned_to) {
+            $query->whereHas('assignees', function($q) use ($request) {
+                $q->where('users.id', $request->assigned_to);
+            });
+        }
         if ($request->date_from) $query->where('due_date', '>=', $request->date_from);
         if ($request->date_to) $query->where('due_date', '<=', $request->date_to);
         if ($request->search) {
@@ -67,7 +71,8 @@ class WorkOrderController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'asset_id' => 'required_if:is_external_client,0|nullable|exists:assets,id',
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_to' => 'nullable|array',
+            'assigned_to.*' => 'exists:users,id',
             'type' => 'required|in:corrective,preventive',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
@@ -85,8 +90,16 @@ class WorkOrderController extends Controller
             $validated['asset_id'] = null;
         }
         $validated['shutdown_required'] = $request->boolean('shutdown_required');
+        
+        $assigneeIds = $validated['assigned_to'] ?? [];
+        // Use first one as primary for compatibility
+        $validated['assigned_to'] = !empty($assigneeIds) ? $assigneeIds[0] : null;
 
         $workOrder = WorkOrder::create($validated);
+        
+        if (!empty($assigneeIds)) {
+            $workOrder->assignees()->sync($assigneeIds);
+        }
 
         WorkOrderActivityLog::create([
             'work_order_id' => $workOrder->id,
@@ -96,14 +109,16 @@ class WorkOrderController extends Controller
             'notes' => 'Work order created',
         ]);
 
-        if ($workOrder->assigned_to) {
-            Notification::create([
-                'user_id' => $workOrder->assigned_to,
-                'type' => 'new_wo',
-                'title' => 'New Work Order Assigned',
-                'message' => "You have been assigned Work Order {$workOrder->wo_number}: {$workOrder->title}",
-                'url' => '/work-orders/'.$workOrder->id,
-            ]);
+        if (!empty($assigneeIds)) {
+            foreach ($assigneeIds as $userId) {
+                Notification::create([
+                    'user_id' => $userId,
+                    'type' => 'new_wo',
+                    'title' => 'New Work Order Assigned',
+                    'message' => "You have been assigned Work Order {$workOrder->wo_number}: {$workOrder->title}",
+                    'url' => '/work-orders/'.$workOrder->id,
+                ]);
+            }
         }
 
         return redirect()->route('work-orders.show', $workOrder)->with('success', 'Work order created successfully.');
@@ -111,7 +126,7 @@ class WorkOrderController extends Controller
 
     public function show(WorkOrder $workOrder)
     {
-        $workOrder->load(['asset', 'assignedTo', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord']);
+        $workOrder->load(['asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord']);
         $technicians = User::where('role', 'technician')->get();
         return view('work-orders.show', compact('workOrder', 'technicians'));
     }
@@ -128,7 +143,8 @@ class WorkOrderController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'asset_id' => 'required_if:is_external_client,0|nullable|exists:assets,id',
-            'assigned_to' => 'nullable|exists:users,id',
+            'assigned_to' => 'nullable|array',
+            'assigned_to.*' => 'exists:users,id',
             'type' => 'required|in:corrective,preventive',
             'priority' => 'required|in:low,medium,high,critical',
             'due_date' => 'required|date',
@@ -144,12 +160,20 @@ class WorkOrderController extends Controller
             $validated['client_name'] = null;
         }
 
-        $oldAssignee = $workOrder->assigned_to;
+        $oldAssigneeIds = $workOrder->assignees->pluck('id')->toArray();
+        $newAssigneeIds = $validated['assigned_to'] ?? [];
+        
+        // Update primary assignee for compatibility
+        $validated['assigned_to'] = !empty($newAssigneeIds) ? $newAssigneeIds[0] : null;
+        
         $workOrder->update($validated);
+        $workOrder->assignees()->sync($newAssigneeIds);
 
-        if ($validated['assigned_to'] && $validated['assigned_to'] != $oldAssignee) {
+        $addedAssignees = array_diff($newAssigneeIds, $oldAssigneeIds);
+
+        foreach ($addedAssignees as $userId) {
             Notification::create([
-                'user_id' => $validated['assigned_to'],
+                'user_id' => $userId,
                 'type' => 'new_wo',
                 'title' => 'Work Order Assigned to You',
                 'message' => "Work Order {$workOrder->wo_number}: {$workOrder->title} has been assigned to you",
@@ -219,7 +243,9 @@ class WorkOrderController extends Controller
     public function myJobs()
     {
         $workOrders = WorkOrder::with(['asset'])
-            ->where('assigned_to', auth()->id())
+            ->whereHas('assignees', function($q) {
+                $q->where('users.id', auth()->id());
+            })
             ->whereNotIn('status', ['closed'])
             ->latest()
             ->paginate(15);

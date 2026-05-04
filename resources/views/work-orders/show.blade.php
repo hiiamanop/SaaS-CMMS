@@ -32,7 +32,7 @@ $wo = $workOrder;
             <a href="{{ route('work-orders.edit',$wo) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
             @endif
             @if($wo->status==='closed' && !$wo->maintenanceRecord)
-            <a href="{{ route('maintenance-records.create', ['work_order_id'=>$wo->id]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-green-700">Create Record</a>
+            <a href="{{ route('maintenance-records.create', ['work_order_id'=>$wo->id]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-green-700">Add Report</a>
             @endif
         </div>
     </div>
@@ -55,7 +55,7 @@ $wo = $workOrder;
                     [$wo->is_external_client ? 'Client Location' : 'Internal Asset', $wo->is_external_client ? ($wo->client_name ?: 'Unknown Client') : ($wo->asset?->name ?: '—')],
                     ['Type', ucfirst($wo->type)],
                     ['Due Date', $wo->due_date->format('M d, Y')],
-                    ['Assigned To', $wo->assignedTo?->name ?? 'Unassigned'],
+                    ['Assigned To', $wo->assignees->isNotEmpty() ? $wo->assignees->pluck('name')->implode(', ') : 'Unassigned'],
                     ['Created By', $wo->createdBy->name],
                     ['Started At', $wo->started_at ? $wo->started_at->format('M d, Y H:i') : '—'],
                     ['Completed At', $wo->completed_at ? $wo->completed_at->format('M d, Y H:i') : '—'],

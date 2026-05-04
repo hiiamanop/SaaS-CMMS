@@ -35,6 +35,7 @@ class MaintenanceSchedule extends Model
     public function asset()              { return $this->belongsTo(Asset::class); }
     public function location()           { return $this->belongsTo(Location::class); }
     public function technician()         { return $this->belongsTo(User::class, 'technician_id'); }
+    public function technicians()        { return $this->belongsToMany(User::class, 'maintenance_schedule_technicians'); }
     public function deletedBy()          { return $this->belongsTo(User::class, 'deleted_by'); }
     public function checksheetSessions() { return $this->hasMany(ChecksheetSession::class); }
     public function workOrders()         { return $this->hasMany(WorkOrder::class); }

@@ -37,7 +37,7 @@ class ToolController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tool_code'     => 'required|string|unique:tools',
+            'tool_code'     => 'nullable|string|unique:tools',
             'name'          => 'required|string|max:255',
             'category'      => 'nullable|string',
             'brand'         => 'nullable|string',
@@ -61,7 +61,7 @@ class ToolController extends Controller
     public function update(Request $request, Tool $tool)
     {
         $validated = $request->validate([
-            'tool_code'     => 'required|string|unique:tools,tool_code,' . $tool->id,
+            'tool_code'     => 'nullable|string|unique:tools,tool_code,' . $tool->id,
             'name'          => 'required|string|max:255',
             'category'      => 'nullable|string',
             'brand'         => 'nullable|string',

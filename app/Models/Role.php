@@ -9,7 +9,7 @@ class Role extends Model
     protected $fillable = ['name', 'label', 'description'];
 
     // Roles used by the system internally — cannot be deleted
-    public const PROTECTED = ['admin', 'supervisor', 'technician'];
+    public const PROTECTED = ['admin', 'supervisor', 'technician', 'developer'];
 
     public function isProtected(): bool
     {

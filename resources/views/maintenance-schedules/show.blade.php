@@ -65,7 +65,7 @@
                                 ['Lokasi Inspeksi', $s->category ?? '—', 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2', 'teal'],
                                 ['Frekuensi', ucfirst($s->frequency), 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z', 'purple'],
                                 ['Next Due Date', $s->next_due_date ? $s->next_due_date->format('d M Y') : '—', 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'red'],
-                                ['Teknisi', $s->technician?->name ?? '—', 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z', 'indigo'],
+                                ['Teknisi', $s->technicians->isNotEmpty() ? $s->technicians->pluck('name')->implode(', ') : '—', 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z', 'indigo'],
                             ];
                         @endphp
                         @foreach($details as [$label, $value, $icon, $color])
@@ -193,7 +193,7 @@
                                 <p class="text-xs font-semibold text-gray-800 line-clamp-1 mb-1">{{ $wo->title }}</p>
                                 <div class="flex items-center justify-between text-[10px] text-gray-400">
                                     <span>{{ $wo->due_date->format('d M Y') }}</span>
-                                    <span class="truncate">{{ $wo->assignedTo?->name ?? 'Unassigned' }}</span>
+                                    <span class="truncate">{{ $wo->assignees->isNotEmpty() ? $wo->assignees->pluck('name')->implode(', ') : 'Unassigned' }}</span>
                                 </div>
                             </a>
                             @endforeach
