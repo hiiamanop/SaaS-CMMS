@@ -18,7 +18,7 @@
                         @if(!field_is_hidden('assets', 'asset_code'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'asset_code', 'Asset Code') !!}</label>
-                            <input name="asset_code" value="{{ old('asset_code') }}" {{ field_attributes('assets', 'asset_code') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_code') border-red-400 @enderror">
+                            <input name="asset_code" value="{{ old('asset_code') }}" {!! field_attributes('assets', 'asset_code') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_code') border-red-400 @enderror">
                             @error('asset_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
                         @endif
@@ -26,7 +26,7 @@
                         @if(!field_is_hidden('assets', 'name'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'name', 'Asset Name') !!}</label>
-                            <input name="name" value="{{ old('name') }}" {{ field_attributes('assets', 'name') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('name') border-red-400 @enderror">
+                            <input name="name" value="{{ old('name') }}" {!! field_attributes('assets', 'name') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('name') border-red-400 @enderror">
                             @error('name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
                         @endif
@@ -34,7 +34,7 @@
                         @if(!field_is_hidden('assets', 'location_id'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'location_id', 'Select PLTS') !!}</label>
-                            <select name="location_id" {{ field_attributes('assets', 'location_id') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <select name="location_id" {!! field_attributes('assets', 'location_id') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 <option value="">— Select PLTS —</option>
                                 @foreach($pltsList as $p)
                                 <option value="{{ $p->id }}" {{ old('location_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
@@ -46,7 +46,7 @@
                         @if(!field_is_hidden('assets', 'category'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'category', 'Category') !!}</label>
-                            <input name="category" value="{{ old('category') }}" {{ field_attributes('assets', 'category') }} placeholder="e.g. Inverter, Transformer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <input name="category" value="{{ old('category') }}" {!! field_attributes('assets', 'category') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                         </div>
                         @endif
 
@@ -72,15 +72,15 @@
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Technical Specifications</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         @if(!field_is_hidden('assets', 'brand'))
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'brand', 'Brand') !!}</label><input name="brand" value="{{ old('brand') }}" {{ field_attributes('assets', 'brand') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'brand', 'Brand') !!}</label><input name="brand" value="{{ old('brand') }}" {!! field_attributes('assets', 'brand') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
 
                         @if(!field_is_hidden('assets', 'model_number'))
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'model_number', 'Model / Type') !!}</label><input name="model" value="{{ old('model') }}" {{ field_attributes('assets', 'model_number') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'model_number', 'Model / Type') !!}</label><input name="model" value="{{ old('model') }}" {!! field_attributes('assets', 'model_number') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
 
                         @if(!field_is_hidden('assets', 'serial_number'))
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'serial_number', 'Serial Number') !!}</label><input name="serial_number" value="{{ old('serial_number') }}" {{ field_attributes('assets', 'serial_number') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'serial_number', 'Serial Number') !!}</label><input name="serial_number" value="{{ old('serial_number') }}" {!! field_attributes('assets', 'serial_number') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
                     </div>
                 </div>
@@ -90,11 +90,11 @@
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Procurement & Warranty</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         @if(!field_is_hidden('assets', 'purchase_date'))
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'purchase_date', 'Purchase Date') !!}</label><input name="purchase_date" type="date" value="{{ old('purchase_date') }}" {{ field_attributes('assets', 'purchase_date') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'purchase_date', 'Purchase Date') !!}</label><input name="purchase_date" type="date" value="{{ old('purchase_date') }}" {!! field_attributes('assets', 'purchase_date') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
 
                         @if(!field_is_hidden('assets', 'warranty_expiry'))
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'warranty_expiry', 'Warranty Expiry') !!}</label><input name="warranty_expiry" type="date" value="{{ old('warranty_expiry') }}" {{ field_attributes('assets', 'warranty_expiry') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'warranty_expiry', 'Warranty Expiry') !!}</label><input name="warranty_expiry" type="date" value="{{ old('warranty_expiry') }}" {!! field_attributes('assets', 'warranty_expiry') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
                         
                         <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Purchase Price (IDR)</label><input name="purchase_price" type="number" step="0.01" value="{{ old('purchase_price') }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
@@ -109,7 +109,7 @@
                 @if(!field_is_hidden('assets', 'description'))
                 <div class="md:col-span-3">
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'description', 'Description / Technical Notes') !!}</label>
-                    <textarea name="description" rows="4" {{ field_attributes('assets', 'description') }} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description') }}</textarea>
+                    <textarea name="description" rows="4" {!! field_attributes('assets', 'description') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description') }}</textarea>
                 </div>
                 @endif
             </div>

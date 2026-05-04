@@ -12,6 +12,7 @@ if (!function_exists('get_field_config')) {
                     'is_disabled' => (bool)$item->is_disabled,
                     'is_hidden'   => (bool)$item->is_hidden,
                     'is_required' => (bool)$item->is_required,
+                    'placeholder' => $item->placeholder,
                 ]];
             })->toArray();
         });
@@ -49,6 +50,7 @@ if (!function_exists('field_attributes')) {
         $attrs = [];
         if ($config['is_disabled']) $attrs[] = 'disabled';
         if ($config['is_required']) $attrs[] = 'required';
+        if ($config['placeholder']) $attrs[] = 'placeholder="e.g. ' . htmlspecialchars($config['placeholder'], ENT_QUOTES) . '"';
         
         return implode(' ', $attrs);
     }
