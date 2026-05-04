@@ -24,8 +24,8 @@
         <!-- Left Side: Visual -->
         <div class="hidden lg:flex lg:w-1/2 login-bg flex-col justify-between p-12 text-white">
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-white rounded-xl p-1.5 shadow-lg">
-                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain">
+                <div class="w-12 h-12 bg-white rounded-xl p-0.5 shadow-lg">
+                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain rounded-lg">
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">CMMS AHP</h2>
@@ -38,8 +38,9 @@
                 <p class="text-lg text-emerald-50">Optimize your renewable energy assets with Aruna's unified maintenance platform.</p>
             </div>
 
-            <div class="text-sm text-emerald-300/60">
-                &copy; {{ date('Y') }} PT Aruna Hijau Power. All rights reserved.
+            <div class="text-sm text-emerald-300/60 flex items-center justify-between">
+                <span>&copy; {{ date('Y') }} PT Aruna Hijau Power</span>
+                <span class="text-[10px] font-bold bg-white/10 px-2 py-0.5 rounded-full uppercase tracking-widest">v{{ config('app.version') }}</span>
             </div>
         </div>
 
