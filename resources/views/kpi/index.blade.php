@@ -39,7 +39,7 @@
     <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         @php
         $cards = [
-            ['label'=>'MTTR', 'value'=>$mttr.' h', 'sub'=>'Mean Time to Repair', 'color'=>'blue',
+            ['label'=>'MTTR', 'value'=>$mttr.' h', 'sub'=>'Mean Time to Repair', 'color'=>'emerald',
              'icon'=>'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2'],
             ['label'=>'MTBF', 'value'=>$mtbf.' h', 'sub'=>'Mean Time Between Failures', 'color'=>'purple',
              'icon'=>'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2'],
@@ -52,7 +52,7 @@
             ['label'=>'Total Shutdown', 'value'=>$totalShutdownHours.' h', 'sub'=>'MR + WO dalam periode', 'color'=>'orange',
              'icon'=>'M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v4'],
         ];
-        $colorMap = ['blue'=>['bg'=>'bg-blue-50','text'=>'text-blue-700','icon'=>'text-blue-500'],'purple'=>['bg'=>'bg-purple-50','text'=>'text-purple-700','icon'=>'text-purple-500'],'green'=>['bg'=>'bg-green-50','text'=>'text-green-700','icon'=>'text-green-500'],'teal'=>['bg'=>'bg-teal-50','text'=>'text-teal-700','icon'=>'text-teal-500'],'red'=>['bg'=>'bg-red-50','text'=>'text-red-700','icon'=>'text-red-500'],'orange'=>['bg'=>'bg-orange-50','text'=>'text-orange-700','icon'=>'text-orange-500'],'yellow'=>['bg'=>'bg-yellow-50','text'=>'text-yellow-700','icon'=>'text-yellow-500']];
+        $colorMap = ['emerald'=>['bg'=>'bg-emerald-50','text'=>'text-emerald-700','icon'=>'text-emerald-500'],'blue'=>['bg'=>'bg-blue-50','text'=>'text-blue-700','icon'=>'text-blue-500'],'purple'=>['bg'=>'bg-purple-50','text'=>'text-purple-700','icon'=>'text-purple-500'],'green'=>['bg'=>'bg-green-50','text'=>'text-green-700','icon'=>'text-green-500'],'teal'=>['bg'=>'bg-teal-50','text'=>'text-teal-700','icon'=>'text-teal-500'],'red'=>['bg'=>'bg-red-50','text'=>'text-red-700','icon'=>'text-red-500'],'orange'=>['bg'=>'bg-orange-50','text'=>'text-orange-700','icon'=>'text-orange-500'],'yellow'=>['bg'=>'bg-yellow-50','text'=>'text-yellow-700','icon'=>'text-yellow-500']];
         @endphp
 
         @foreach($cards as $card)
@@ -123,10 +123,10 @@ new Chart(document.getElementById('chartMonthlyWo'), {
     data: {
         labels,
         datasets: [
-            { label: 'Open', data: monthlyData.map(d => d.open), backgroundColor: '#3b82f6' },
+            { label: 'Open', data: monthlyData.map(d => d.open), backgroundColor: '#10b981' },
             { label: 'In Progress', data: monthlyData.map(d => d.in_progress), backgroundColor: '#f59e0b' },
             { label: 'Pending Review', data: monthlyData.map(d => d.pending_review), backgroundColor: '#8b5cf6' },
-            { label: 'Closed', data: monthlyData.map(d => d.closed), backgroundColor: '#10b981' },
+            { label: 'Closed', data: monthlyData.map(d => d.closed), backgroundColor: '#059669' },
         ]
     },
     options: {
@@ -147,7 +147,7 @@ new Chart(document.getElementById('chartPriority'), {
         labels: ['Low', 'Medium', 'High', 'Critical'],
         datasets: [{
             data: [byPriority.low, byPriority.medium, byPriority.high, byPriority.critical],
-            backgroundColor: ['#6b7280', '#3b82f6', '#f59e0b', '#ef4444'],
+            backgroundColor: ['#6b7280', '#10b981', '#f59e0b', '#ef4444'],
             borderWidth: 2,
             borderColor: '#fff',
         }]
@@ -170,8 +170,8 @@ new Chart(document.getElementById('chartMttr'), {
         datasets: [{
             label: 'MTTR (h)',
             data: mttrTrend.map(d => d.value),
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59,130,246,0.08)',
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.08)',
             fill: true,
             tension: 0.3,
             pointRadius: 4,
