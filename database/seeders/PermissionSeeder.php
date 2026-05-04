@@ -33,23 +33,27 @@ class PermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
+        // Create/Update roles
+        $admin      = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin', 'guard_name' => 'web']);
+        $developer  = Role::firstOrCreate(['name' => 'developer'], ['label' => 'Developer', 'guard_name' => 'web']);
+        $superAdmin = Role::firstOrCreate(['name' => 'super-admin'], ['label' => 'Super Admin', 'guard_name' => 'web']);
+        $supervisor = Role::firstOrCreate(['name' => 'supervisor'], ['label' => 'Supervisor', 'guard_name' => 'web']);
+        $technician = Role::firstOrCreate(['name' => 'technician'], ['label' => 'Technician', 'guard_name' => 'web']);
+        $pm         = Role::firstOrCreate(['name' => 'pm'], ['label' => 'Project Manager', 'guard_name' => 'web']);
+
         // Assign permissions to roles
-        $admin = Role::where('name', 'admin')->first();
         if ($admin) {
             $admin->syncPermissions(Permission::all());
         }
 
-        $developer = Role::where('name', 'developer')->first();
         if ($developer) {
             $developer->syncPermissions(Permission::all());
         }
 
-        $superAdmin = Role::where('name', 'super-admin')->first();
         if ($superAdmin) {
             $superAdmin->syncPermissions(Permission::all());
         }
 
-        $supervisor = Role::where('name', 'supervisor')->first();
         if ($supervisor) {
             $supervisor->syncPermissions([
                 'view-assets', 'view-consumables', 'view-tools', 'view-spare-parts',
@@ -57,7 +61,6 @@ class PermissionSeeder extends Seeder
             ]);
         }
 
-        $technician = Role::where('name', 'technician')->first();
         if ($technician) {
             $technician->syncPermissions([
                 'view-assets', 'view-consumables', 'view-tools', 'view-spare-parts',

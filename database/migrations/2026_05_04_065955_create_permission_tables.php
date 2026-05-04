@@ -35,6 +35,7 @@ return new class extends Migration
         /**
          * See `docs/prerequisites.md` for suggested lengths on 'name' and 'guard_name' if "1071 Specified key was too long" errors are encountered.
          */
+        Schema::dropIfExists($tableNames['roles']); // Drop old custom roles table
         Schema::create($tableNames['roles'], static function (Blueprint $table) use ($teams, $columnNames) {
             $table->id(); // role id
             if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
@@ -42,6 +43,8 @@ return new class extends Migration
                 $table->index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
             }
             $table->string('name');
+            $table->string('label')->nullable();
+            $table->text('description')->nullable();
             $table->string('guard_name');
             $table->timestamps();
             if ($teams || config('permission.testing')) {
