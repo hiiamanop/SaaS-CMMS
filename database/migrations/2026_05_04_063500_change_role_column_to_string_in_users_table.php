@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop check constraint for Postgres if it exists
+        if (config('database.default') === 'pgsql') {
+            \DB::statement('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->string('role')->change();
         });

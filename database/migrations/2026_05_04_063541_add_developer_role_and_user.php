@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop check constraint for Postgres if it exists (fix for SQLSTATE[23514])
+        if (config('database.default') === 'pgsql') {
+            \DB::statement('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
+        }
+
         // Insert Role if not exists
         \DB::table('roles')->updateOrInsert(
             ['name' => 'developer'],
