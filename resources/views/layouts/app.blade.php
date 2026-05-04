@@ -125,7 +125,7 @@
                         <span x-show="sidebarOpen" class="truncate">My Jobs</span>
                     </a>
                 @endif
-                @if(in_array($user->role, ['admin', 'developer']))
+                @if(in_array($user->role, ['admin', 'developer', 'super-admin']))
                     <a href="{{ route('settings.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all
                                                   {{ request()->routeIs('settings*') ? 'bg-brand-50/80 text-brand shadow-sm' : 'text-gray-500 hover:bg-brand-50 hover:text-brand' }}">
@@ -240,7 +240,7 @@
                         My Jobs
                     </a>
                 @endif
-                @if(in_array($user->role, ['admin', 'developer']))
+                @if(in_array($user->role, ['admin', 'developer', 'super-admin']))
                     <a href="{{ route('settings.index') }}" @click="mobileOpen=false"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-brand-50 hover:text-brand transition-all">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"

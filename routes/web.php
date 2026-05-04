@@ -81,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Schedule Report
     Route::get('schedule-report', [ScheduleReportController::class, 'index'])->name('schedule-report.index');
+    Route::post('schedule-report/override', [ScheduleReportController::class, 'overrideOnTime'])->name('schedule-report.override');
     Route::get('schedule-report/pdf/{tab}', [ScheduleReportController::class, 'exportPdf'])->name('schedule-report.pdf');
 
     // Settings (admin only)

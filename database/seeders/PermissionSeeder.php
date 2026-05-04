@@ -44,6 +44,11 @@ class PermissionSeeder extends Seeder
             $developer->syncPermissions(Permission::all());
         }
 
+        $superAdmin = Role::where('name', 'super-admin')->first();
+        if ($superAdmin) {
+            $superAdmin->syncPermissions(Permission::all());
+        }
+
         $supervisor = Role::where('name', 'supervisor')->first();
         if ($supervisor) {
             $supervisor->syncPermissions([

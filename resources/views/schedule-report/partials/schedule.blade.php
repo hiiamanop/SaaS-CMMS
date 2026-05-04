@@ -114,7 +114,7 @@ $now = \Carbon\Carbon::now();
 
                         $isDone    = $completedWO || $completedSession;
                         $doneAt    = $completedWO?->completed_at ?? $completedSession?->submitted_at;
-                        $isOnTime  = $doneAt && $doneAt->lte($weekEnd);
+                        $isOnTime  = ($doneAt && $doneAt->lte($weekEnd)) || ($completedWO?->override_on_time) || ($completedSession?->override_on_time);
                     @endphp
                     <td class="border border-gray-300 px-0.5 py-1 text-center">
                         @if($rowType === 'Renc.')
@@ -125,7 +125,21 @@ $now = \Carbon\Carbon::now();
                             @if($isPlanned && $isDone && $isOnTime)
                                 <span class="text-green-600 font-bold" title="Selesai tepat waktu">✓</span>
                             @elseif($isPlanned && $isDone && !$isOnTime)
-                                <span class="text-orange-500 font-bold" title="Selesai terlambat">✓</span>
+                                <div class="relative group inline-block">
+                                    <span class="text-orange-500 font-bold cursor-help" title="Selesai terlambat">✓</span>
+                                    @if(auth()->user()->role === 'super-admin')
+                                    <div class="absolute hidden group-hover:block left-1/2 -translate-x-1/2 bottom-full mb-1 z-20">
+                                        <form action="{{ route('schedule-report.override') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="type" value="{{ $completedWO ? 'wo' : 'session' }}">
+                                            <input type="hidden" name="id" value="{{ $completedWO?->id ?? $completedSession?->id }}">
+                                            <button type="submit" class="bg-white border border-gray-200 px-2 py-1 rounded shadow-sm text-[10px] text-green-600 hover:bg-green-50 whitespace-nowrap font-bold">
+                                                Set Hijau
+                                            </button>
+                                        </form>
+                                    </div>
+                                    @endif
+                                </div>
                             @elseif($isPlanned && !$isDone && $isPast && $isStarted)
                                 <span class="text-red-600 font-bold" title="Terlewat / belum dikerjakan">✗</span>
                             @elseif($isPlanned && !$isDone && !$isStarted)
