@@ -28,15 +28,20 @@ class SettingsController extends Controller
     {
         $this->authorizeAdmin();
         $users = User::orderBy('name')->get();
-        $roles = Role::orderBy('label')->get();
+        $roles = Role::with('permissions')->orderBy('label')->get();
         $locations = \App\Models\Location::orderBy('name')->get();
+        
+        $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get()->groupBy(function($perm) {
+            $parts = explode('-', $perm->name);
+            return end($parts);
+        });
         
         $fieldConfigs = [];
         if (auth()->user()->role === 'developer') {
             $fieldConfigs = \App\Models\FieldConfiguration::orderBy('module')->orderBy('label')->get()->groupBy('module');
         }
 
-        return view('settings.index', compact('users', 'roles', 'locations', 'fieldConfigs'));
+        return view('settings.index', compact('users', 'roles', 'locations', 'fieldConfigs', 'permissions'));
     }
 
     public function updateFieldSettings(Request $request)
@@ -213,6 +218,17 @@ class SettingsController extends Controller
         $role->delete();
         return redirect()->route('settings.index', ['tab' => 'roles'])
             ->with('success', 'Role berhasil dihapus.');
+    }
+
+    public function updateRolePermissions(Request $request, Role $role)
+    {
+        $this->authorizeAdmin();
+        
+        $permissions = $request->input('permissions', []);
+        $role->syncPermissions($permissions);
+        
+        return redirect()->route('settings.index', ['tab' => 'roles'])
+            ->with('success', 'Akses Role "' . $role->label . '" berhasil diperbarui.');
     }
 
     // ─── Lokasi PLTS CRUD ───────────────────────────────────────────────────

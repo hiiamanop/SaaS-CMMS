@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('settings/users/{user}', [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
     Route::post('settings/roles', [SettingsController::class, 'storeRole'])->name('settings.roles.store');
     Route::put('settings/roles/{role}', [SettingsController::class, 'updateRole'])->name('settings.roles.update');
+    Route::put('settings/roles/{role}/permissions', [SettingsController::class, 'updateRolePermissions'])->name('settings.roles.permissions');
     Route::delete('settings/roles/{role}', [SettingsController::class, 'destroyRole'])->name('settings.roles.destroy');
     Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');

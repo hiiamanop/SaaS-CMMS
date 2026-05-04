@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null }">
+<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null, editingPermissions: null }">
 
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -214,6 +214,11 @@
                                 </div>
                             </form>
                             <div class="flex items-center justify-end gap-2" x-show="!editing">
+                                <button type="button" @click="editingPermissions = (editingPermissions === {{ $role->id }} ? null : {{ $role->id }})"
+                                        :class="editingPermissions === {{ $role->id }} ? 'bg-brand text-gray-900' : 'text-gray-600 hover:text-gray-900 border border-gray-200'"
+                                        class="text-sm px-3 py-1.5 rounded-lg transition-colors">
+                                    Akses
+                                </button>
                                 <button type="button" @click="editing=true"
                                         class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
@@ -224,6 +229,43 @@
                                     Hapus
                                 </button>
                                 @endif
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- Permission Settings --}}
+                    <tr x-show="editingPermissions === {{ $role->id }}" x-cloak>
+                        <td colspan="5" class="p-0">
+                            <div class="p-6 bg-gray-50 border-t border-b border-gray-200">
+                                <form action="{{ route('settings.roles.permissions', $role) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                        @foreach($permissions as $category => $perms)
+                                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-3 border-b border-gray-50 pb-2">{{ $category }}</h4>
+                                            <div class="space-y-2">
+                                                @foreach($perms as $p)
+                                                <label class="flex items-center gap-2 cursor-pointer group">
+                                                    <input type="checkbox" name="permissions[]" value="{{ $p->name }}" 
+                                                        {{ $role->hasPermissionTo($p->name) ? 'checked' : '' }}
+                                                        class="rounded border-gray-300 text-brand focus:ring-brand">
+                                                    <span class="text-sm text-gray-600 group-hover:text-gray-900">
+                                                        {{ ucwords(str_replace(['-', $category], [' ', ''], $p->name)) }}
+                                                    </span>
+                                                </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-6 flex justify-end gap-3">
+                                        <button type="button" @click="editingPermissions = null" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Batal</button>
+                                        <button type="submit" class="px-5 py-2 bg-brand-dark text-white text-sm font-bold rounded-lg shadow-md hover:bg-gray-700 transition-all flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                                            Simpan Akses {{ $role->label }}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </td>
                     </tr>

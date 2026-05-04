@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+class Role extends SpatieRole
 {
-    protected $fillable = ['name', 'label', 'description'];
+    protected $fillable = ['name', 'guard_name', 'label', 'description'];
 
     // Roles used by the system internally — cannot be deleted
     public const PROTECTED = ['admin', 'supervisor', 'technician', 'developer'];
