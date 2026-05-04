@@ -23,10 +23,10 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin(): bool { return $this->role === 'admin'; }
+    public function isAdmin(): bool { return in_array($this->role, ['admin', 'developer', 'super-admin']); }
     public function isSupervisor(): bool { return $this->role === 'supervisor'; }
     public function isTechnician(): bool { return $this->role === 'technician'; }
-    public function isAdminOrSupervisor(): bool { return in_array($this->role, ['admin', 'supervisor']); }
+    public function isAdminOrSupervisor(): bool { return in_array($this->role, ['admin', 'supervisor', 'developer', 'super-admin']); }
 
     public function location() { return $this->belongsTo(Location::class); }
 

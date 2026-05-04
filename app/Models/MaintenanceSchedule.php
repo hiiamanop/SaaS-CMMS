@@ -142,11 +142,19 @@ class MaintenanceSchedule extends Model
                 break;
 
             case 'triwulan':
-                $periodParams = [['quarter' => 1], ['quarter' => 2], ['quarter' => 3], ['quarter' => 4]];
+                $plannedQuarters = collect($this->planned_weeks ?? [])->pluck('month')->unique()->sort()->values();
+                $quarters = $plannedQuarters->isNotEmpty() ? $plannedQuarters->all() : range(1, 4);
+                foreach ($quarters as $q) {
+                    $periodParams[] = ['quarter' => $q];
+                }
                 break;
+
             case 'quarterly':
-                $periodParams[] = ['semester' => 1];
-                $periodParams[] = ['semester' => 2];
+                $plannedSemesters = collect($this->planned_weeks ?? [])->pluck('month')->unique()->sort()->values();
+                $semesters = $plannedSemesters->isNotEmpty() ? $plannedSemesters->all() : range(1, 2);
+                foreach ($semesters as $s) {
+                    $periodParams[] = ['semester' => $s];
+                }
                 break;
 
             case 'annually':
