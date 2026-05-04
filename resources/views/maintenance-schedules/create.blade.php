@@ -22,7 +22,7 @@ $oldWeeks   = old('planned_weeks', []);
         </div>
     </div>
 
-    <form action="{{ route('maintenance-schedules.store') }}" method="POST" class="space-y-6" x-data="{ shutdown: {{ old('shutdown_required') ? 'true' : 'false' }} }">
+    <form action="{{ route('maintenance-schedules.store') }}" method="POST" class="space-y-6" x-data="{ shutdown: {{ old('shutdown_required') ? 'true' : 'false' }}, frequency: '{{ old('frequency', 'monthly') }}' }">
         @csrf
 
         {{-- Informasi Alat --}}
@@ -62,14 +62,25 @@ $oldWeeks   = old('planned_weeks', []);
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Frekuensi <span class="text-red-500">*</span></label>
-                    <select name="frequency" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('frequency') border-red-400 @enderror">
-                        <option value="weekly"    {{ old('frequency')=='weekly'    ? 'selected' : '' }}>Mingguan</option>
-                        <option value="monthly"   {{ old('frequency','monthly')=='monthly'   ? 'selected' : '' }}>Bulanan</option>
-                        <option value="triwulan"  {{ old('frequency')=='triwulan'  ? 'selected' : '' }}>Triwulan</option>
-                        <option value="quarterly" {{ old('frequency')=='quarterly' ? 'selected' : '' }}>Semesteran</option>
-                        <option value="annually"  {{ old('frequency')=='annually'  ? 'selected' : '' }}>Tahunan</option>
+                    <select name="frequency" required x-model="frequency"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('frequency') border-red-400 @enderror">
+                        <option value="weekly">Mingguan</option>
+                        <option value="monthly">Bulanan</option>
+                        <option value="triwulan">Triwulan</option>
+                        <option value="quarterly">Semesteran</option>
+                        <option value="annually">Tahunan</option>
                     </select>
                     @error('frequency')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign Technicians (Multiple)</label>
+                    <select name="technicians[]" id="techSelect" multiple placeholder="Pilih teknisi..." class="w-full">
+                        @foreach($technicians as $t)
+                        <option value="{{ $t->id }}" {{ collect(old('technicians'))->contains($t->id) ? 'selected' : '' }}>
+                            {{ $t->name }}
+                        </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai <span class="text-red-500">*</span></label>
@@ -175,19 +186,21 @@ $oldWeeks   = old('planned_weeks', []);
         </div>
 
         {{-- Grid Jadwal Minggu --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-3" x-show="frequency !== 'annually'">
             <div class="flex items-center justify-between flex-wrap gap-2">
-                <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Jadwal Minggu dalam Setahun</h2>
-                <div class="flex items-center gap-2">
-                    <p class="text-xs text-gray-400 hidden sm:block">Klik header baris/kolom untuk pilih semua di baris/kolom tersebut</p>
-                    <button type="button" id="btnCheckAllWeeks" onclick="toggleAllWeeks(this)"
+                <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Jadwal Pelaksanaan</h2>
+                <div class="flex items-center gap-2" x-show="frequency === 'weekly' || frequency === 'monthly'">
+                    <p class="text-xs text-gray-400 hidden sm:block">Klik header untuk pilih semua</p>
+                    <button type="button" onclick="toggleAllWeeks(this)"
                             class="text-xs px-2.5 py-1 bg-blue-50 text-brand hover:bg-blue-100 rounded-md border border-blue-200 font-medium whitespace-nowrap">
                         Ceklis Semua
                     </button>
                 </div>
             </div>
             @error('planned_weeks')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
-            <div class="overflow-x-auto">
+
+            {{-- Table Weekly --}}
+            <div class="overflow-x-auto" x-show="frequency === 'weekly'">
                 <table id="weekGrid" class="text-xs border-collapse w-full" style="min-width:680px">
                     <thead>
                         <tr class="bg-gray-100">
@@ -217,11 +230,86 @@ $oldWeeks   = old('planned_weeks', []);
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-gray-400 sm:hidden">Klik header baris/kolom untuk pilih semua di baris/kolom tersebut</p>
+
+            {{-- Table Monthly --}}
+            <div class="overflow-x-auto" x-show="frequency === 'monthly'">
+                <table class="text-xs border-collapse w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            @foreach($months as $idx => $m)
+                            <th class="border border-gray-300 px-1 py-1.5 text-center font-semibold">{{ $m }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @foreach(range(1,12) as $month)
+                            @php $key = $month.'_1'; $checked = isset($oldWeeks[$key]); @endphp
+                            <td class="border border-gray-300 px-1 py-4 text-center">
+                                <input type="checkbox" name="planned_weeks[{{ $key }}]" value="1"
+                                       {{ $checked ? 'checked' : '' }}
+                                       data-month="{{ $month }}"
+                                       class="week-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer">
+                            </td>
+                            @endforeach
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Table Triwulan --}}
+            <div class="overflow-x-auto" x-show="frequency === 'triwulan'">
+                <table class="text-xs border-collapse w-full max-w-md">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Q1 (Jan-Mar)</th>
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Q2 (Apr-Jun)</th>
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Q3 (Jul-Sep)</th>
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Q4 (Okt-Des)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @foreach(range(1,4) as $q)
+                            @php $key = $q.'_1'; $checked = isset($oldWeeks[$key]); @endphp
+                            <td class="border border-gray-300 px-4 py-4 text-center">
+                                <input type="checkbox" name="planned_weeks[{{ $key }}]" value="1"
+                                       {{ $checked ? 'checked' : '' }}
+                                       class="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer">
+                            </td>
+                            @endforeach
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Table Semester --}}
+            <div class="overflow-x-auto" x-show="frequency === 'quarterly'">
+                <table class="text-xs border-collapse w-full max-w-xs">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Semester 1</th>
+                            <th class="border border-gray-300 px-4 py-1.5 text-center font-semibold">Semester 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @foreach(range(1,2) as $s)
+                            @php $key = $s.'_1'; $checked = isset($oldWeeks[$key]); @endphp
+                            <td class="border border-gray-300 px-4 py-4 text-center">
+                                <input type="checkbox" name="planned_weeks[{{ $key }}]" value="1"
+                                       {{ $checked ? 'checked' : '' }}
+                                       class="w-5 h-5 rounded border-gray-300 text-brand focus:ring-brand cursor-pointer">
+                            </td>
+                            @endforeach
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Catatan --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-10 mt-8">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Catatan</label>
             <textarea name="notes" rows="3" placeholder="Catatan tambahan..."
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('notes') }}</textarea>
@@ -239,6 +327,12 @@ $oldWeeks   = old('planned_weeks', []);
 </div>
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#techSelect', {
+        plugins: ['remove_button'],
+        maxItems: null,
+    });
+});
 function toggleAllWeeks(btn) {
     const cbs = document.querySelectorAll('#weekGrid .week-cb');
     const allChecked = [...cbs].every(cb => cb.checked);

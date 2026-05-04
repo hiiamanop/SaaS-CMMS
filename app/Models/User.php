@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = ['name', 'email', 'password', 'role', 'location_id', 'phone', 'avatar', 'is_active'];
     protected $hidden = ['password', 'remember_token'];
@@ -21,10 +23,10 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin(): bool { return $this->role === 'admin'; }
+    public function isAdmin(): bool { return in_array($this->role, ['admin', 'developer', 'super-admin']); }
     public function isSupervisor(): bool { return $this->role === 'supervisor'; }
     public function isTechnician(): bool { return $this->role === 'technician'; }
-    public function isAdminOrSupervisor(): bool { return in_array($this->role, ['admin', 'supervisor']); }
+    public function isAdminOrSupervisor(): bool { return in_array($this->role, ['admin', 'supervisor', 'developer', 'super-admin']); }
 
     public function location() { return $this->belongsTo(Location::class); }
 

@@ -73,13 +73,27 @@
 
     {{-- Filters --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-        <form method="GET" class="flex flex-wrap gap-3">
-            <input name="date_from" type="date" value="{{ request('date_from') }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-            <input name="date_to" type="date" value="{{ request('date_to') }}"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-            <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium">Filter</button>
-            <a href="{{ route('timeline.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Reset</a>
+        <form method="GET" class="flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[200px]">
+                <input name="search" type="text" value="{{ request('search') }}" placeholder="Search ID, Title, Asset..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            </div>
+            <select name="work_type" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand bg-white">
+                <option value="all">All Types</option>
+                <option value="work_order" {{ request('work_type') === 'work_order' ? 'selected' : '' }}>Work Orders</option>
+                <option value="maint_schedule" {{ request('work_type') === 'maint_schedule' ? 'selected' : '' }}>Maint. Schedules</option>
+            </select>
+            <div class="flex items-center gap-2">
+                <input name="date_from" type="date" value="{{ request('date_from') }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                <span class="text-gray-400 text-sm">to</span>
+                <input name="date_to" type="date" value="{{ request('date_to') }}"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium">Filter</button>
+                <a href="{{ route('timeline.index') }}" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Reset</a>
+            </div>
         </form>
     </div>
 

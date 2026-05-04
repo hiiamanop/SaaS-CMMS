@@ -114,7 +114,7 @@ $now = \Carbon\Carbon::now();
 
                         $isDone    = $completedWO || $completedSession;
                         $doneAt    = $completedWO?->completed_at ?? $completedSession?->submitted_at;
-                        $isOnTime  = $doneAt && $doneAt->lte($weekEnd);
+                        $isOnTime  = ($doneAt && $doneAt->lte($weekEnd)) || ($completedWO?->override_on_time) || ($completedSession?->override_on_time);
                     @endphp
                     <td class="border border-gray-300 px-0.5 py-1 text-center">
                         @if($rowType === 'Renc.')
@@ -125,7 +125,16 @@ $now = \Carbon\Carbon::now();
                             @if($isPlanned && $isDone && $isOnTime)
                                 <span class="text-green-600 font-bold" title="Selesai tepat waktu">✓</span>
                             @elseif($isPlanned && $isDone && !$isOnTime)
-                                <span class="text-orange-500 font-bold" title="Selesai terlambat">✓</span>
+                                @if(auth()->user()->role === 'super-admin')
+                                    <button type="button" 
+                                            onclick="confirmOverride('{{ $completedWO ? 'wo' : 'session' }}', {{ $completedWO?->id ?? $completedSession?->id }})"
+                                            class="text-orange-500 font-bold hover:scale-125 transition-transform cursor-pointer" 
+                                            title="Klik untuk Set Hijau (Admin Only)">
+                                        ✓
+                                    </button>
+                                @else
+                                    <span class="text-orange-500 font-bold" title="Selesai terlambat">✓</span>
+                                @endif
                             @elseif($isPlanned && !$isDone && $isPast && $isStarted)
                                 <span class="text-red-600 font-bold" title="Terlewat / belum dikerjakan">✗</span>
                             @elseif($isPlanned && !$isDone && !$isStarted)
@@ -182,3 +191,32 @@ $now = \Carbon\Carbon::now();
         </span>
     </div>
 </div>
+
+@if(auth()->user()->role === 'super-admin')
+<form id="overrideForm" action="{{ route('schedule-report.override') }}" method="POST" style="display:none;">
+    @csrf
+    <input type="hidden" name="type" id="overrideType">
+    <input type="hidden" name="id" id="overrideId">
+</form>
+
+<script>
+function confirmOverride(type, id) {
+    Swal.fire({
+        title: 'Set Hijau?',
+        text: "Apakah Anda ingin mengubah status laporan ini menjadi Tepat Waktu (Hijau) secara manual?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Set Hijau!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('overrideType').value = type;
+            document.getElementById('overrideId').value = id;
+            document.getElementById('overrideForm').submit();
+        }
+    })
+}
+</script>
+@endif

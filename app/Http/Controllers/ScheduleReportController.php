@@ -75,4 +75,21 @@ class ScheduleReportController extends Controller
 
         return $pdf->download($filename);
     }
+    public function overrideOnTime(Request $request)
+    {
+        if (auth()->user()->role !== 'super-admin') {
+            abort(403);
+        }
+
+        $type = $request->input('type');
+        $id   = $request->input('id');
+
+        if ($type === 'wo') {
+            WorkOrder::where('id', $id)->update(['override_on_time' => true]);
+        } else {
+            ChecksheetSession::where('id', $id)->update(['override_on_time' => true]);
+        }
+
+        return back()->with('success', 'Status jadwal berhasil diubah menjadi Tepat Waktu.');
+    }
 }

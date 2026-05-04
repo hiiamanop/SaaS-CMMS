@@ -16,8 +16,8 @@
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Basic Information</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Asset Code <span class="text-red-500">*</span></label>
-                            <input name="asset_code" value="{{ old('asset_code', $asset->asset_code) }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_code') border-red-400 @enderror">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Asset Code</label>
+                            <input name="asset_code" value="{{ old('asset_code', $asset->asset_code) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_code') border-red-400 @enderror">
                             @error('asset_code')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>

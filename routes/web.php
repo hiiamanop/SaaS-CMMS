@@ -81,10 +81,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Schedule Report
     Route::get('schedule-report', [ScheduleReportController::class, 'index'])->name('schedule-report.index');
+    Route::post('schedule-report/override', [ScheduleReportController::class, 'overrideOnTime'])->name('schedule-report.override');
     Route::get('schedule-report/pdf/{tab}', [ScheduleReportController::class, 'exportPdf'])->name('schedule-report.pdf');
 
     // Settings (admin only)
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('settings/fields', [SettingsController::class, 'updateFieldSettings'])->name('settings.fields.update');
     Route::get('settings/users/create', [SettingsController::class, 'createUser'])->name('settings.users.create');
     Route::post('settings/users', [SettingsController::class, 'storeUser'])->name('settings.users.store');
     Route::get('settings/users/{user}/edit', [SettingsController::class, 'editUser'])->name('settings.users.edit');
@@ -92,13 +94,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('settings/users/{user}', [SettingsController::class, 'destroyUser'])->name('settings.users.destroy');
     Route::post('settings/roles', [SettingsController::class, 'storeRole'])->name('settings.roles.store');
     Route::put('settings/roles/{role}', [SettingsController::class, 'updateRole'])->name('settings.roles.update');
+    Route::put('settings/roles/{role}/permissions', [SettingsController::class, 'updateRolePermissions'])->name('settings.roles.permissions');
     Route::delete('settings/roles/{role}', [SettingsController::class, 'destroyRole'])->name('settings.roles.destroy');
     Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
     Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
 
-    // Daily Reports
+    // Daily Reports (Personal Notes)
     Route::resource('daily-reports', DailyReportController::class)->only(['index', 'store', 'destroy']);
+    Route::post('daily-reports/{dailyReport}/upload-photo', [DailyReportController::class, 'uploadPhoto'])->name('daily-reports.upload-photo');
+    Route::delete('daily-reports/{dailyReport}/photos/{photo}', [DailyReportController::class, 'deletePhoto'])->name('daily-reports.delete-photo');
 });
 
 require __DIR__.'/auth.php';

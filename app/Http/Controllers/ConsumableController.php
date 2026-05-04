@@ -36,7 +36,7 @@ class ConsumableController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'item_code'   => 'required|string|unique:consumables',
+            'item_code'   => 'nullable|string|unique:consumables',
             'name'        => 'required|string|max:255',
             'category'    => 'nullable|string',
             'unit'        => 'required|string',
@@ -61,7 +61,7 @@ class ConsumableController extends Controller
     public function update(Request $request, Consumable $consumable)
     {
         $validated = $request->validate([
-            'item_code'   => 'required|string|unique:consumables,item_code,' . $consumable->id,
+            'item_code'   => 'nullable|string|unique:consumables,item_code,' . $consumable->id,
             'name'        => 'required|string|max:255',
             'category'    => 'nullable|string',
             'unit'        => 'required|string',

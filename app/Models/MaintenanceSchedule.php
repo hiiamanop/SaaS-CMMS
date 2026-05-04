@@ -35,6 +35,7 @@ class MaintenanceSchedule extends Model
     public function asset()              { return $this->belongsTo(Asset::class); }
     public function location()           { return $this->belongsTo(Location::class); }
     public function technician()         { return $this->belongsTo(User::class, 'technician_id'); }
+    public function technicians()        { return $this->belongsToMany(User::class, 'maintenance_schedule_technicians'); }
     public function deletedBy()          { return $this->belongsTo(User::class, 'deleted_by'); }
     public function checksheetSessions() { return $this->hasMany(ChecksheetSession::class); }
     public function workOrders()         { return $this->hasMany(WorkOrder::class); }
@@ -141,11 +142,19 @@ class MaintenanceSchedule extends Model
                 break;
 
             case 'triwulan':
-                $periodParams = [['quarter' => 1], ['quarter' => 2], ['quarter' => 3], ['quarter' => 4]];
+                $plannedQuarters = collect($this->planned_weeks ?? [])->pluck('month')->unique()->sort()->values();
+                $quarters = $plannedQuarters->isNotEmpty() ? $plannedQuarters->all() : range(1, 4);
+                foreach ($quarters as $q) {
+                    $periodParams[] = ['quarter' => $q];
+                }
                 break;
+
             case 'quarterly':
-                $periodParams[] = ['semester' => 1];
-                $periodParams[] = ['semester' => 2];
+                $plannedSemesters = collect($this->planned_weeks ?? [])->pluck('month')->unique()->sort()->values();
+                $semesters = $plannedSemesters->isNotEmpty() ? $plannedSemesters->all() : range(1, 2);
+                foreach ($semesters as $s) {
+                    $periodParams[] = ['semester' => $s];
+                }
                 break;
 
             case 'annually':

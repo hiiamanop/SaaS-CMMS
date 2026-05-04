@@ -15,6 +15,7 @@ class ChecksheetSession extends Model
         'signed_by_teknisi', 'signed_date_teknisi',
         'signed_by_spv', 'signed_date_spv',
         'signed_by_pm', 'signed_date_pm',
+        'override_on_time',
     ];
 
     protected $casts = [

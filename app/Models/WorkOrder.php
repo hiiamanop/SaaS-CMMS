@@ -15,7 +15,7 @@ class WorkOrder extends Model
         'assigned_to', 'assigned_to_external', 'created_by',
         'maintenance_schedule_id', 'type', 'priority', 'status', 'order_date',
         'due_date', 'start_date', 'started_at', 'completed_at', 'description', 'notes',
-        'shutdown_required',
+        'shutdown_required', 'override_on_time',
     ];
 
     protected function casts(): array
@@ -28,6 +28,7 @@ class WorkOrder extends Model
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
             'shutdown_required' => 'boolean',
+            'override_on_time' => 'boolean',
         ];
     }
 

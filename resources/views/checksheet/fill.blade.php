@@ -174,7 +174,7 @@
             <div class="grid grid-cols-1 gap-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Dibuat oleh (Teknisi ONM) <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Diinspeksi oleh (Teknisi ONM) <span class="text-red-500">*</span></label>
                         <input type="text" name="signed_by_teknisi" value="{{ old('signed_by_teknisi', auth()->user()->name) }}" required
                                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     </div>
@@ -193,18 +193,6 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                         <input type="date" name="signed_date_spv" value="{{ old('signed_date_spv') }}"
-                               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Disetujui oleh (PM)</label>
-                        <input type="text" name="signed_by_pm" value="{{ old('signed_by_pm') }}"
-                               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                        <input type="date" name="signed_date_pm" value="{{ old('signed_date_pm') }}"
                                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     </div>
                 </div>

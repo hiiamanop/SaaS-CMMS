@@ -17,7 +17,7 @@
         .section-header { background: #e5e7eb; font-weight: bold; }
         .signatures { margin-top: 20px; }
         .sig-table { width: 100%; }
-        .sig-table td { width: 33%; border: 1px solid #000; padding: 40px 10px 10px; text-align: center; }
+        .sig-table td { width: 50%; border: 1px solid #000; padding: 40px 10px 10px; text-align: center; }
         .footer { text-align: right; font-size: 9px; color: #555; margin-top: 10px; }
     </style>
 </head>
@@ -130,7 +130,7 @@
         <table class="sig-table">
             <tr>
                 <td>
-                    <strong>Dibuat oleh (Teknisi ONM)</strong><br><br><br>
+                    <strong>Diinspeksi oleh (Teknisi ONM)</strong><br><br><br>
                     {{ $session->signed_by_teknisi ?? '___________________' }}<br>
                     <small>{{ $session->signed_date_teknisi?->format('d M Y') ?? '' }}</small>
                 </td>
@@ -138,11 +138,6 @@
                     <strong>Diperiksa oleh (SPV ONM)</strong><br><br><br>
                     {{ $session->signed_by_spv ?? '___________________' }}<br>
                     <small>{{ $session->signed_date_spv?->format('d M Y') ?? '' }}</small>
-                </td>
-                <td>
-                    <strong>Disetujui oleh (PM)</strong><br><br><br>
-                    {{ $session->signed_by_pm ?? '___________________' }}<br>
-                    <small>{{ $session->signed_date_pm?->format('d M Y') ?? '' }}</small>
                 </td>
             </tr>
         </table>

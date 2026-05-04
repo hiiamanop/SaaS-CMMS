@@ -38,7 +38,7 @@ class SparePartController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'part_code' => 'required|string|unique:spare_parts',
+            'part_code' => 'nullable|string|unique:spare_parts',
             'name' => 'required|string|max:255',
             'category' => 'nullable|string',
             'unit' => 'required|string',
@@ -69,7 +69,7 @@ class SparePartController extends Controller
     public function update(Request $request, SparePart $sparePart)
     {
         $validated = $request->validate([
-            'part_code' => 'required|string|unique:spare_parts,part_code,'.$sparePart->id,
+            'part_code' => 'nullable|string|unique:spare_parts,part_code,'.$sparePart->id,
             'name' => 'required|string|max:255',
             'category' => 'nullable|string',
             'unit' => 'required|string',

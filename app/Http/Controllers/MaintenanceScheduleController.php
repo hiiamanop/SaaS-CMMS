@@ -69,6 +69,8 @@ class MaintenanceScheduleController extends Controller
         $validated = $request->validate([
             'location_id'               => $user->isAdmin() ? 'required|exists:locations,id' : 'nullable',
             'technician_id'             => 'nullable|exists:users,id',
+            'technicians'               => 'nullable|array',
+            'technicians.*'             => 'exists:users,id',
             'category'                  => 'nullable|string|max:255',
             'trafo_name'                => 'required|string|max:255',
             'item_pekerjaan'            => 'required|array|min:1',
@@ -111,6 +113,11 @@ class MaintenanceScheduleController extends Controller
         $validated['planned_weeks'] = $planned ?: null;
 
         $schedule = MaintenanceSchedule::create($validated);
+        
+        if ($request->has('technicians')) {
+            $schedule->technicians()->sync($request->technicians);
+        }
+
         $count = $schedule->generateYearSessions(Carbon::parse($validated['start_date'])->year);
 
         return redirect()->route('maintenance-schedules.show', $schedule)
@@ -138,6 +145,8 @@ class MaintenanceScheduleController extends Controller
         $validated = $request->validate([
             'location_id'               => $user->isAdmin() ? 'required|exists:locations,id' : 'nullable',
             'technician_id'             => 'nullable|exists:users,id',
+            'technicians'               => 'nullable|array',
+            'technicians.*'             => 'exists:users,id',
             'category'                  => 'nullable|string|max:255',
             'trafo_name'                => 'required|string|max:255',
             'item_pekerjaan'            => 'required|array|min:1',
@@ -178,6 +187,11 @@ class MaintenanceScheduleController extends Controller
         $validated['planned_weeks'] = $planned ?: null;
 
         $maintenanceSchedule->update($validated);
+
+        if ($request->has('technicians')) {
+            $maintenanceSchedule->technicians()->sync($request->technicians);
+        }
+
         $count = $maintenanceSchedule->generateYearSessions();
 
         $msg = 'Jadwal berhasil diperbarui.';

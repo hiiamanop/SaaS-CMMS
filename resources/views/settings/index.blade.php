@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null }">
+<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null, editingPermissions: null }">
 
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -53,6 +53,13 @@
                 class="py-3 text-sm transition-colors">
                 Lokasi PLTS
             </button>
+            @if(auth()->user()->role === 'developer')
+            <button @click="tab='fields'"
+                :class="tab==='fields' ? 'border-b-2 border-gray-900 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'"
+                class="py-3 text-sm transition-colors">
+                Form Fields
+            </button>
+            @endif
         </nav>
     </div>
 
@@ -207,6 +214,11 @@
                                 </div>
                             </form>
                             <div class="flex items-center justify-end gap-2" x-show="!editing">
+                                <button type="button" @click="editingPermissions = (editingPermissions === {{ $role->id }} ? null : {{ $role->id }})"
+                                        :class="editingPermissions === {{ $role->id }} ? 'bg-brand text-gray-900' : 'text-gray-600 hover:text-gray-900 border border-gray-200'"
+                                        class="text-sm px-3 py-1.5 rounded-lg transition-colors">
+                                    Akses
+                                </button>
                                 <button type="button" @click="editing=true"
                                         class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
@@ -217,6 +229,43 @@
                                     Hapus
                                 </button>
                                 @endif
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- Permission Settings --}}
+                    <tr x-show="editingPermissions === {{ $role->id }}" x-cloak>
+                        <td colspan="5" class="p-0">
+                            <div class="p-6 bg-gray-50 border-t border-b border-gray-200">
+                                <form action="{{ route('settings.roles.permissions', $role) }}" method="POST">
+                                    @csrf @method('PUT')
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                        @foreach($permissions as $category => $perms)
+                                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-3 border-b border-gray-50 pb-2">{{ $category }}</h4>
+                                            <div class="space-y-2">
+                                                @foreach($perms as $p)
+                                                <label class="flex items-center gap-2 cursor-pointer group">
+                                                    <input type="checkbox" name="permissions[]" value="{{ $p->name }}" 
+                                                        {{ $role->hasPermissionTo($p->name) ? 'checked' : '' }}
+                                                        class="rounded border-gray-300 text-brand focus:ring-brand">
+                                                    <span class="text-sm text-gray-600 group-hover:text-gray-900">
+                                                        {{ ucwords(str_replace(['-', $category], [' ', ''], $p->name)) }}
+                                                    </span>
+                                                </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-6 flex justify-end gap-3">
+                                        <button type="button" @click="editingPermissions = null" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Batal</button>
+                                        <button type="submit" class="px-5 py-2 bg-brand-dark text-white text-sm font-bold rounded-lg shadow-md hover:bg-gray-700 transition-all flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                                            Simpan Akses {{ $role->label }}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -258,6 +307,7 @@
 
     {{-- ── Tab: Lokasi PLTS ──────────────────────────────────────────────────── --}}
     <div x-show="tab==='locations'" x-transition>
+        {{-- ... existing location content ... --}}
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100">
                 <h2 class="font-semibold text-gray-900">Manajemen Lokasi PLTS</h2>
@@ -365,6 +415,63 @@
             </form>
         </div>
     </div>
+
+    {{-- ── Tab: Form Fields ────────────────────────────────────────────── --}}
+    @if(auth()->user()->role === 'developer')
+    <div x-show="tab==='fields'" x-transition>
+        <form action="{{ route('settings.fields.update') }}" method="POST">
+            @csrf
+            <div class="space-y-6">
+                @foreach($fieldConfigs as $module => $fields)
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                    <div class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                        <h2 class="font-bold text-gray-900 uppercase tracking-wider text-xs">{{ $module }}</h2>
+                        <span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">{{ count($fields) }} Fields</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50/50 border-b border-gray-100">
+                                <tr>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Field Label</th>
+                                    <th class="px-5 py-3 text-center font-semibold text-gray-600">Hidden</th>
+                                    <th class="px-5 py-3 text-center font-semibold text-gray-600">Disabled</th>
+                                    <th class="px-5 py-3 text-center font-semibold text-gray-600">Required</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                @foreach($fields as $field)
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-5 py-3">
+                                        <div class="font-medium text-gray-900">{{ $field->label }}</div>
+                                        <div class="text-[10px] text-gray-400 font-mono">{{ $field->field_name }}</div>
+                                    </td>
+                                    <td class="px-5 py-3 text-center">
+                                        <input type="checkbox" name="fields[{{ $field->id }}][is_hidden]" {{ $field->is_hidden ? 'checked' : '' }} class="rounded border-gray-300 text-brand focus:ring-brand">
+                                    </td>
+                                    <td class="px-5 py-3 text-center">
+                                        <input type="checkbox" name="fields[{{ $field->id }}][is_disabled]" {{ $field->is_disabled ? 'checked' : '' }} class="rounded border-gray-300 text-brand focus:ring-brand">
+                                    </td>
+                                    <td class="px-5 py-3 text-center">
+                                        <input type="checkbox" name="fields[{{ $field->id }}][is_required]" {{ $field->is_required ? 'checked' : '' }} class="rounded border-gray-300 text-brand focus:ring-brand">
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            
+            <div class="sticky bottom-6 mt-8 flex justify-end">
+                <button type="submit" class="px-6 py-3 bg-brand text-gray-900 font-bold rounded-xl shadow-lg hover:bg-brand-600 transition-all flex items-center gap-2 border border-brand/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                    Simpan Konfigurasi Field
+                </button>
+            </div>
+        </form>
+    </div>
+    @endif
 
 </div>
 @endsection

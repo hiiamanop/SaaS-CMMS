@@ -114,6 +114,7 @@ $freqLabels = [
                         <th class="px-4 py-3 text-left">Judul Schedule</th>
                         <th class="px-4 py-3 text-left">Lokasi PLTS</th>
                         <th class="px-4 py-3 text-left">Nama Trafo</th>
+                        <th class="px-4 py-3 text-left">Teknisi</th>
                         <th class="px-4 py-3 text-center">Frekuensi</th>
                         <th class="px-4 py-3 text-center">Shutdown</th>
                         <th class="px-4 py-3 text-center">Minggu Terjadwal</th>
@@ -146,6 +147,7 @@ $freqLabels = [
                     </td>
                     <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->location->name ?? '—' }}</td>
                     <td class="px-4 py-3 text-gray-600 text-sm">{{ $s->trafo_name ?: '—' }}</td>
+                    <td class="px-4 py-3 text-gray-600 text-xs">{{ $s->technicians->isNotEmpty() ? $s->technicians->pluck('name')->implode(', ') : '—' }}</td>
                     <td class="px-4 py-3 text-center">
                         <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium {{ $fl['class'] }}">{{ $fl['label'] }}</span>
                     </td>

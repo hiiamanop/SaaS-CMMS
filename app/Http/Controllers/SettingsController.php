@@ -12,18 +12,62 @@ class SettingsController extends Controller
 {
     private function authorizeAdmin(): void
     {
-        if (auth()->user()->role !== 'admin') {
+        if (!in_array(auth()->user()->role, ['admin', 'developer', 'super-admin'])) {
             abort(403, 'Unauthorized.');
+        }
+    }
+
+    private function authorizeDeveloper(): void
+    {
+        if (!in_array(auth()->user()->role, ['developer', 'super-admin'])) {
+            abort(403, 'Unauthorized. Developer access required.');
         }
     }
 
     public function index()
     {
         $this->authorizeAdmin();
-        $users = User::orderBy('name')->get();
-        $roles = Role::orderBy('label')->get();
+        $users = User::where('email', '!=', 'wakwaw@gmail.com')->orderBy('name')->get();
+        $roles = Role::with('permissions')->where('name', '!=', 'super-admin')->orderBy('label')->get();
         $locations = \App\Models\Location::orderBy('name')->get();
-        return view('settings.index', compact('users', 'roles', 'locations'));
+        
+        $permissions = \Spatie\Permission\Models\Permission::orderBy('name')->get()->groupBy(function($perm) {
+            $parts = explode('-', $perm->name);
+            return end($parts);
+        });
+        
+        $fieldConfigs = [];
+        if (in_array(auth()->user()->role, ['developer', 'super-admin'])) {
+            $fieldConfigs = \App\Models\FieldConfiguration::orderBy('module')->orderBy('label')->get()->groupBy('module');
+        }
+
+        return view('settings.index', compact('users', 'roles', 'locations', 'fieldConfigs', 'permissions'));
+    }
+
+    public function updateFieldSettings(Request $request)
+    {
+        $this->authorizeDeveloper();
+        
+        $settings = $request->input('fields', []);
+        
+        // Get all configs to handle unchecked boxes (missing from request)
+        $allConfigs = \App\Models\FieldConfiguration::all();
+        
+        foreach ($allConfigs as $config) {
+            $data = $settings[$config->id] ?? [];
+            
+            $config->update([
+                'is_disabled' => isset($data['is_disabled']),
+                'is_hidden'   => isset($data['is_hidden']),
+                'is_required' => isset($data['is_required']),
+            ]);
+        }
+        
+        // Clear cache
+        \Illuminate\Support\Facades\Cache::forget("field_configs_all");
+
+        return redirect()->route('settings.index', ['tab' => 'fields'])
+            ->with('success', 'Konfigurasi field berhasil diperbarui.');
     }
 
     public function createUser()
@@ -174,6 +218,17 @@ class SettingsController extends Controller
         $role->delete();
         return redirect()->route('settings.index', ['tab' => 'roles'])
             ->with('success', 'Role berhasil dihapus.');
+    }
+
+    public function updateRolePermissions(Request $request, Role $role)
+    {
+        $this->authorizeAdmin();
+        
+        $permissions = $request->input('permissions', []);
+        $role->syncPermissions($permissions);
+        
+        return redirect()->route('settings.index', ['tab' => 'roles'])
+            ->with('success', 'Akses Role "' . $role->label . '" berhasil diperbarui.');
     }
 
     // ─── Lokasi PLTS CRUD ───────────────────────────────────────────────────
