@@ -38,8 +38,9 @@
                 <p class="text-lg text-emerald-50">Optimize your renewable energy assets with Aruna's unified maintenance platform.</p>
             </div>
 
-            <div class="text-sm text-emerald-300/60">
-                &copy; {{ date('Y') }} PT Aruna Hijau Power. All rights reserved.
+            <div class="text-sm text-emerald-300/60 flex items-center justify-between">
+                <span>&copy; {{ date('Y') }} PT Aruna Hijau Power</span>
+                <span class="text-[10px] font-bold bg-white/10 px-2 py-0.5 rounded-full uppercase tracking-widest">v{{ config('app.version') }}</span>
             </div>
         </div>
 

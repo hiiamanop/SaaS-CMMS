@@ -31,7 +31,7 @@
                     <div x-show="sidebarOpen" class="flex flex-col">
                         <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
                         <span class="text-gray-400 font-bold uppercase tracking-tight mt-0.5"
-                            style="font-size: 9px !important;">PT Aruna Hijau Power</span>
+                            style="font-size: 9px !important;">PT Aruna Hijau Power — v{{ config('app.version') }}</span>
                     </div>
                 </div>
                 <button x-show="sidebarOpen" @click="sidebarOpen=false"
