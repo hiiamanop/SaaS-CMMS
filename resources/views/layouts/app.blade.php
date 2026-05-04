@@ -25,9 +25,8 @@
             class="hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0 h-screen sticky top-0 shadow-sm">
             <div class="flex items-center h-20 px-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div
-                        class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-100 p-1">
-                        <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-100 p-0.5">
+                        <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain rounded-md">
                     </div>
                     <div x-show="sidebarOpen" class="flex flex-col">
                         <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
@@ -184,11 +183,10 @@
             x-transition:enter-end="translate-x-0" x-transition:leave="transition duration-200"
             x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" style="display:none">
             <div class="flex items-center h-20 px-4 border-b border-gray-100">
-                <div
-                    class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3 flex-shrink-0 border border-gray-100 p-1">
-                    <img src="{{ asset('logo.jpeg') }}" alt="Aruna Logo" class="w-full h-full object-contain">
+                <div class="w-12 h-12 bg-white rounded-xl p-0.5 shadow-lg">
+                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain rounded-lg">
                 </div>
-                <div class="flex flex-col">
+                <div class="flex flex-col ml-3">
                     <span class="font-black text-gray-900 leading-none text-base">CMMS AHP</span>
                     <span class="text-[6px] text-gray-400 font-bold uppercase tracking-tighter mt-0.5">PT Aruna Hijau
                         Power</span>

@@ -24,8 +24,8 @@
         <!-- Left Side: Visual -->
         <div class="hidden lg:flex lg:w-1/2 login-bg flex-col justify-between p-12 text-white">
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-white rounded-xl p-1.5 shadow-lg">
-                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain">
+                <div class="w-12 h-12 bg-white rounded-xl p-0.5 shadow-lg">
+                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain rounded-lg">
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold tracking-tight">CMMS AHP</h2>
