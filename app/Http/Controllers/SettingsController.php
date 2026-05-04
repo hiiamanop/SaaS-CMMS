@@ -57,6 +57,7 @@ class SettingsController extends Controller
             $data = $settings[$config->id] ?? [];
             
             $config->update([
+                'placeholder' => $data['placeholder'] ?? null,
                 'is_disabled' => isset($data['is_disabled']),
                 'is_hidden'   => isset($data['is_hidden']),
                 'is_required' => isset($data['is_required']),

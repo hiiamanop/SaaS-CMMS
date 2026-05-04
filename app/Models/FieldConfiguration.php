@@ -10,6 +10,7 @@ class FieldConfiguration extends Model
         'module',
         'field_name',
         'label',
+        'placeholder',
         'is_disabled',
         'is_hidden',
         'is_required',

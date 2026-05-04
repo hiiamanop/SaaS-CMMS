@@ -433,6 +433,7 @@
                             <thead class="bg-gray-50/50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-5 py-3 text-left font-semibold text-gray-600">Field Label</th>
+                                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Placeholder</th>
                                     <th class="px-5 py-3 text-center font-semibold text-gray-600">Hidden</th>
                                     <th class="px-5 py-3 text-center font-semibold text-gray-600">Disabled</th>
                                     <th class="px-5 py-3 text-center font-semibold text-gray-600">Required</th>
@@ -444,6 +445,11 @@
                                     <td class="px-5 py-3">
                                         <div class="font-medium text-gray-900">{{ $field->label }}</div>
                                         <div class="text-[10px] text-gray-400 font-mono">{{ $field->field_name }}</div>
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        <input type="text" name="fields[{{ $field->id }}][placeholder]" value="{{ $field->placeholder }}" 
+                                               placeholder="cth: Masukkan nama..."
+                                               class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-brand focus:border-brand">
                                     </td>
                                     <td class="px-5 py-3 text-center">
                                         <input type="checkbox" name="fields[{{ $field->id }}][is_hidden]" {{ $field->is_hidden ? 'checked' : '' }} class="rounded border-gray-300 text-brand focus:ring-brand">
