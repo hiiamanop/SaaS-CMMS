@@ -63,9 +63,17 @@
                                 ['route' => 'consumables.index', 'label' => 'Consumable'],
                             ]
                         ],
-                        ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule', 'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z', 'match' => 'maintenance-schedules*', 'roles' => null],
-                        ['route' => 'checksheet.index', 'label' => 'Checksheet', 'icon' => 'M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'match' => 'checksheet.index', 'roles' => null],
-                        ['route' => 'schedule-report.index', 'label' => 'Schedule Report', 'icon' => 'M12 20h9 M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z', 'match' => 'schedule-report*', 'roles' => null],
+                        [
+                            'label' => 'Management Schedule',
+                            'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z',
+                            'match' => ['maintenance-schedules*', 'checksheet*', 'schedule-report*'],
+                            'roles' => null,
+                            'sub' => [
+                                ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule'],
+                                ['route' => 'checksheet.index', 'label' => 'Checksheet'],
+                                ['route' => 'schedule-report.index', 'label' => 'Schedule Report'],
+                            ]
+                        ],
                         ['route' => 'work-orders.index', 'label' => 'Work Orders & Report', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
                         ['route' => 'timeline.index', 'label' => 'Timeline', 'icon' => 'M5 2h14 M5 22h14 M12 12l7-7H5l7 7zm0 0l7 7H5l7-7z', 'match' => 'timeline*', 'roles' => null],
                         ['route' => 'daily-reports.index', 'label' => 'Personal Notes', 'icon' => 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', 'match' => 'daily-reports*', 'roles' => null],

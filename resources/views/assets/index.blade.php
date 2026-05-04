@@ -41,13 +41,29 @@
                 <th class="px-5 py-3 text-left">Asset Code</th><th class="px-5 py-3 text-left">Name</th><th class="px-5 py-3 text-left">Category</th><th class="px-5 py-3 text-left">Location</th><th class="px-5 py-3 text-left">Status</th><th class="px-5 py-3 text-left">Brand / Model</th><th class="px-5 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody class="divide-y divide-gray-50">
+            @php $lastLocation = null; @endphp
             @foreach($assets as $asset)
-            @php $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','under_maintenance'=>'bg-yellow-100 text-yellow-700','retired'=>'bg-red-100 text-red-600']; @endphp
+            @php 
+                $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','under_maintenance'=>'bg-yellow-100 text-yellow-700','retired'=>'bg-red-100 text-red-600']; 
+            @endphp
+
+            @if($lastLocation !== $asset->location)
+            <tr class="bg-gray-50/80">
+                <td colspan="7" class="px-5 py-2 font-bold text-brand uppercase tracking-wider text-xs">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Location: {{ $asset->location }}
+                    </div>
+                </td>
+            </tr>
+            @php $lastLocation = $asset->location; @endphp
+            @endif
+
             <tr class="hover:bg-opacity-90 transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-gray-600">{{ $asset->asset_code }}</td>
                 <td class="px-5 py-3"><a href="{{ route('assets.show', $asset) }}" class="font-medium text-gray-900 hover:text-brand">{{ $asset->name }}</a></td>
                 <td class="px-5 py-3 text-gray-500">{{ $asset->category }}</td>
-                <td class="px-5 py-3 text-gray-500">{{ $asset->location }}</td>
+                <td class="px-5 py-3 text-gray-500 italic text-xs">{{ $asset->location }}</td>
                 <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$asset->status]??'bg-gray-100 text-gray-600' }}">{{ ucwords(str_replace('_',' ',$asset->status)) }}</span></td>
                 <td class="px-5 py-3 text-gray-500">{{ $asset->brand }} {{ $asset->model }}</td>
                 <td class="px-5 py-3 text-right">
