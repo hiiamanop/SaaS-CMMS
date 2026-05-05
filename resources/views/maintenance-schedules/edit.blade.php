@@ -316,8 +316,8 @@ if ($oldWeeks !== null) {
                     </thead>
                     <tbody>
                         <tr>
-                            @foreach(range(1,2) as $s)
-                            @php $key = $s.'_1'; $checked = isset($plannedSet[$key]); @endphp
+                            @foreach(range(1,2) as $sem)
+                            @php $key = $sem.'_1'; $checked = isset($plannedSet[$key]); @endphp
                             <td class="border border-gray-300 px-4 py-4 text-center">
                                 <input type="checkbox" name="planned_weeks[{{ $key }}]" value="1"
                                        {{ $checked ? 'checked' : '' }}

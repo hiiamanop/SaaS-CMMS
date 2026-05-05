@@ -17,6 +17,7 @@ use App\Http\Controllers\ToolController;
 use App\Http\Controllers\ConsumableController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ItemImportController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,6 +25,10 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // AI Chatbot
+    Route::get('/chat/messages', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::delete('/chat/clear', [ChatController::class, 'clearHistory'])->name('chat.clear');
     // Import Items
     Route::post('items/import', [ItemImportController::class, 'import'])->name('items.import');
     // Dashboard
