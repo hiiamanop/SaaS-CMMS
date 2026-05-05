@@ -10,9 +10,15 @@ use App\Models\Consumable;
 use App\Models\Asset;
 use App\Models\Tool;
 use App\Models\WorkOrder;
+use App\Models\MaintenanceRecord;
+use App\Models\Notification;
+use App\Models\ChecksheetSession;
+use App\Models\DailyReport;
+use App\Models\User;
 use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ChatController extends Controller
 {
@@ -64,12 +70,28 @@ class ChatController extends Controller
                 ];
             })->toArray();
 
-        // 3. Get AI Response
-        $response = $this->gemini->generateResponse($history);
+        // 3. Get AI Response with Manual Fallback
+        try {
+            $response = $this->gemini->generateResponse($history);
+            
+            if (isset($response['error'])) {
+                throw new \Exception($response['error']['message'] ?? 'Gemini Quota Exceeded');
+            }
+        } catch (\Exception $e) {
+            \Log::warning("Gemini AI Offline: " . $e->getMessage());
+            $fallback = $this->handleManualFallback($request->message);
+            
+            ChatMessage::create([
+                'user_id' => Auth::id(),
+                'role'    => 'model',
+                'content' => $fallback,
+            ]);
 
-        if (isset($response['error'])) {
-            \Illuminate\Support\Facades\Log::error('ChatController Gemini Error', ['response' => $response]);
-            return response()->json(['status' => 'error', 'message' => 'Gagal menghubungi AI: ' . ($response['error']['message'] ?? 'Unknown Error')]);
+            return response()->json([
+                'status' => 'success', 
+                'message' => $fallback,
+                'is_fallback' => true
+            ]);
         }
 
         if (isset($response['candidates'][0]['content'])) {
@@ -183,6 +205,21 @@ class ChatController extends Controller
 
             case 'manage_work_orders':
                 return $this->handleWorkOrderCrud($args['action'], $args['data'] ?? []);
+
+            case 'manage_maintenance_records':
+                return $this->handleRecordSearch($args['query'] ?? '');
+
+            case 'manage_notifications':
+                return $this->handleNotificationManagement($args['action']);
+
+            case 'manage_checksheets':
+                return $this->handleChecksheetManagement($args['action']);
+
+            case 'manage_daily_reports':
+                return $this->handleDailyReportManagement($args['action'], $args['content'] ?? '');
+
+            case 'manage_settings':
+                return $this->handleSettingsManagement($args['action']);
 
             case 'get_system_analytics':
                 return $this->handleAnalytics($args['type'], $args['period'] ?? 'bulan ini');
@@ -330,10 +367,10 @@ class ChatController extends Controller
     {
         if ($action === 'search') {
             $query = $data['query'] ?? '';
-            $wos = WorkOrder::where('wo_number', 'like', "%$query%")->orWhere('task_name', 'like', "%$query%")->with('asset')->take(5)->get();
+            $wos = WorkOrder::where('wo_number', 'like', "%$query%")->orWhere('title', 'like', "%$query%")->with('asset')->take(5)->get();
             if ($wos->isEmpty()) return "Tidak menemukan Work Order.";
             $res = "Daftar Work Order Terkait:\n";
-            foreach ($wos as $wo) $res .= "- **{$wo->wo_number}**: {$wo->task_name} (Aset: ".($wo->asset->name ?? 'N/A').") - Status: **{$wo->status}**\n";
+            foreach ($wos as $wo) $res .= "- **{$wo->wo_number}**: {$wo->title} (Aset: ".($wo->asset->name ?? 'N/A').") - Status: **{$wo->status}**\n";
             return $res;
         }
         
@@ -365,5 +402,152 @@ class ChatController extends Controller
         return "📅 **Analisa Timeline ($period)**:\n" .
                "- Menunjukkan tren peningkatan aktivitas pemeliharaan di pertengahan bulan.\n" .
                "- Penggunaan sparepart terbanyak ada pada kategori Elektrikal.";
+    }
+
+    protected function handleRecordSearch($query)
+    {
+        $records = MaintenanceRecord::where('equipment_name', 'like', "%$query%")->orWhere('maintenance_description', 'like', "%$query%")->take(5)->get();
+        if ($records->isEmpty()) return "Tidak menemukan riwayat pemeliharaan untuk '$query'.";
+        
+        $res = "Daftar Riwayat Pemeliharaan Terakhir:\n";
+        foreach ($records as $r) $res .= "- **" . ($r->completed_at ? $r->completed_at->format('d/m/Y') : 'N/A') . "**: {$r->equipment_name} - {$r->maintenance_type}\n";
+        return $res;
+    }
+
+    protected function handleNotificationManagement($action)
+    {
+        if ($action === 'list') {
+            $notifs = Notification::where('user_id', Auth::id())->where('is_read', false)->latest()->take(5)->get();
+            if ($notifs->isEmpty()) return "Tidak ada notifikasi baru.";
+            $res = "Notifikasi Terbaru Anda:\n";
+            foreach ($notifs as $n) {
+                $msg = $n->data['message'] ?? $n->title;
+                $res .= "- $msg (" . $n->created_at->diffForHumans() . ")\n";
+            }
+            return $res;
+        }
+        
+        if ($action === 'mark_all_read') {
+            Notification::where('user_id', Auth::id())->update(['is_read' => true]);
+            return "✅ Semua notifikasi telah ditandai sebagai sudah dibaca.";
+        }
+        
+        return "Aksi $action pada notifikasi belum didukung.";
+    }
+
+    protected function handleChecksheetManagement($action)
+    {
+        $status = ($action === 'list_active') ? 'draft' : 'submitted';
+        $sessions = ChecksheetSession::where('status', $status)->latest()->take(5)->get();
+        if ($sessions->isEmpty()) return "Tidak ada sesi checksheet " . ($status === 'draft' ? "aktif" : "selesai") . ".";
+        
+        $res = "Daftar Sesi Checksheet " . ($status === 'draft' ? "Aktif" : "Selesai") . ":\n";
+        foreach ($sessions as $s) {
+            $submittedBy = $s->submittedBy->name ?? 'N/A';
+            $res .= "- **{$s->period_label}**: {$s->equipment_location} (Oleh: $submittedBy)\n";
+        }
+        return $res;
+    }
+
+    protected function handleDailyReportManagement($action, $content = '')
+    {
+        if ($action === 'list') {
+            $reports = DailyReport::where('user_id', Auth::id())->latest()->take(5)->get();
+            if ($reports->isEmpty()) return "Anda belum membuat laporan harian.";
+            $res = "Laporan Harian Terakhir Anda:\n";
+            foreach ($reports as $r) {
+                $res .= "- **" . $r->created_at->format('d/m/Y H:i') . "**: " . Str::limit($r->content, 50) . "\n";
+            }
+            return $res;
+        }
+        
+        if ($action === 'create') {
+            DailyReport::create(['user_id' => Auth::id(), 'content' => $content]);
+            return "✅ Laporan harian berhasil disimpan.";
+        }
+        
+        return "Aksi $action pada laporan harian belum didukung.";
+    }
+
+    protected function handleSettingsManagement($action)
+    {
+        if ($action === 'list_users') {
+            $users = User::take(10)->get();
+            $res = "Daftar Pengguna Sistem:\n";
+            foreach ($users as $u) $res .= "- **{$u->name}** ({$u->role})\n";
+            return $res;
+        }
+        
+        if ($action === 'list_locations') {
+            $locations = Location::all();
+            $res = "Daftar Lokasi Terdaftar:\n";
+            foreach ($locations as $l) $res .= "- **ID {$l->id}**: {$l->name}\n";
+            return $res;
+        }
+        
+        return "Aksi $action pada pengaturan belum didukung.";
+    }
+
+    protected function handleManualFallback($message)
+    {
+        $msg = strtolower($message);
+        
+        // 1. Items & Stock (Spare Parts, Tools, Consumables)
+        if (Str::contains($msg, ['stok', 'item', 'barang', 'habis', 'menipis', 'suku cadang', 'spare part', 'part', 'alat kerja', 'tool', 'consumable'])) {
+            return $this->executeFunction('get_low_stock_items', []);
+        }
+
+        // 2. Schedules & Agenda
+        if (Str::contains($msg, ['jadwal', 'maintain', 'kapan', 'agenda', 'rencana'])) {
+            return $this->executeFunction('get_maintenance_schedules', ['date' => 'today']);
+        }
+
+        // 3. Assets & Equipment
+        if (Str::contains($msg, ['aset', 'asset', 'mesin', 'alat', 'peralatan', 'unit'])) {
+            $query = trim(str_replace(['cari', 'tampilkan', 'lihat', 'aset', 'asset', 'mesin'], '', $msg));
+            return $this->handleAssetCrud('search', ['query' => $query ?: $msg]);
+        }
+
+        // 4. Work Orders
+        if (Str::contains($msg, ['wo', 'work order', 'tugas', 'perintah kerja', 'perbaikan'])) {
+            $query = trim(str_replace(['cari', 'tampilkan', 'wo', 'work order'], '', $msg));
+            return $this->handleWorkOrderCrud('search', ['query' => $query ?: $msg]);
+        }
+
+        // 5. Notifications
+        if (Str::contains($msg, ['notif', 'pemberitahuan', 'pesan baru', 'kabar'])) {
+            return $this->handleNotificationManagement('list');
+        }
+
+        // 6. Records & History
+        if (Str::contains($msg, ['riwayat', 'record', 'history', 'lampau', 'lalu', 'selesai'])) {
+            $query = trim(str_replace(['riwayat', 'record', 'history'], '', $msg));
+            return $this->handleRecordSearch($query ?: $msg);
+        }
+
+        // 7. Checksheets & Inspection
+        if (Str::contains($msg, ['checksheet', 'inspeksi', 'form', 'pemeriksaan'])) {
+            return $this->handleChecksheetManagement('list_active');
+        }
+
+        // 8. Analytics, KPI, & Performance
+        if (Str::contains($msg, ['kpi', 'analisa', 'performa', 'statistik', 'grafik', 'timeline'])) {
+            $type = Str::contains($msg, 'timeline') ? 'timeline' : 'kpi';
+            return $this->handleAnalytics($type, 'bulan ini');
+        }
+
+        // 9. Daily Reports
+        if (Str::contains($msg, ['laporan harian', 'catatan harian', 'daily report'])) {
+            return $this->handleDailyReportManagement('list');
+        }
+
+        // 10. Settings (Users, Locations)
+        if (Str::contains($msg, ['user', 'pengguna', 'daftar nama', 'lokasi', 'tempat', 'wilayah'])) {
+            $action = Str::contains($msg, ['user', 'pengguna']) ? 'list_users' : 'list_locations';
+            return $this->handleSettingsManagement($action);
+        }
+
+        // Outside Context
+        return "Maaf, saya tidak mengerti maksud anda.";
     }
 }

@@ -102,13 +102,64 @@ class GeminiService
                             ]
                         ],
                         [
-                            'name' => 'get_system_analytics',
-                            'description' => 'Mendapatkan data Timeline atau KPI untuk dianalisis.',
+                            'name' => 'manage_maintenance_records',
+                            'description' => 'Melihat atau mencari riwayat (record) pemeliharaan yang sudah selesai.',
                             'parameters' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'type' => ['type' => 'string', 'enum' => ['timeline', 'kpi']],
-                                    'period' => ['type' => 'string', 'description' => 'Periode (misal: "bulan ini", "minggu lalu")']
+                                    'query' => ['type' => 'string', 'description' => 'Kata kunci pencarian (nama alat atau deskripsi).']
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'manage_notifications',
+                            'description' => 'Mengecek notifikasi terbaru atau menandai notifikasi sebagai sudah dibaca.',
+                            'parameters' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'action' => ['type' => 'string', 'enum' => ['list', 'mark_all_read']],
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'manage_checksheets',
+                            'description' => 'Melihat status sesi checksheet (inspeksi) yang sedang berjalan atau sudah selesai.',
+                            'parameters' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'action' => ['type' => 'string', 'enum' => ['list_active', 'list_submitted']],
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'manage_daily_reports',
+                            'description' => 'Mengelola laporan harian personal (catatan harian teknisi).',
+                            'parameters' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'action' => ['type' => 'string', 'enum' => ['list', 'create']],
+                                    'content' => ['type' => 'string', 'description' => 'Isi laporan jika action adalah create.']
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'manage_settings',
+                            'description' => 'Melihat atau mengelola pengaturan sistem seperti daftar pengguna atau lokasi.',
+                            'parameters' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'action' => ['type' => 'string', 'enum' => ['list_users', 'list_locations']],
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'get_system_analytics',
+                            'description' => 'Memberikan analisa KPI (Key Performance Indicator) atau Timeline aktivitas sistem.',
+                            'parameters' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'type' => ['type' => 'string', 'enum' => ['kpi', 'timeline']],
+                                    'period' => ['type' => 'string', 'description' => 'Periode analisa (contoh: bulan ini, tahun ini).']
                                 ],
                                 'required' => ['type']
                             ]
