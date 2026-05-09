@@ -472,7 +472,7 @@
         function notifBell() { return { open: false, count: 0, items: [], async load() { try { const r = await fetch('{{ route("notifications.unread") }}'); const d = await r.json(); this.items = d.notifications; this.count = d.count; } catch (e) { } } } }
         function delModal() { return { show: false, action: '', message: 'Are you sure you want to delete this item?', open(a, m) { this.action = a; this.message = m || this.message; this.show = true; } } }
     </script>
-    <x-chat-widget />
+    {{-- <x-chat-widget /> --}}
 </body>
 
 </html>
