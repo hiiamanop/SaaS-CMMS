@@ -447,7 +447,9 @@
                                     'Metering'    => 'bg-indigo-500 hover:bg-indigo-600 ring-indigo-300',
                                 ];
                                 $saColor = $saColorMap[$supportingAsset->category] ?? 'bg-slate-500 hover:bg-slate-600 ring-slate-300';
-                                $saLabel = $supportingAsset->category === 'Transformer' ? 'TRAFO' : strtoupper($supportingAsset->category);
+                                $saLabel = $supportingAsset->category === 'Transformer'
+                                    ? 'TRAFO'
+                                    : collect(explode('-', $supportingAsset->asset_code))->last();
                             @endphp
                             <a href="{{ route('assets.show', $supportingAsset->id) }}"
                                @mouseenter="tip = { code: '{{ $supportingAsset->asset_code }}', name: '{{ addslashes($supportingAsset->name) }}', status: '{{ $supportingAsset->status }}' }"
