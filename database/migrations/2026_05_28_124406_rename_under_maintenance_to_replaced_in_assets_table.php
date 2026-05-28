@@ -7,11 +7,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE assets MODIFY COLUMN status ENUM('active','inactive','replaced','retired') DEFAULT 'active'");
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE assets DROP CONSTRAINT IF EXISTS assets_status_check");
+            DB::statement("ALTER TABLE assets ADD CONSTRAINT assets_status_check CHECK (status IN ('active','inactive','replaced','retired'))");
+        } else {
+            DB::statement("ALTER TABLE assets MODIFY COLUMN status ENUM('active','inactive','replaced','retired') DEFAULT 'active'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE assets MODIFY COLUMN status ENUM('active','inactive','under_maintenance','retired') DEFAULT 'active'");
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE assets DROP CONSTRAINT IF EXISTS assets_status_check");
+            DB::statement("ALTER TABLE assets ADD CONSTRAINT assets_status_check CHECK (status IN ('active','inactive','under_maintenance','retired'))");
+        } else {
+            DB::statement("ALTER TABLE assets MODIFY COLUMN status ENUM('active','inactive','under_maintenance','retired') DEFAULT 'active'");
+        }
     }
 };
