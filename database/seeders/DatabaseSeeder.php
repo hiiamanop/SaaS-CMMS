@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             UserSeeder::class,
             FieldConfigurationSeeder::class,
-            // LestariPertiwiSeeder::class,
+            LestariPertiwiSeeder::class,
         ]);
     }
 }

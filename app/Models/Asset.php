@@ -53,7 +53,7 @@ class Asset extends Model
         $stringPad = str_pad($this->string_number, 2, '0', STR_PAD_LEFT);
         $modulePad = str_pad($this->module_slot, 2, '0', STR_PAD_LEFT);
 
-        return "{$this->transformer_block}-N{$stringPad}-S{$modulePad}";
+        return "{$this->transformer_block}-INV{$stringPad}-S{$modulePad}";
     }
 
     public function scopeByTransformerBlock($query, $block)

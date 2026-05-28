@@ -382,7 +382,7 @@
                             style="width:52px;height:30px;">
                             @if($asset)
                             @php
-                                $hierarchyCode = $asset->transformer_block . '-N' . str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) . '-S' . str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT);
+                                $hierarchyCode = $asset->transformer_block . '-INV' . str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) . '-S' . str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT);
                                 $colorClass    = $statusColors[$asset->status] ?? 'bg-gray-200 ring-gray-200';
                             @endphp
                             <a href="{{ route('assets.show', $asset->id) }}"
