@@ -13,6 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <style>
         body { font-family: 'Outfit', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
     @stack('styles')
 </head>

@@ -8,7 +8,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Add New Asset</h1>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <form action="{{ route('assets.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('assets.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="{ category: '{{ old('category') }}' }">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Basic Info Section --}}
@@ -46,7 +46,20 @@
                         @if(!field_is_hidden('assets', 'category'))
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'category', 'Category') !!}</label>
-                            <input name="category" value="{{ old('category') }}" {!! field_attributes('assets', 'category') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <input name="category" x-model="category" list="asset-categories" value="{{ old('category') }}" {!! field_attributes('assets', 'category') !!} placeholder="Pilih atau ketik kategori..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <datalist id="asset-categories">
+                                <option value="PV Module">PV Module (Panel Surya)</option>
+                                <option value="Inverter">Inverter</option>
+                                <option value="Transformer">Transformer (Trafo)</option>
+                                <option value="String Combiner Box">String Combiner Box (SCB)</option>
+                                <option value="Battery">Battery / Energy Storage</option>
+                                <option value="Monitoring System">Monitoring System (SCADA)</option>
+                                <option value="Mounting Structure">Mounting Structure (Racking)</option>
+                                <option value="Protection Relay">Protection Relay</option>
+                                <option value="Switchgear">Switchgear / MV Panel</option>
+                                <option value="Metering">Metering</option>
+                                <option value="Cable">Cable & Wiring</option>
+                            </datalist>
                         </div>
                         @endif
 
@@ -60,7 +73,7 @@
                             <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                                 <option value="active" {{ old('status')=='active'?'selected':'' }}>Active</option>
                                 <option value="inactive" {{ old('status')=='inactive'?'selected':'' }}>Inactive</option>
-                                <option value="under_maintenance" {{ old('status')=='under_maintenance'?'selected':'' }}>Under Maintenance</option>
+                                <option value="replaced" {{ old('status')=='replaced'?'selected':'' }}>Replaced</option>
                                 <option value="retired" {{ old('status')=='retired'?'selected':'' }}>Retired</option>
                             </select>
                         </div>
@@ -82,6 +95,28 @@
                         @if(!field_is_hidden('assets', 'serial_number'))
                         <div><label class="block text-sm font-medium text-gray-700 mb-1.5">{!! field_label('assets', 'serial_number', 'Serial Number') !!}</label><input name="serial_number" value="{{ old('serial_number') }}" {!! field_attributes('assets', 'serial_number') !!} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         @endif
+                    </div>
+                </div>
+
+                {{-- PV Module Hierarchy --}}
+                <div class="md:col-span-3" x-show="category === 'PV Module'" x-cloak>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">PV Module Hierarchy <span class="text-blue-500 font-normal normal-case tracking-normal">(T01-N05-S14)</span></h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Transformer Block</label>
+                            <input name="transformer_block" value="{{ old('transformer_block') }}" placeholder="e.g. T01, T02" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand uppercase">
+                            <p class="text-xs text-gray-400 mt-1">Blok trafo (T01, T02, ...)</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">String Number (N)</label>
+                            <input name="string_number" type="number" min="1" max="999" value="{{ old('string_number') }}" placeholder="e.g. 5" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <p class="text-xs text-gray-400 mt-1">Nomor string (1-21)</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Module Slot (S)</label>
+                            <input name="module_slot" type="number" min="1" max="999" value="{{ old('module_slot') }}" placeholder="e.g. 14" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <p class="text-xs text-gray-400 mt-1">Slot modul dalam string (1-21)</p>
+                        </div>
                     </div>
                 </div>
 

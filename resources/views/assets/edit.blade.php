@@ -8,7 +8,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Edit Asset</h1>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <form action="{{ route('assets.update', $asset) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('assets.update', $asset) }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="{ category: '{{ old('category', $asset->category) }}' }">
             @csrf @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Basic Info Section --}}
@@ -36,7 +36,20 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Category <span class="text-red-500">*</span></label>
-                            <input name="category" value="{{ old('category', $asset->category) }}" required placeholder="e.g. Inverter, Transformer" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <input name="category" x-model="category" list="asset-categories" value="{{ old('category', $asset->category) }}" required placeholder="Pilih atau ketik kategori..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <datalist id="asset-categories">
+                                <option value="PV Module">PV Module (Panel Surya)</option>
+                                <option value="Inverter">Inverter</option>
+                                <option value="Transformer">Transformer (Trafo)</option>
+                                <option value="String Combiner Box">String Combiner Box (SCB)</option>
+                                <option value="Battery">Battery / Energy Storage</option>
+                                <option value="Monitoring System">Monitoring System (SCADA)</option>
+                                <option value="Mounting Structure">Mounting Structure (Racking)</option>
+                                <option value="Protection Relay">Protection Relay</option>
+                                <option value="Switchgear">Switchgear / MV Panel</option>
+                                <option value="Metering">Metering</option>
+                                <option value="Cable">Cable & Wiring</option>
+                            </datalist>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Internal Location <span class="text-red-500">*</span></label>
@@ -45,7 +58,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Status <span class="text-red-500">*</span></label>
                             <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
-                                @foreach(['active','inactive','under_maintenance','retired'] as $s)
+                                @foreach(['active','inactive','replaced','retired'] as $s)
                                 <option value="{{ $s }}" {{ old('status',$asset->status)==$s?'selected':'' }}>{{ ucwords(str_replace('_',' ',$s)) }}</option>
                                 @endforeach
                             </select>
@@ -60,6 +73,28 @@
                         <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Brand</label><input name="brand" value="{{ old('brand', $asset->brand) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Model / Type</label><input name="model" value="{{ old('model', $asset->model) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
                         <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Serial Number</label><input name="serial_number" value="{{ old('serial_number', $asset->serial_number) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand"></div>
+                    </div>
+                </div>
+
+                {{-- PV Module Hierarchy --}}
+                <div class="md:col-span-3" x-show="category === 'PV Module'" x-cloak>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">PV Module Hierarchy <span class="text-blue-500 font-normal normal-case tracking-normal">(T01-N05-S14)</span></h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Transformer Block</label>
+                            <input name="transformer_block" value="{{ old('transformer_block', $asset->transformer_block) }}" placeholder="e.g. T01, T02" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand uppercase">
+                            <p class="text-xs text-gray-400 mt-1">Blok trafo (T01, T02, ...)</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">String Number (N)</label>
+                            <input name="string_number" type="number" min="1" max="999" value="{{ old('string_number', $asset->string_number) }}" placeholder="e.g. 5" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <p class="text-xs text-gray-400 mt-1">Nomor string (1-21)</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Module Slot (S)</label>
+                            <input name="module_slot" type="number" min="1" max="999" value="{{ old('module_slot', $asset->module_slot) }}" placeholder="e.g. 14" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <p class="text-xs text-gray-400 mt-1">Slot modul dalam string (1-21)</p>
+                        </div>
                     </div>
                 </div>
 
