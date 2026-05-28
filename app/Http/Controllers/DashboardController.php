@@ -63,7 +63,7 @@ class DashboardController extends Controller
             ->whereNotNull('transformer_block')
             ->select(['id', 'name', 'asset_code', 'category', 'brand', 'model', 'status', 'transformer_block', 'visual_row', 'visual_col'])
             ->orderBy('transformer_block')
-            ->orderByRaw("FIELD(category, 'Inverter', 'Transformer', 'Metering')")
+            ->orderByRaw("CASE category WHEN 'Inverter' THEN 1 WHEN 'Transformer' THEN 2 WHEN 'Metering' THEN 3 ELSE 4 END")
             ->get()
             ->groupBy('transformer_block');
 
