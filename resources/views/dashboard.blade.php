@@ -390,7 +390,7 @@
                                @mouseleave="tip = null"
                                class="flex items-center justify-center w-[52px] h-[30px] rounded-[3px] transition-all duration-100 hover:scale-[1.2] hover:z-10 relative hover:ring-2 {{ $colorClass }}">
                                 <span class="text-[7px] font-bold text-gray-800 leading-none select-none pointer-events-none">
-                                    N{{ str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) }}-S{{ str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT) }}
+                                    INV{{ str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) }}-S{{ str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT) }}
                                 </span>
                             </a>
                             @elseif($supportingAsset)
