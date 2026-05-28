@@ -50,7 +50,7 @@ class LestariPertiwiSeeder extends Seeder
         foreach ($rows as $r) {
             $strPad  = str_pad($r['string'], 2, '0', STR_PAD_LEFT);
             $slotPad = str_pad($r['slot'], 2, '0', STR_PAD_LEFT);
-            $code    = "{$r['block']}-N{$strPad}-S{$slotPad}";
+            $code    = "{$r['block']}-INV{$strPad}-S{$slotPad}";
 
             Asset::create([
                 'asset_code'        => $code,
