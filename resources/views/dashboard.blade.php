@@ -245,8 +245,21 @@
 
     {{-- PV Module Map --}}
     @if($pvMapData->isNotEmpty())
+    @php
+        $firstBlock    = $pvMapData->keys()->first() ?? '';
+        $allBlocks     = $pvMapData->keys()->values()->toArray();
+        $blockLocNames = $blockLocations ?? [];
+    @endphp
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
-         x-data="{ activeBlock: '{{ $pvMapData->keys()->first() }}' }">
+         x-data="{
+             activeBlock: '{{ $firstBlock }}',
+             blocks: {{ json_encode($allBlocks) }},
+             blockNames: {{ json_encode($blockLocNames) }},
+             showBlockDropdown: false,
+             get activeIndex() { return this.blocks.indexOf(this.activeBlock); },
+             prev() { this.activeBlock = this.blocks[Math.max(0, this.activeIndex - 1)]; },
+             next() { this.activeBlock = this.blocks[Math.min(this.blocks.length - 1, this.activeIndex + 1)]; }
+         }">
 
         {{-- Header --}}
         <div class="px-6 py-5 border-b border-gray-50 flex flex-wrap items-center justify-between gap-3">
@@ -254,14 +267,47 @@
                 <h2 class="text-lg font-bold text-gray-900">Peta Susunan PV Module</h2>
                 <p class="text-xs text-gray-500">Status kondisi setiap modul secara visual — klik sel untuk detail aset</p>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                @foreach($pvMapData->keys() as $block)
-                <button @click="activeBlock = '{{ $block }}'"
-                        :class="activeBlock === '{{ $block }}' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all font-mono">
-                    {{ $block }}
+            <div class="flex items-center gap-1.5">
+                {{-- Prev --}}
+                <button @click="prev()" :disabled="activeIndex === 0"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
                 </button>
-                @endforeach
+
+                {{-- Badge + Dropdown --}}
+                <div class="relative">
+                    <button @click="showBlockDropdown = !showBlockDropdown"
+                            class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-200/50 transition-all">
+                        <span class="font-mono" x-text="activeBlock"></span>
+                        <span class="text-emerald-200 font-normal text-xs" x-text="blockNames[activeBlock] ? '— ' + blockNames[activeBlock] : ''"></span>
+                        <svg class="w-3.5 h-3.5 text-emerald-300 transition-transform duration-200" :class="showBlockDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+
+                    <div x-show="showBlockDropdown"
+                         @click.outside="showBlockDropdown = false"
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 min-w-[200px] z-50">
+                        @foreach($pvMapData->keys() as $block)
+                        <button @click="activeBlock = '{{ $block }}'; showBlockDropdown = false"
+                                class="w-full text-left px-4 py-2.5 text-sm transition-all flex items-center justify-between gap-4"
+                                :class="activeBlock === '{{ $block }}' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50'">
+                            <span class="font-mono font-bold">{{ $block }}</span>
+                            <span class="text-xs text-gray-400 truncate">{{ $blockLocations[$block] ?? '' }}</span>
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Next --}}
+                <button @click="next()" :disabled="activeIndex === blocks.length - 1"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
             </div>
         </div>
 
@@ -401,7 +447,9 @@
                                     'Metering'    => 'bg-indigo-500 hover:bg-indigo-600 ring-indigo-300',
                                 ];
                                 $saColor = $saColorMap[$supportingAsset->category] ?? 'bg-slate-500 hover:bg-slate-600 ring-slate-300';
-                                $saLabel = $supportingAsset->category === 'Transformer' ? 'TRAFO' : strtoupper($supportingAsset->category);
+                                $saLabel = $supportingAsset->category === 'Transformer'
+                                    ? 'TRAFO'
+                                    : collect(explode('-', $supportingAsset->asset_code))->last();
                             @endphp
                             <a href="{{ route('assets.show', $supportingAsset->id) }}"
                                @mouseenter="tip = { code: '{{ $supportingAsset->asset_code }}', name: '{{ addslashes($supportingAsset->name) }}', status: '{{ $supportingAsset->status }}' }"

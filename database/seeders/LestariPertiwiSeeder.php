@@ -10,15 +10,18 @@ class LestariPertiwiSeeder extends Seeder
 {
     public function run(): void
     {
-        $location = Location::create([
-            'name'         => 'Lestari Pertiwi',
-            'capacity_mwp' => 0.137,
-            'address'      => 'Jl. Lestari Pertiwi No. 1, Area PLTS',
-            'is_active'    => true,
-        ]);
+        $location = Location::firstOrCreate(
+            ['name' => 'Lestari Pertiwi'],
+            [
+                'capacity_mwp' => 0.137,
+                'address'      => 'Jl. Lestari Pertiwi No. 1, Area PLTS',
+                'is_active'    => true,
+            ]
+        );
 
         $this->seedPVModules($location->id);
         $this->seedSupportingAssets($location->id);
+        $this->seedStringInverters($location->id);
     }
 
     private function seedPVModules(int $locationId): void
@@ -33,49 +36,48 @@ class LestariPertiwiSeeder extends Seeder
         $handle = fopen($csvPath, 'r');
         fgetcsv($handle); // skip header
 
-        $rows = [];
+        $count = 0;
         while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) >= 5) {
-                $rows[] = [
-                    'block'      => trim($row[0]),
-                    'string'     => (int) $row[1],
-                    'slot'       => (int) $row[2],
-                    'visual_row' => (int) $row[3],
-                    'visual_col' => (int) $row[4],
-                ];
-            }
+            if (count($row) < 5) continue;
+
+            [$block, $string, $slot, $visualRow, $visualCol] = $row;
+            $block  = trim($block);
+            $string = (int) $string;
+            $slot   = (int) $slot;
+
+            $strPad  = str_pad($string, 2, '0', STR_PAD_LEFT);
+            $slotPad = str_pad($slot,   2, '0', STR_PAD_LEFT);
+            $code    = "{$block}-INV{$strPad}-S{$slotPad}";
+
+            Asset::updateOrCreate(
+                [
+                    'transformer_block' => $block,
+                    'string_number'     => $string,
+                    'module_slot'       => $slot,
+                ],
+                [
+                    'asset_code'      => $code,
+                    'location_id'     => $locationId,
+                    'name'            => "PV Module {$code}",
+                    'category'        => 'PV Module',
+                    'location'        => "Ground Array {$block}",
+                    'status'          => 'active',
+                    'brand'           => 'Jinko Solar',
+                    'model'           => 'JKM550M-72HL4-V',
+                    'serial_number'   => "SN-{$code}",
+                    'purchase_date'   => '2024-03-01',
+                    'purchase_price'  => 4200000,
+                    'warranty_expiry' => '2049-03-01',
+                    'description'     => "PV module INV{$strPad}-S{$slotPad}, blok {$block}",
+                    'visual_row'      => (int) $visualRow,
+                    'visual_col'      => (int) $visualCol,
+                ]
+            );
+            $count++;
         }
+
         fclose($handle);
-
-        foreach ($rows as $r) {
-            $strPad  = str_pad($r['string'], 2, '0', STR_PAD_LEFT);
-            $slotPad = str_pad($r['slot'], 2, '0', STR_PAD_LEFT);
-            $code    = "{$r['block']}-INV{$strPad}-S{$slotPad}";
-
-            Asset::create([
-                'asset_code'        => $code,
-                'location_id'       => $locationId,
-                'name'              => "PV Module {$code}",
-                'category'          => 'PV Module',
-                'location'          => "Ground Array {$r['block']}",
-                'status'            => 'active',
-                'brand'             => 'Jinko Solar',
-                'model'             => 'JKM550M-72HL4-V',
-                'serial_number'     => "SN-{$code}",
-                'purchase_date'     => '2024-03-01',
-                'purchase_price'    => 4200000,
-                'warranty_expiry'   => '2049-03-01',
-                'description'       => "PV module string N{$strPad}, slot S{$slotPad}, blok {$r['block']}",
-                'transformer_block' => $r['block'],
-                'string_number'     => $r['string'],
-                'module_slot'       => $r['slot'],
-                'visual_row'        => $r['visual_row'],
-                'visual_col'        => $r['visual_col'],
-            ]);
-        }
-
-        $count = count($rows);
-        $this->command->info("  Seeded PV modules: {$count}");
+        $this->command->info("  PV modules T01: {$count}");
     }
 
     private function seedSupportingAssets(int $locationId): void
@@ -131,10 +133,50 @@ class LestariPertiwiSeeder extends Seeder
         ];
 
         foreach ($assets as $asset) {
-            Asset::create(array_merge($asset, ['location_id' => $locationId]));
+            Asset::updateOrCreate(
+                ['asset_code' => $asset['asset_code']],
+                array_merge($asset, ['location_id' => $locationId])
+            );
         }
 
-        $count = count($assets);
-        $this->command->info("  Seeded supporting assets: {$count}");
+        $this->command->info('  Supporting assets T01: ' . count($assets));
+    }
+
+    private function seedStringInverters(int $locationId): void
+    {
+        $inverters = [
+            ['code' => 'T01-INV01', 'row' => 4,  'col' => 10],
+            ['code' => 'T01-INV02', 'row' => 2,  'col' => 10],
+            ['code' => 'T01-INV03', 'row' => 5,  'col' => 17],
+            ['code' => 'T01-INV04', 'row' => 2,  'col' => 17],
+            ['code' => 'T01-INV05', 'row' => 6,  'col' => 10],
+            ['code' => 'T01-INV06', 'row' => 9,  'col' => 17],
+            ['code' => 'T01-INV07', 'row' => 7,  'col' => 17],
+            ['code' => 'T01-INV08', 'row' => 8,  'col' => 10],
+            ['code' => 'T01-INV09', 'row' => 10, 'col' => 17],
+            ['code' => 'T01-INV10', 'row' => 10, 'col' => 10],
+            ['code' => 'T01-INV11', 'row' => 12, 'col' => 17],
+            ['code' => 'T01-INV12', 'row' => 13, 'col' => 17],
+        ];
+
+        foreach ($inverters as $inv) {
+            Asset::updateOrCreate(
+                ['asset_code' => $inv['code']],
+                [
+                    'location_id'       => $locationId,
+                    'name'              => 'Inverter ' . $inv['code'],
+                    'category'          => 'Inverter',
+                    'location'          => 'Area PLTS T01',
+                    'status'            => 'active',
+                    'brand'             => 'Huawei',
+                    'model'             => 'SUN2000-36KTL-M3',
+                    'transformer_block' => 'T01',
+                    'visual_row'        => $inv['row'],
+                    'visual_col'        => $inv['col'],
+                ]
+            );
+        }
+
+        $this->command->info('  String inverters T01: ' . count($inverters));
     }
 }
