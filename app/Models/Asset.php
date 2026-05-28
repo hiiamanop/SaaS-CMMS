@@ -14,6 +14,8 @@ class Asset extends Model
         'asset_code', 'location_id', 'name', 'category', 'location', 'status',
         'brand', 'model', 'serial_number', 'purchase_date',
         'purchase_price', 'warranty_expiry', 'description', 'photo',
+        'transformer_block', 'string_number', 'module_slot',
+        'visual_row', 'visual_col',
     ];
 
     protected function casts(): array
@@ -36,9 +38,37 @@ class Asset extends Model
         return match($this->status) {
             'active' => 'green',
             'inactive' => 'gray',
-            'under_maintenance' => 'yellow',
+            'replaced' => 'yellow',
             'retired' => 'red',
             default => 'gray',
         };
+    }
+
+    public function getHierarchyCodeAttribute(): ?string
+    {
+        if (!$this->transformer_block || !$this->string_number || !$this->module_slot) {
+            return null;
+        }
+
+        $stringPad = str_pad($this->string_number, 2, '0', STR_PAD_LEFT);
+        $modulePad = str_pad($this->module_slot, 2, '0', STR_PAD_LEFT);
+
+        return "{$this->transformer_block}-N{$stringPad}-S{$modulePad}";
+    }
+
+    public function scopeByTransformerBlock($query, $block)
+    {
+        return $query->where('transformer_block', $block);
+    }
+
+    public function scopeByString($query, $block, $stringNumber)
+    {
+        return $query->where('transformer_block', $block)
+            ->where('string_number', $stringNumber);
+    }
+
+    public function scopeIsPVModule($query)
+    {
+        return $query->where('category', 'PV Module')->whereNotNull('transformer_block');
     }
 }

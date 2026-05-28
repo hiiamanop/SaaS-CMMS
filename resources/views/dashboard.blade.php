@@ -242,6 +242,254 @@
             </div>
         </div>
     </div>
+
+    {{-- PV Module Map --}}
+    @if($pvMapData->isNotEmpty())
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+         x-data="{ activeBlock: '{{ $pvMapData->keys()->first() }}' }">
+
+        {{-- Header --}}
+        <div class="px-6 py-5 border-b border-gray-50 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Peta Susunan PV Module</h2>
+                <p class="text-xs text-gray-500">Status kondisi setiap modul secara visual — klik sel untuk detail aset</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                @foreach($pvMapData->keys() as $block)
+                <button @click="activeBlock = '{{ $block }}'"
+                        :class="activeBlock === '{{ $block }}' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all font-mono">
+                    {{ $block }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Legend --}}
+        <div class="px-6 pt-4 pb-2 flex items-center gap-5 flex-wrap">
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-emerald-400 inline-block"></span>Active</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-amber-400 inline-block"></span>Replaced</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-gray-300 inline-block"></span>Inactive</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-red-400 inline-block"></span>Retired</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded border-2 border-dashed border-gray-300 inline-block"></span>Belum Input</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-violet-500 inline-block"></span>Transformer</span>
+        </div>
+
+        {{-- Grid per block --}}
+        @foreach($pvMapData as $block => $modules)
+        @php
+            $useVisual = $modules->whereNotNull('visual_row')->whereNotNull('visual_col')->count() > 0;
+            $statusColors = [
+                'active'            => 'bg-emerald-400 hover:bg-emerald-500 ring-emerald-300',
+                'replaced'          => 'bg-amber-400 hover:bg-amber-500 ring-amber-300',
+                'inactive'          => 'bg-gray-300 hover:bg-gray-400 ring-gray-200',
+                'retired'           => 'bg-red-400 hover:bg-red-500 ring-red-300',
+            ];
+
+            if ($useVisual) {
+                $maxRow = $modules->max('visual_row');
+                $maxCol = $modules->max('visual_col');
+                // Build lookup: [row][col] => asset
+                $grid = [];
+                foreach ($modules->whereNotNull('visual_row') as $m) {
+                    $grid[$m->visual_row][$m->visual_col] = $m;
+                }
+                // Detect column gaps (section dividers — gaps ≥ 2 between consecutive used cols)
+                $usedCols = $modules->whereNotNull('visual_col')->pluck('visual_col')->unique()->sort()->values();
+                $dividerCols = [];
+                for ($i = 1; $i < $usedCols->count(); $i++) {
+                    if ($usedCols[$i] - $usedCols[$i - 1] >= 2) {
+                        $dividerCols[] = $usedCols[$i - 1]; // gap after this col
+                    }
+                }
+            } else {
+                $maxRow = $modules->max('string_number');
+                $maxCol = $modules->max('module_slot');
+                $grid = [];
+                foreach ($modules as $m) {
+                    $grid[$m->string_number][$m->module_slot] = $m;
+                }
+                $dividerCols = [];
+            }
+
+            // Supporting assets (Inverter, Transformer, Metering) with visual positions
+            $supportingGrid = [];
+            if (isset($supportingAssets[$block])) {
+                foreach ($supportingAssets[$block] as $sa) {
+                    if ($sa->visual_row && $sa->visual_col) {
+                        $supportingGrid[$sa->visual_row][$sa->visual_col] = $sa;
+                        $maxRow = max($maxRow, $sa->visual_row);
+                    }
+                }
+            }
+        @endphp
+        <div x-show="activeBlock === '{{ $block }}'" x-cloak
+             x-data="{ tip: null }"
+             @mousemove.window="if(tip && $refs.pvtip) { $refs.pvtip.style.top = ($event.clientY + 14) + 'px'; $refs.pvtip.style.left = ($event.clientX + 14) + 'px' }"
+             class="px-6 pb-6 overflow-x-auto">
+
+            {{-- Tooltip --}}
+            <div x-ref="pvtip" x-show="tip" x-cloak
+                 style="position:fixed;pointer-events:none;z-index:9999;"
+                 class="bg-gray-900 text-white rounded-xl px-3 py-2.5 text-xs shadow-2xl min-w-[140px]">
+                <p class="font-mono font-black text-emerald-400" x-text="tip?.code"></p>
+                <p class="mt-0.5 text-gray-200 font-medium" x-text="tip?.name"></p>
+                <p class="mt-1 text-[10px] uppercase tracking-widest font-bold"
+                   :class="{
+                     'text-emerald-400': tip?.status === 'active',
+                     'text-amber-400': tip?.status === 'replaced',
+                     'text-gray-400': tip?.status === 'inactive',
+                     'text-red-400': tip?.status === 'retired'
+                   }"
+                   x-text="tip?.status?.replaceAll('_', ' ')"></p>
+            </div>
+
+            @if(!$useVisual)
+            {{-- Mode: simple string×slot grid (no visual positions yet) --}}
+            <p class="text-[10px] text-amber-500 font-medium mb-2 pt-2">
+                ⚠ Posisi visual belum dikonfigurasi — menampilkan grid sederhana (string × slot).
+                Import layout via: <code class="bg-gray-100 px-1 rounded">php artisan cmms:import-pv-layout layout.csv</code>
+            </p>
+            @endif
+
+            <div class="pt-1 flex justify-center">
+                <table class="border-separate" style="border-spacing:3px;">
+                    @if(!$useVisual)
+                    <thead>
+                        <tr>
+                            <th class="w-8"></th>
+                            @for($col = 1; $col <= $maxCol; $col++)
+                            <th class="w-[22px] text-[7px] font-bold text-gray-300 text-center pb-0.5">{{ $col }}</th>
+                            @endfor
+                        </tr>
+                    </thead>
+                    @endif
+                    <tbody>
+                    @for($row = 1; $row <= $maxRow; $row++)
+                    <tr>
+                        @if(!$useVisual)
+                        <td class="text-right pr-1 text-[8px] font-bold text-gray-400 w-8 align-middle">
+                            N{{ str_pad($row, 2, '0', STR_PAD_LEFT) }}
+                        </td>
+                        @endif
+                        @for($col = 1; $col <= $maxCol; $col++)
+                        @php
+                            $asset           = $grid[$row][$col] ?? null;
+                            $supportingAsset = $supportingGrid[$row][$col] ?? null;
+                            $isDivider       = in_array($col, $dividerCols);
+                        @endphp
+                        <td class="p-0 align-middle {{ $isDivider ? 'border-r-2 border-gray-300' : '' }}"
+                            style="width:52px;height:30px;">
+                            @if($asset)
+                            @php
+                                $hierarchyCode = $asset->transformer_block . '-N' . str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) . '-S' . str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT);
+                                $colorClass    = $statusColors[$asset->status] ?? 'bg-gray-200 ring-gray-200';
+                            @endphp
+                            <a href="{{ route('assets.show', $asset->id) }}"
+                               @mouseenter="tip = { code: '{{ $hierarchyCode }}', name: '{{ addslashes($asset->name) }}', status: '{{ $asset->status }}' }"
+                               @mouseleave="tip = null"
+                               class="flex items-center justify-center w-[52px] h-[30px] rounded-[3px] transition-all duration-100 hover:scale-[1.2] hover:z-10 relative hover:ring-2 {{ $colorClass }}">
+                                <span class="text-[7px] font-bold text-gray-800 leading-none select-none pointer-events-none">
+                                    N{{ str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) }}-S{{ str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT) }}
+                                </span>
+                            </a>
+                            @elseif($supportingAsset)
+                            @php
+                                $saColorMap = [
+                                    'Inverter'    => 'bg-blue-500 hover:bg-blue-600 ring-blue-300',
+                                    'Transformer' => 'bg-violet-500 hover:bg-violet-600 ring-violet-300',
+                                    'Metering'    => 'bg-indigo-500 hover:bg-indigo-600 ring-indigo-300',
+                                ];
+                                $saColor = $saColorMap[$supportingAsset->category] ?? 'bg-slate-500 hover:bg-slate-600 ring-slate-300';
+                                $saLabel = $supportingAsset->category === 'Transformer' ? 'TRAFO' : strtoupper($supportingAsset->category);
+                            @endphp
+                            <a href="{{ route('assets.show', $supportingAsset->id) }}"
+                               @mouseenter="tip = { code: '{{ $supportingAsset->asset_code }}', name: '{{ addslashes($supportingAsset->name) }}', status: '{{ $supportingAsset->status }}' }"
+                               @mouseleave="tip = null"
+                               class="flex items-center justify-center w-[52px] h-[30px] rounded-[3px] transition-all duration-100 hover:scale-[1.2] hover:z-10 relative hover:ring-2 {{ $saColor }}">
+                                <span class="text-[7px] font-bold text-white leading-none select-none pointer-events-none">{{ $saLabel }}</span>
+                            </a>
+                            @else
+                            <div class="w-[52px] h-[30px] rounded-[3px] border border-dashed border-gray-200 bg-gray-50"></div>
+                            @endif
+                        </td>
+                        @endfor
+                    </tr>
+                    @endfor
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Summary strip --}}
+            <div class="mt-4 pt-3 border-t border-gray-50 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-500">
+                @if($useVisual)
+                <span class="text-emerald-600 font-medium">✓ Layout fisik aktif</span>
+                <span>Grid: <b class="text-gray-700">{{ $maxRow }} baris × {{ $maxCol }} kol</b></span>
+                @else
+                <span>{{ $modules->max('string_number') }} string × {{ $modules->max('module_slot') }} slot</span>
+                @endif
+                <span>Terdaftar: <b class="text-gray-800">{{ $modules->count() }}</b></span>
+                <span class="text-emerald-600 font-medium">Active: {{ $modules->where('status','active')->count() }}</span>
+                @if($modules->where('status','replaced')->count())
+                <span class="text-amber-600 font-medium">Replaced: {{ $modules->where('status','replaced')->count() }}</span>
+                @endif
+                @if($modules->where('status','inactive')->count())
+                <span class="text-gray-500 font-medium">Inactive: {{ $modules->where('status','inactive')->count() }}</span>
+                @endif
+                @if($modules->where('status','retired')->count())
+                <span class="text-red-500 font-medium">Retired: {{ $modules->where('status','retired')->count() }}</span>
+                @endif
+            </div>
+
+            {{-- Supporting Assets Panel (Inverter / Transformer / Metering) --}}
+            @if(isset($supportingAssets[$block]) && $supportingAssets[$block]->isNotEmpty())
+            @php
+                $statusIcon = [
+                    'active'            => ['dot' => 'bg-emerald-400', 'text' => 'text-emerald-600', 'label' => 'Active'],
+                    'replaced'          => ['dot' => 'bg-amber-400',   'text' => 'text-amber-600',   'label' => 'Replaced'],
+                    'inactive'          => ['dot' => 'bg-gray-300',    'text' => 'text-gray-500',    'label' => 'Inactive'],
+                    'retired'           => ['dot' => 'bg-red-400',     'text' => 'text-red-500',     'label' => 'Retired'],
+                ];
+                $categoryIcon = [
+                    'Inverter'    => 'M13 10V3L4 14h7v7l9-11h-7z',
+                    'Transformer' => 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18',
+                    'Metering'    => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+                ];
+            @endphp
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Perangkat Pendukung — Blok {{ $block }}</p>
+                <div class="flex flex-wrap gap-3">
+                    @foreach($supportingAssets[$block] as $sa)
+                    @php
+                        $si = $statusIcon[$sa->status] ?? ['dot'=>'bg-gray-300','text'=>'text-gray-500','label'=>$sa->status];
+                        $ci = $categoryIcon[$sa->category] ?? 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16';
+                    @endphp
+                    <a href="{{ route('assets.show', $sa->id) }}"
+                       class="flex items-center gap-3 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-2xl px-4 py-3 transition-all group min-w-[200px]">
+                        <div class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 group-hover:text-emerald-600 transition-colors shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $ci }}"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $sa->category }}</p>
+                            <p class="text-sm font-bold text-gray-800 truncate">{{ $sa->name }}</p>
+                            <p class="text-[10px] text-gray-500 truncate">{{ $sa->brand }} {{ $sa->model }}</p>
+                            <div class="flex items-center gap-1 mt-1">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $si['dot'] }}"></span>
+                                <span class="text-[10px] font-bold {{ $si['text'] }}">{{ $si['label'] }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+        @endforeach
+    </div>
+    @endif
+
 </div>
 @endsection
 

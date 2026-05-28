@@ -2,7 +2,7 @@
 @section('title', $asset->name)
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('assets.index') }}" class="hover:text-gray-800">Assets</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">{{ $asset->name }}</span>@endsection
 @section('content')
-@php $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','under_maintenance'=>'bg-yellow-100 text-yellow-700','retired'=>'bg-red-100 text-red-600']; @endphp
+@php $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','replaced'=>'bg-amber-100 text-amber-700','retired'=>'bg-red-100 text-red-600']; @endphp
 <div class="space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -42,6 +42,15 @@
 
         {{-- Overview --}}
         <div x-show="tab==='overview'" class="p-6">
+            @if($asset->hierarchy_code)
+            <div class="mb-5 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3">
+                <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+                <div>
+                    <span class="text-xs font-medium text-blue-500 uppercase tracking-wide">PV Module Position</span>
+                    <p class="text-base font-bold text-blue-800 font-mono">{{ $asset->hierarchy_code }}</p>
+                </div>
+            </div>
+            @endif
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                 @php $fields=[['Location',$asset->location],['Brand',$asset->brand??'—'],['Model',$asset->model??'—'],['Serial #',$asset->serial_number??'—'],['Purchase Date',$asset->purchase_date?->format('M d, Y')??'—'],['Purchase Price',$asset->purchase_price?'IDR '.number_format($asset->purchase_price):'—'],['Warranty Expiry',$asset->warranty_expiry?->format('M d, Y')??'—'],['Description',$asset->description??'—']]; @endphp
                 @foreach($fields as [$label,$value])

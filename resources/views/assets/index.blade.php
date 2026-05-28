@@ -23,7 +23,7 @@
                 <option value="">All Statuses</option>
                 <option value="active" {{ request('status')=='active'?'selected':'' }}>Active</option>
                 <option value="inactive" {{ request('status')=='inactive'?'selected':'' }}>Inactive</option>
-                <option value="under_maintenance" {{ request('status')=='under_maintenance'?'selected':'' }}>Under Maintenance</option>
+                <option value="replaced" {{ request('status')=='replaced'?'selected':'' }}>Replaced</option>
                 <option value="retired" {{ request('status')=='retired'?'selected':'' }}>Retired</option>
             </select>
             <button type="submit" class="px-4 py-2 bg-brand-dark text-white font-bold rounded-lg text-sm font-medium hover:bg-gray-700">Filter</button>
@@ -44,7 +44,7 @@
             @php $lastLocation = null; @endphp
             @foreach($assets as $asset)
             @php 
-                $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','under_maintenance'=>'bg-yellow-100 text-yellow-700','retired'=>'bg-red-100 text-red-600']; 
+                $sc=['active'=>'bg-green-100 text-green-700','inactive'=>'bg-gray-100 text-gray-600','replaced'=>'bg-amber-100 text-amber-700','retired'=>'bg-red-100 text-red-600'];
             @endphp
 
             @if($lastLocation !== $asset->location)

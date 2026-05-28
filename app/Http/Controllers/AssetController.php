@@ -47,7 +47,7 @@ class AssetController extends Controller
             'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
             'location' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive,under_maintenance,retired',
+            'status' => 'required|in:active,inactive,replaced,retired',
             'brand' => 'nullable|string',
             'model' => 'nullable|string',
             'serial_number' => 'nullable|string',
@@ -56,6 +56,9 @@ class AssetController extends Controller
             'warranty_expiry' => 'nullable|date',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
+            'transformer_block' => 'nullable|string|max:20',
+            'string_number' => 'nullable|integer|min:1|max:999',
+            'module_slot' => 'nullable|integer|min:1|max:999',
         ]);
 
         if ($request->hasFile('photo')) {
@@ -90,7 +93,7 @@ class AssetController extends Controller
             'location_id' => 'required|exists:locations,id',
             'category' => 'required|string|max:100',
             'location' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive,under_maintenance,retired',
+            'status' => 'required|in:active,inactive,replaced,retired',
             'brand' => 'nullable|string',
             'model' => 'nullable|string',
             'serial_number' => 'nullable|string',
@@ -99,6 +102,9 @@ class AssetController extends Controller
             'warranty_expiry' => 'nullable|date',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|max:2048',
+            'transformer_block' => 'nullable|string|max:20',
+            'string_number' => 'nullable|integer|min:1|max:999',
+            'module_slot' => 'nullable|integer|min:1|max:999',
         ]);
 
         if ($request->hasFile('photo')) {
