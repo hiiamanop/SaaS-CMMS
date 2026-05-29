@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('consumables', ConsumableController::class);
 
     // Maintenance Schedules
+    Route::get('maintenance-schedules/transformers', [MaintenanceScheduleController::class, 'getTransformers'])->name('maintenance-schedules.transformers');
     Route::resource('maintenance-schedules', MaintenanceScheduleController::class);
 
     // Findings

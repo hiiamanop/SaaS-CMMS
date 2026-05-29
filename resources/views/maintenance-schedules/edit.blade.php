@@ -35,9 +35,14 @@ if ($oldWeeks !== null) {
               frequency: '{{ old('frequency', $s->frequency) }}',
               locationId: '{{ old('location_id', $s->location_id ?? $userLocation?->id ?? '') }}',
               trafoName: '{{ old('trafo_name', $s->trafo_name ?? '') }}',
-              transformers: @json($transformersByLocation),
-              get trafoOptions() { return this.locationId && this.transformers[this.locationId] ? this.transformers[this.locationId] : []; }
-          }">
+              trafoOptions: [],
+              async loadTrafos() {
+                  if (!this.locationId) { this.trafoOptions = []; return; }
+                  const r = await fetch('{{ route('maintenance-schedules.transformers') }}?location_id=' + this.locationId);
+                  this.trafoOptions = await r.json();
+              }
+          }"
+          x-init="loadTrafos()">
         @csrf @method('PUT')
 
         {{-- Informasi Alat --}}
@@ -48,7 +53,7 @@ if ($oldWeeks !== null) {
                 @if(auth()->user()->isAdmin())
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi PLTS <span class="text-red-500">*</span></label>
-                    <select name="location_id" x-model="locationId" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('location_id') border-red-400 @enderror">
+                    <select name="location_id" x-model="locationId" @change="loadTrafos()" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('location_id') border-red-400 @enderror">
                         <option value="">Pilih lokasi PLTS...</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('location_id', $s->location_id) == $loc->id ? 'selected' : '' }}>

@@ -56,27 +56,25 @@ class MaintenanceScheduleController extends Controller
 
     public function create()
     {
-        $technicians            = User::whereIn('role', ['technician', 'supervisor'])->orderBy('name')->get();
-        $locations              = Location::where('is_active', true)->orderBy('name')->get();
-        $userLocation           = Auth::user()->location;
-        $transformersByLocation = $this->getTransformersByLocation();
-        return view('maintenance-schedules.create', compact('technicians', 'locations', 'userLocation', 'transformersByLocation'));
+        $technicians  = User::whereIn('role', ['technician', 'supervisor'])->orderBy('name')->get();
+        $locations    = Location::where('is_active', true)->orderBy('name')->get();
+        $userLocation = Auth::user()->location;
+        return view('maintenance-schedules.create', compact('technicians', 'locations', 'userLocation'));
     }
 
-    private function getTransformersByLocation(): array
+    public function getTransformers(Request $request)
     {
-        return \App\Models\Asset::where('category', 'Transformer')
-            ->whereNotNull('location_id')
-            ->select(['id', 'name', 'asset_code', 'location_id', 'transformer_block'])
-            ->orderBy('location_id')
+        $locationId = $request->integer('location_id');
+        $transformers = \App\Models\Asset::where('category', 'Transformer')
+            ->where('location_id', $locationId)
             ->orderBy('name')
-            ->get()
-            ->groupBy('location_id')
-            ->map(fn($assets) => $assets->map(fn($a) => [
+            ->get(['id', 'name', 'transformer_block'])
+            ->map(fn($a) => [
                 'value' => $a->transformer_block ?? $a->name,
                 'label' => $a->transformer_block ? $a->transformer_block . ' — ' . $a->name : $a->name,
-            ])->values()->toArray())
-            ->toArray();
+            ]);
+
+        return response()->json($transformers);
     }
 
     public function store(Request $request)
@@ -149,11 +147,10 @@ class MaintenanceScheduleController extends Controller
 
     public function edit(MaintenanceSchedule $maintenanceSchedule)
     {
-        $technicians            = User::whereIn('role', ['technician', 'supervisor'])->orderBy('name')->get();
-        $locations              = Location::where('is_active', true)->orderBy('name')->get();
-        $userLocation           = Auth::user()->location;
-        $transformersByLocation = $this->getTransformersByLocation();
-        return view('maintenance-schedules.edit', compact('maintenanceSchedule', 'technicians', 'locations', 'userLocation', 'transformersByLocation'));
+        $technicians  = User::whereIn('role', ['technician', 'supervisor'])->orderBy('name')->get();
+        $locations    = Location::where('is_active', true)->orderBy('name')->get();
+        $userLocation = Auth::user()->location;
+        return view('maintenance-schedules.edit', compact('maintenanceSchedule', 'technicians', 'locations', 'userLocation'));
     }
 
     public function update(Request $request, MaintenanceSchedule $maintenanceSchedule)

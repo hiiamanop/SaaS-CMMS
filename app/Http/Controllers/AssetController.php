@@ -26,7 +26,7 @@ class AssetController extends Controller
         if ($request->location)
             $query->where('location', 'like', '%' . $request->location . '%');
 
-        $assets = $query->orderBy('location')->latest()->paginate(15)->withQueryString();
+        $assets = $query->orderBy('location')->orderBy('name')->paginate(15)->withQueryString();
         $categories = Asset::distinct()->pluck('category');
         $locations = Asset::distinct()->pluck('location');
 
