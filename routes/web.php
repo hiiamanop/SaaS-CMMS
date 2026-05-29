@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Maintenance Schedules
     Route::resource('maintenance-schedules', MaintenanceScheduleController::class);
 
+    // Findings
+    Route::resource('findings', \App\Http\Controllers\FindingController::class);
+
     // Work Orders
     Route::resource('work-orders', WorkOrderController::class);
     Route::post('work-orders/{workOrder}/update-status', [WorkOrderController::class, 'updateStatus'])->name('work-orders.update-status');

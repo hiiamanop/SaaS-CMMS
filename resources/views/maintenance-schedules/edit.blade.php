@@ -30,7 +30,14 @@ if ($oldWeeks !== null) {
     </div>
 
     <form action="{{ route('maintenance-schedules.update', $s) }}" method="POST" class="space-y-6"
-          x-data="{ shutdown: {{ ($s->shutdown_required || old('shutdown_required')) ? 'true' : 'false' }}, frequency: '{{ old('frequency', $s->frequency) }}' }">
+          x-data="{
+              shutdown: {{ ($s->shutdown_required || old('shutdown_required')) ? 'true' : 'false' }},
+              frequency: '{{ old('frequency', $s->frequency) }}',
+              locationId: '{{ old('location_id', $s->location_id ?? $userLocation?->id ?? '') }}',
+              trafoName: '{{ old('trafo_name', $s->trafo_name ?? '') }}',
+              transformers: @json($transformersByLocation),
+              get trafoOptions() { return this.locationId && this.transformers[this.locationId] ? this.transformers[this.locationId] : []; }
+          }">
         @csrf @method('PUT')
 
         {{-- Informasi Alat --}}
@@ -41,7 +48,7 @@ if ($oldWeeks !== null) {
                 @if(auth()->user()->isAdmin())
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Lokasi PLTS <span class="text-red-500">*</span></label>
-                    <select name="location_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('location_id') border-red-400 @enderror">
+                    <select name="location_id" x-model="locationId" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('location_id') border-red-400 @enderror">
                         <option value="">Pilih lokasi PLTS...</option>
                         @foreach($locations as $loc)
                         <option value="{{ $loc->id }}" {{ old('location_id', $s->location_id) == $loc->id ? 'selected' : '' }}>
@@ -65,10 +72,20 @@ if ($oldWeeks !== null) {
 
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Alat / Trafo <span class="text-red-500">*</span></label>
-                    <input name="trafo_name" value="{{ old('trafo_name', $s->trafo_name) }}" required
-                           placeholder="cth: Trafo 1600 kVA, TR-01"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('trafo_name') border-red-400 @enderror">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Trafo <span class="text-red-500">*</span></label>
+                    <select name="trafo_name" x-model="trafoName" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('trafo_name') border-red-400 @enderror">
+                        <option value="">— Pilih Trafo —</option>
+                        <template x-for="t in trafoOptions" :key="t.value">
+                            <option :value="t.value" x-text="t.label" :selected="t.value === trafoName"></option>
+                        </template>
+                        <template x-if="trafoOptions.length === 0 && locationId">
+                            <option disabled>Tidak ada trafo di PLTS ini</option>
+                        </template>
+                        <template x-if="!locationId">
+                            <option disabled>Pilih PLTS terlebih dahulu</option>
+                        </template>
+                    </select>
                     @error('trafo_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>

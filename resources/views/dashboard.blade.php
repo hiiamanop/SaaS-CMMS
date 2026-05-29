@@ -318,6 +318,7 @@
             <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-gray-300 inline-block"></span>Inactive</span>
             <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-red-400 inline-block"></span>Retired</span>
             <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded border-2 border-dashed border-gray-300 inline-block"></span>Belum Input</span>
+            <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-blue-500 inline-block"></span>Inverter</span>
             <span class="flex items-center gap-1.5 text-xs text-gray-600 font-medium"><span class="w-3.5 h-3.5 rounded bg-violet-500 inline-block"></span>Transformer</span>
         </div>
 
@@ -489,50 +490,6 @@
                 @endif
             </div>
 
-            {{-- Supporting Assets Panel (Inverter / Transformer / Metering) --}}
-            @if(isset($supportingAssets[$block]) && $supportingAssets[$block]->isNotEmpty())
-            @php
-                $statusIcon = [
-                    'active'            => ['dot' => 'bg-emerald-400', 'text' => 'text-emerald-600', 'label' => 'Active'],
-                    'replaced'          => ['dot' => 'bg-amber-400',   'text' => 'text-amber-600',   'label' => 'Replaced'],
-                    'inactive'          => ['dot' => 'bg-gray-300',    'text' => 'text-gray-500',    'label' => 'Inactive'],
-                    'retired'           => ['dot' => 'bg-red-400',     'text' => 'text-red-500',     'label' => 'Retired'],
-                ];
-                $categoryIcon = [
-                    'Inverter'    => 'M13 10V3L4 14h7v7l9-11h-7z',
-                    'Transformer' => 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18',
-                    'Metering'    => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-                ];
-            @endphp
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Perangkat Pendukung — Blok {{ $block }}</p>
-                <div class="flex flex-wrap gap-3">
-                    @foreach($supportingAssets[$block] as $sa)
-                    @php
-                        $si = $statusIcon[$sa->status] ?? ['dot'=>'bg-gray-300','text'=>'text-gray-500','label'=>$sa->status];
-                        $ci = $categoryIcon[$sa->category] ?? 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16';
-                    @endphp
-                    <a href="{{ route('assets.show', $sa->id) }}"
-                       class="flex items-center gap-3 bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 rounded-2xl px-4 py-3 transition-all group min-w-[200px]">
-                        <div class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-500 group-hover:text-emerald-600 transition-colors shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $ci }}"/>
-                            </svg>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $sa->category }}</p>
-                            <p class="text-sm font-bold text-gray-800 truncate">{{ $sa->name }}</p>
-                            <p class="text-[10px] text-gray-500 truncate">{{ $sa->brand }} {{ $sa->model }}</p>
-                            <div class="flex items-center gap-1 mt-1">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $si['dot'] }}"></span>
-                                <span class="text-[10px] font-bold {{ $si['text'] }}">{{ $si['label'] }}</span>
-                            </div>
-                        </div>
-                    </a>
-                    @endforeach
-                </div>
-            </div>
-            @endif
         </div>
         @endforeach
     </div>

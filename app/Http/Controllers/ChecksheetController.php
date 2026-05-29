@@ -6,6 +6,7 @@ use App\Models\ChecksheetSession;
 
 use App\Models\ChecksheetResult;
 use App\Models\ChecksheetAbnormal;
+use App\Models\Finding;
 use App\Models\MaintenanceSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -150,17 +151,42 @@ class ChecksheetController extends Controller
             $result = ChecksheetResult::where('session_id', $session->id)
                 ->where('item_name', $itemName)
                 ->first();
-                
+
             if (!$result) {
                 $result = new ChecksheetResult([
                     'session_id' => $session->id,
                     'item_name'  => $itemName,
                 ]);
             }
-            
+
             $result->result = $data['result'] ?? null;
             $result->notes  = $data['notes'] ?? null;
             $result->save();
+
+            // Auto-create Finding dari item X (anomali) yang punya catatan
+            try {
+                $itemResult = $data['result'] ?? null;
+                $itemNotes  = trim($data['notes'] ?? '');
+                if ($itemResult === 'X' && $itemNotes !== '') {
+                    Finding::updateOrCreate(
+                        [
+                            'source_type'           => 'checksheet',
+                            'checksheet_session_id' => $session->id,
+                            'title'                 => substr('Anomali: ' . $itemName, 0, 255),
+                        ],
+                        [
+                            'item_name'   => $itemName,
+                            'description' => $itemNotes,
+                            'found_date'  => now()->toDateString(),
+                            'location_id' => $session->schedule?->location_id,
+                            'reported_by' => auth()->id(),
+                            'status'      => 'open',
+                        ]
+                    );
+                }
+            } catch (\Exception $e) {
+                \Log::error('Finding auto-create from X item failed: ' . $e->getMessage());
+            }
         }
 
         if ($request->has('abnormals')) {
@@ -175,6 +201,30 @@ class ChecksheetController extends Controller
                         'tgl_selesai'          => $ab['tgl_selesai'] ?? null,
                         'pic'                  => $ab['pic'] ?? null,
                     ]);
+
+                    // Auto-create Finding dari anomali checksheet
+                    try {
+                        Finding::updateOrCreate(
+                            [
+                                'source_type'           => 'checksheet',
+                                'checksheet_session_id' => $session->id,
+                                'title'                 => substr($ab['abnormal_description'], 0, 255),
+                            ],
+                            [
+                                'description'   => $ab['penanganan'] ?? null,
+                                'action_taken'  => $ab['penanganan'] ?? null,
+                                'found_date'    => $ab['tanggal'] ?? now()->toDateString(),
+                                'resolved_date' => $ab['tgl_selesai'] ?? null,
+                                'pic'           => $ab['pic'] ?? null,
+                                'location_id'   => $session->schedule?->location_id,
+                                'reported_by'   => auth()->id(),
+                                'severity'      => 'medium',
+                                'status'        => !empty($ab['tgl_selesai']) ? 'resolved' : 'open',
+                            ]
+                        );
+                    } catch (\Exception $e) {
+                        \Log::error('Finding auto-create failed: ' . $e->getMessage());
+                    }
                 }
             }
         }

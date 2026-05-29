@@ -69,12 +69,13 @@
                         [
                             'label' => 'Management Schedule',
                             'icon' => 'M8 2v4 M16 2v4 M3 10h18 M3 6h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z',
-                            'match' => ['maintenance-schedules*', 'checksheet*', 'schedule-report*'],
+                            'match' => ['maintenance-schedules*', 'checksheet*', 'schedule-report*', 'findings*'],
                             'roles' => null,
                             'sub' => [
                                 ['route' => 'maintenance-schedules.index', 'label' => 'Maint. Schedule'],
                                 ['route' => 'checksheet.index', 'label' => 'Checksheet'],
                                 ['route' => 'schedule-report.index', 'label' => 'Schedule Report'],
+                                ['route' => 'findings.index', 'label' => 'Findings'],
                             ]
                         ],
                         ['route' => 'work-orders.index', 'label' => 'Work Orders & Report', 'icon' => 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', 'match' => 'work-orders*', 'roles' => null],
