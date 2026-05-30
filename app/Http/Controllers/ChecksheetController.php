@@ -75,9 +75,11 @@ class ChecksheetController extends Controller
                     ->sortBy(fn($s) => $this->sessionDueDate($s, $freq)->timestamp) // most overdue first
                     ->values();
             } else {
-                // Sort by closest due date to today
+                // Unsubmitted naik (urutan due date), submitted turun ke bawah
                 $sessions = $fetched->sortBy(function ($s) use ($today, $freq) {
-                    return abs($today->diffInDays($this->sessionDueDate($s, $freq), false));
+                    $dueDiff = abs($today->diffInDays($this->sessionDueDate($s, $freq), false));
+                    $offset  = $s->status === 'submitted' ? 1_000_000 : 0;
+                    return $offset + $dueDiff;
                 })->values();
             }
 
@@ -252,7 +254,7 @@ class ChecksheetController extends Controller
                 [
                     'source_type'           => 'checksheet',
                     'checksheet_session_id' => $session->id,
-                    'title'                 => substr('Anomali: ' . $result->item_name, 0, 255),
+                    'title'                 => substr('Finding: ' . $result->item_name, 0, 255),
                 ],
                 [
                     'item_name'    => $result->item_name,
