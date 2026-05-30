@@ -40,6 +40,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Assets
+    Route::post('assets/swap-position', [AssetController::class, 'swapPosition'])->name('assets.swap-position');
+    Route::post('assets/update-position', [AssetController::class, 'updatePosition'])->name('assets.update-position');
+    Route::get('assets/by-location', [AssetController::class, 'byLocation'])->name('assets.by-location');
+    Route::post('assets/quick-save-pv', [AssetController::class, 'quickSavePv'])->name('assets.quick-save-pv');
+    Route::delete('assets/{asset}/pv', [AssetController::class, 'destroyPv'])->name('assets.destroy-pv');
     Route::resource('assets', AssetController::class);
 
     Route::resource('spare-parts', SparePartController::class);
@@ -48,7 +53,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('consumables', ConsumableController::class);
 
     // Maintenance Schedules
+    Route::get('maintenance-schedules/transformers', [MaintenanceScheduleController::class, 'getTransformers'])->name('maintenance-schedules.transformers');
     Route::resource('maintenance-schedules', MaintenanceScheduleController::class);
+
+    // Findings
+    Route::resource('findings', \App\Http\Controllers\FindingController::class);
 
     // Work Orders
     Route::resource('work-orders', WorkOrderController::class);

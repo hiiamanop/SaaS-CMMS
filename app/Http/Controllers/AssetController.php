@@ -26,7 +26,7 @@ class AssetController extends Controller
         if ($request->location)
             $query->where('location', 'like', '%' . $request->location . '%');
 
-        $assets = $query->orderBy('location')->latest()->paginate(15)->withQueryString();
+        $assets = $query->orderBy('location')->orderBy('name')->paginate(15)->withQueryString();
         $categories = Asset::distinct()->pluck('category');
         $locations = Asset::distinct()->pluck('location');
 
@@ -123,5 +123,78 @@ class AssetController extends Controller
             Storage::disk('public')->delete($asset->photo);
         $asset->delete();
         return redirect()->route('assets.index')->with('success', 'Asset deleted successfully.');
+    }
+
+    public function updatePosition(Request $request)
+    {
+        $request->validate([
+            'asset_id' => 'required|integer|exists:assets,id',
+            'row'      => 'required|integer|min:1',
+            'col'      => 'required|integer|min:1',
+        ]);
+
+        Asset::where('id', $request->asset_id)->update([
+            'visual_row' => $request->row,
+            'visual_col' => $request->col,
+        ]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function swapPosition(Request $request)
+    {
+        $request->validate([
+            'asset_a' => 'required|integer|exists:assets,id',
+            'asset_b' => 'nullable|integer|exists:assets,id',
+            'row_b'   => 'required|integer|min:1',
+            'col_b'   => 'required|integer|min:1',
+        ]);
+
+        $assetA = Asset::findOrFail($request->asset_a);
+        $rowA   = $assetA->visual_row;
+        $colA   = $assetA->visual_col;
+
+        if ($request->asset_b) {
+            $assetB = Asset::findOrFail($request->asset_b);
+            $assetB->update(['visual_row' => $rowA, 'visual_col' => $colA]);
+        }
+
+        $assetA->update(['visual_row' => $request->row_b, 'visual_col' => $request->col_b]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function byLocation(Request $request)
+    {
+        $assets = Asset::where('location_id', $request->location_id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'asset_code', 'status', 'category', 'visual_row', 'visual_col', 'transformer_block']);
+
+        return response()->json($assets);
+    }
+
+    public function quickSavePv(Request $request)
+    {
+        $request->validate([
+            'asset_id'          => 'required|integer|exists:assets,id',
+            'transformer_block' => 'required|string|max:100',
+            'visual_row'        => 'required|integer|min:1',
+            'visual_col'        => 'required|integer|min:1',
+        ]);
+
+        Asset::where('id', $request->asset_id)->update([
+            'transformer_block' => $request->transformer_block,
+            'visual_row'        => $request->visual_row,
+            'visual_col'        => $request->visual_col,
+        ]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function destroyPv(Asset $asset)
+    {
+        // Hapus dari grid (bersihkan posisi visual), tidak hapus asset
+        $asset->update(['visual_row' => null, 'visual_col' => null, 'transformer_block' => null]);
+        return response()->json(['ok' => true]);
     }
 }

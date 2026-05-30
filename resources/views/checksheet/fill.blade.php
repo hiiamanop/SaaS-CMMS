@@ -123,7 +123,7 @@
                         </label>
                         <input type="file" accept=".jpg,.jpeg,.png,.heic"
                                @change="uploadPhoto($event, '{{ addslashes($itemKey) }}')"
-                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-dark text-white font-bold file:text-gray-900 hover:file:bg-gray-700">
+                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-dark text-white font-bold file:text-white hover:file:bg-gray-700">
 
                         {{-- Existing photos --}}
                         @if($existing && $existing->photos)
@@ -147,8 +147,8 @@
         @endforeach
     </div>
 
-    {{-- Abnormal Notes (Semesteran & Tahunan) --}}
-    @if(in_array($session->schedule->frequency, ['semester', 'yearly']))
+    {{-- Abnormal Notes (tersembunyi — findings dibuat otomatis dari item X) --}}
+    @if(false)
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <h3 class="text-base font-bold text-gray-900 mb-3">Catatan Abnormal</h3>
         <div id="abnormal-rows" class="space-y-3">
@@ -256,7 +256,9 @@ function checksheetFill(sessionId, totalItems) {
         },
 
         async submitChecksheet(e) {
-            if (Object.keys(this.pendingItems).length > 0) {
+            const hasPending   = Object.keys(this.pendingItems).length > 0;
+            const hasAbnormals = this.collectAbnormals().length > 0;
+            if (hasPending || hasAbnormals) {
                 this.saveStatus = 'Menyimpan...';
                 await this.autosave();
             }
@@ -267,8 +269,31 @@ function checksheetFill(sessionId, totalItems) {
             document.getElementById('submitForm').submit();
         },
 
+        collectAbnormals() {
+            const rows = document.querySelectorAll('#abnormal-rows > div');
+            const result = [];
+            rows.forEach((row) => {
+                const fields = {};
+                row.querySelectorAll('input').forEach(input => {
+                    const m = input.name ? input.name.match(/abnormals\[\d+\]\[(\w+)\]/) : null;
+                    if (m) fields[m[1]] = input.value || null;
+                });
+                if (fields.abnormal_description && fields.abnormal_description.trim()) {
+                    result.push({
+                        tanggal:              fields.tanggal || null,
+                        abnormal_description: fields.abnormal_description.trim(),
+                        penanganan:           fields.penanganan || null,
+                        tgl_selesai:          fields.tgl_selesai || null,
+                        pic:                  fields.pic || null,
+                    });
+                }
+            });
+            return result;
+        },
+
         async autosave() {
-            if (Object.keys(this.pendingItems).length === 0) return;
+            const abnormals = this.collectAbnormals();
+            if (Object.keys(this.pendingItems).length === 0 && abnormals.length === 0) return;
             this.saveStatus = 'Menyimpan...';
             try {
                 const resp = await fetch(`/checksheet/${sessionId}/autosave`, {
@@ -277,7 +302,7 @@ function checksheetFill(sessionId, totalItems) {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ items: this.pendingItems }),
+                    body: JSON.stringify({ items: this.pendingItems, abnormals }),
                 });
                 const data = await resp.json();
                 if (data.ok) {

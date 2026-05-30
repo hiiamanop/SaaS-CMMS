@@ -62,6 +62,21 @@ class MaintenanceScheduleController extends Controller
         return view('maintenance-schedules.create', compact('technicians', 'locations', 'userLocation'));
     }
 
+    public function getTransformers(Request $request)
+    {
+        $locationId = $request->integer('location_id');
+        $transformers = \App\Models\Asset::where('category', 'Transformer')
+            ->where('location_id', $locationId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'transformer_block'])
+            ->map(fn($a) => [
+                'value' => $a->transformer_block ?? $a->name,
+                'label' => $a->transformer_block ? $a->transformer_block . ' — ' . $a->name : $a->name,
+            ]);
+
+        return response()->json($transformers);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();

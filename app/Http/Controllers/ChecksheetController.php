@@ -6,6 +6,7 @@ use App\Models\ChecksheetSession;
 
 use App\Models\ChecksheetResult;
 use App\Models\ChecksheetAbnormal;
+use App\Models\Finding;
 use App\Models\MaintenanceSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -150,14 +151,14 @@ class ChecksheetController extends Controller
             $result = ChecksheetResult::where('session_id', $session->id)
                 ->where('item_name', $itemName)
                 ->first();
-                
+
             if (!$result) {
                 $result = new ChecksheetResult([
                     'session_id' => $session->id,
                     'item_name'  => $itemName,
                 ]);
             }
-            
+
             $result->result = $data['result'] ?? null;
             $result->notes  = $data['notes'] ?? null;
             $result->save();
@@ -242,6 +243,51 @@ class ChecksheetController extends Controller
             'signed_by_pm'        => $request->signed_by_pm,
             'signed_date_pm'      => $request->signed_date_pm,
         ]);
+
+        $now = now();
+
+        // Buat findings dari item X yang punya catatan
+        $session->results()->where('result', 'X')->whereNotNull('notes')->where('notes', '!=', '')->each(function ($result) use ($session, $now) {
+            Finding::updateOrCreate(
+                [
+                    'source_type'           => 'checksheet',
+                    'checksheet_session_id' => $session->id,
+                    'title'                 => substr('Anomali: ' . $result->item_name, 0, 255),
+                ],
+                [
+                    'item_name'    => $result->item_name,
+                    'description'  => $result->notes,
+                    'found_date'   => $now->toDateString(),
+                    'finding_time' => $now,
+                    'location_id'  => $session->schedule?->location_id,
+                    'reported_by'  => Auth::id(),
+                    'status'       => 'open',
+                ]
+            );
+        });
+
+        // Buat findings dari section abnormal
+        $session->abnormals()->each(function ($ab) use ($session, $now) {
+            $isResolved = !empty($ab->tgl_selesai);
+            Finding::updateOrCreate(
+                [
+                    'source_type'           => 'checksheet',
+                    'checksheet_session_id' => $session->id,
+                    'title'                 => substr($ab->abnormal_description, 0, 255),
+                ],
+                [
+                    'description'   => $ab->penanganan,
+                    'action_taken'  => $ab->penanganan,
+                    'found_date'    => $ab->tanggal ?? $now->toDateString(),
+                    'finding_time'  => $now,
+                    'resolved_date' => $ab->tgl_selesai,
+                    'close_time'    => $isResolved ? $now : null,
+                    'location_id'   => $session->schedule?->location_id,
+                    'reported_by'   => Auth::id(),
+                    'status'        => $isResolved ? 'resolved' : 'open',
+                ]
+            );
+        });
 
         return redirect()->route('checksheet.show', $session)
             ->with('success', 'Checksheet berhasil disubmit.');

@@ -64,6 +64,10 @@ class DashboardController extends Controller
             fn($modules) => optional($modules->first()->locationId)->name ?? ''
         )->toArray();
 
+        $blockLocationIds = $pvMapData->map(
+            fn($modules) => $modules->first()->location_id ?? null
+        )->toArray();
+
         $supportingAssets = Asset::whereIn('category', ['Inverter', 'Transformer', 'Metering'])
             ->whereNotNull('transformer_block')
             ->select(['id', 'name', 'asset_code', 'category', 'brand', 'model', 'status', 'transformer_block', 'visual_row', 'visual_col'])
@@ -74,7 +78,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalAssets', 'openWorkOrders', 'overdueWorkOrders', 'lowStockCount', 'pendingChecksheets',
-            'recentWorkOrders', 'upcomingSchedules', 'lowStockParts', 'chartData', 'pvMapData', 'supportingAssets', 'blockLocations'
+            'recentWorkOrders', 'upcomingSchedules', 'lowStockParts', 'chartData', 'pvMapData', 'supportingAssets', 'blockLocations', 'blockLocationIds'
         ));
     }
 }

@@ -11,9 +11,9 @@ class WorkOrder extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'wo_number', 'title', 'asset_id', 'is_external_client', 'client_name', 
+        'wo_number', 'title', 'asset_id', 'is_external_client', 'client_name',
         'assigned_to', 'assigned_to_external', 'created_by',
-        'maintenance_schedule_id', 'type', 'priority', 'status', 'order_date',
+        'maintenance_schedule_id', 'finding_id', 'type', 'priority', 'status', 'order_date',
         'due_date', 'start_date', 'started_at', 'completed_at', 'description', 'notes',
         'shutdown_required', 'override_on_time',
     ];
@@ -33,6 +33,7 @@ class WorkOrder extends Model
     }
 
     public function asset() { return $this->belongsTo(Asset::class); }
+    public function finding() { return $this->belongsTo(\App\Models\Finding::class); }
     public function assignedTo() { return $this->belongsTo(User::class, 'assigned_to'); }
     public function assignees() { return $this->belongsToMany(User::class, 'work_order_assignees'); }
     public function createdBy() { return $this->belongsTo(User::class, 'created_by'); }
