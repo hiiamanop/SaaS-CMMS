@@ -54,7 +54,8 @@
                     <th class="px-5 py-3 text-left">Lokasi</th>
                     <th class="px-5 py-3 text-left">Sumber</th>
                     <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-left">Tanggal</th>
+                    <th class="px-5 py-3 text-left">Finding Time</th>
+                    <th class="px-5 py-3 text-left">Close Time</th>
                     <th class="px-5 py-3 text-right">Aksi</th>
                 </tr></thead>
                 <tbody class="divide-y divide-gray-50">
@@ -86,7 +87,8 @@
                             {{ $statusLabels[$finding->status] ?? $finding->status }}
                         </span>
                     </td>
-                    <td class="px-5 py-4 text-xs text-gray-500">{{ $finding->found_date?->format('d M Y') ?? '-' }}</td>
+                    <td class="px-5 py-4 text-xs text-gray-500">{{ $finding->finding_time?->format('d M Y, H:i') ?? '-' }}</td>
+                    <td class="px-5 py-4 text-xs text-gray-500">{{ $finding->close_time?->format('d M Y, H:i') ?? '-' }}</td>
                     <td class="px-5 py-4 text-right">
                         <div class="flex items-center justify-end gap-3">
                             <a href="{{ route('findings.show', $finding) }}"

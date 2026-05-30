@@ -24,7 +24,11 @@
                 </div>
                 <h1 class="text-xl font-bold text-gray-900">{{ $finding->title }}</h1>
             </div>
-            <div class="flex gap-2 shrink-0">
+            <div class="flex gap-2 shrink-0 flex-wrap">
+                <a href="{{ route('work-orders.create', ['title' => 'Penanganan: '.$finding->title, 'description' => $finding->description, 'from_finding' => $finding->id]) }}"
+                   class="px-4 py-2 bg-orange-400 text-white rounded-lg text-sm font-bold hover:bg-orange-500 transition-all">
+                    Buat Work Order
+                </a>
                 <a href="{{ route('findings.edit', $finding) }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all">Edit</a>
                 <form method="POST" action="{{ route('findings.destroy', $finding) }}" onsubmit="return confirm('Hapus finding ini?')">
                     @csrf @method('DELETE')
@@ -42,8 +46,16 @@
                 <p class="font-semibold text-gray-800">{{ $finding->found_date?->format('d M Y') ?? '-' }}</p>
             </div>
             <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Finding Time</p>
+                <p class="font-semibold text-gray-800">{{ $finding->finding_time?->format('d M Y, H:i') ?? '-' }}</p>
+            </div>
+            <div>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Tanggal Selesai</p>
                 <p class="font-semibold text-gray-800">{{ $finding->resolved_date?->format('d M Y') ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Close Time</p>
+                <p class="font-semibold text-gray-800">{{ $finding->close_time?->format('d M Y, H:i') ?? '-' }}</p>
             </div>
         </div>
     </div>

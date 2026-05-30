@@ -10,13 +10,16 @@
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{isExternal:false}">
             @csrf
+            @if(request('from_finding'))
+            <input type="hidden" name="from_finding" value="{{ request('from_finding') }}">
+            @endif
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {{-- Left Column: Main Details --}}
                 <div class="lg:col-span-2 space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Task Title <span class="text-red-500">*</span></label>
-                        <input name="title" value="{{ old('title') }}" required placeholder="e.g. Inverter Repair" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('title') border-red-400 @enderror">
+                        <input name="title" value="{{ old('title', request('title')) }}" required placeholder="e.g. Inverter Repair" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('title') border-red-400 @enderror">
                         @error('title')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
@@ -68,7 +71,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description') }}</textarea>
+                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description', request('description')) }}</textarea>
                     </div>
                 </div>
 

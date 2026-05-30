@@ -12,12 +12,14 @@ class Finding extends Model
     protected $fillable = [
         'title', 'description', 'status',
         'source_type', 'checksheet_session_id', 'item_name', 'location_id', 'reported_by',
-        'found_date', 'resolved_date', 'action_taken',
+        'found_date', 'finding_time', 'resolved_date', 'close_time', 'action_taken',
     ];
 
     protected $casts = [
-        'found_date'    => 'date',
-        'resolved_date' => 'date',
+        'found_date'   => 'date',
+        'finding_time' => 'datetime',
+        'resolved_date'=> 'date',
+        'close_time'   => 'datetime',
     ];
 
     public function session()

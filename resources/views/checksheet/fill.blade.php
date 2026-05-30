@@ -123,7 +123,7 @@
                         </label>
                         <input type="file" accept=".jpg,.jpeg,.png,.heic"
                                @change="uploadPhoto($event, '{{ addslashes($itemKey) }}')"
-                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-dark text-white font-bold file:text-gray-900 hover:file:bg-gray-700">
+                               class="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-dark text-white font-bold file:text-white hover:file:bg-gray-700">
 
                         {{-- Existing photos --}}
                         @if($existing && $existing->photos)

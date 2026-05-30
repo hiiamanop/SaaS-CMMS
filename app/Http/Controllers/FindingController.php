@@ -41,10 +41,17 @@ class FindingController extends Controller
             'action_taken'  => 'nullable|string',
         ]);
 
-        Finding::create(array_merge($validated, [
-            'source_type' => 'manual',
-            'reported_by' => auth()->id(),
-        ]));
+        $extra = [
+            'source_type'  => 'manual',
+            'reported_by'  => auth()->id(),
+            'finding_time' => now(),
+        ];
+
+        if (in_array($validated['status'], ['resolved', 'closed'])) {
+            $extra['close_time'] = now();
+        }
+
+        Finding::create(array_merge($validated, $extra));
 
         return redirect()->route('findings.index')->with('success', 'Finding berhasil ditambahkan.');
     }
@@ -72,6 +79,11 @@ class FindingController extends Controller
             'resolved_date' => 'nullable|date',
             'action_taken'  => 'nullable|string',
         ]);
+
+        // Set close_time otomatis saat status berubah ke resolved/closed
+        if (in_array($validated['status'], ['resolved', 'closed']) && !$finding->close_time) {
+            $validated['close_time'] = now();
+        }
 
         $finding->update($validated);
 

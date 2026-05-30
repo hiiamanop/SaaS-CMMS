@@ -95,10 +95,19 @@ class WorkOrderController extends Controller
         // Use first one as primary for compatibility
         $validated['assigned_to'] = !empty($assigneeIds) ? $assigneeIds[0] : null;
 
+        $findingId = $request->input('from_finding');
+        if ($findingId) {
+            $validated['finding_id'] = $findingId;
+        }
+
         $workOrder = WorkOrder::create($validated);
-        
+
         if (!empty($assigneeIds)) {
             $workOrder->assignees()->sync($assigneeIds);
+        }
+
+        if ($findingId) {
+            \App\Models\Finding::where('id', $findingId)->update(['status' => 'in_progress']);
         }
 
         WorkOrderActivityLog::create([
@@ -231,6 +240,10 @@ class WorkOrderController extends Controller
         }
 
         if ($newStatus === 'closed') {
+            if ($workOrder->finding_id) {
+                \App\Models\Finding::where('id', $workOrder->finding_id)
+                    ->update(['status' => 'resolved', 'resolved_date' => now()->toDateString(), 'close_time' => now()]);
+            }
             return redirect()->route('maintenance-records.create', ['work_order_id' => $workOrder->id])
                 ->with('success', 'Work order closed. Please create a maintenance record.');
         }

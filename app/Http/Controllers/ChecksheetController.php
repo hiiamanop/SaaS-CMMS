@@ -162,31 +162,6 @@ class ChecksheetController extends Controller
             $result->result = $data['result'] ?? null;
             $result->notes  = $data['notes'] ?? null;
             $result->save();
-
-            // Auto-create Finding dari item X (anomali) yang punya catatan
-            try {
-                $itemResult = $data['result'] ?? null;
-                $itemNotes  = trim($data['notes'] ?? '');
-                if ($itemResult === 'X' && $itemNotes !== '') {
-                    Finding::updateOrCreate(
-                        [
-                            'source_type'           => 'checksheet',
-                            'checksheet_session_id' => $session->id,
-                            'title'                 => substr('Anomali: ' . $itemName, 0, 255),
-                        ],
-                        [
-                            'item_name'   => $itemName,
-                            'description' => $itemNotes,
-                            'found_date'  => now()->toDateString(),
-                            'location_id' => $session->schedule?->location_id,
-                            'reported_by' => auth()->id(),
-                            'status'      => 'open',
-                        ]
-                    );
-                }
-            } catch (\Exception $e) {
-                \Log::error('Finding auto-create from X item failed: ' . $e->getMessage());
-            }
         }
 
         if ($request->has('abnormals')) {
@@ -201,30 +176,6 @@ class ChecksheetController extends Controller
                         'tgl_selesai'          => $ab['tgl_selesai'] ?? null,
                         'pic'                  => $ab['pic'] ?? null,
                     ]);
-
-                    // Auto-create Finding dari anomali checksheet
-                    try {
-                        Finding::updateOrCreate(
-                            [
-                                'source_type'           => 'checksheet',
-                                'checksheet_session_id' => $session->id,
-                                'title'                 => substr($ab['abnormal_description'], 0, 255),
-                            ],
-                            [
-                                'description'   => $ab['penanganan'] ?? null,
-                                'action_taken'  => $ab['penanganan'] ?? null,
-                                'found_date'    => $ab['tanggal'] ?? now()->toDateString(),
-                                'resolved_date' => $ab['tgl_selesai'] ?? null,
-                                'pic'           => $ab['pic'] ?? null,
-                                'location_id'   => $session->schedule?->location_id,
-                                'reported_by'   => auth()->id(),
-                                'severity'      => 'medium',
-                                'status'        => !empty($ab['tgl_selesai']) ? 'resolved' : 'open',
-                            ]
-                        );
-                    } catch (\Exception $e) {
-                        \Log::error('Finding auto-create failed: ' . $e->getMessage());
-                    }
                 }
             }
         }
@@ -292,6 +243,51 @@ class ChecksheetController extends Controller
             'signed_by_pm'        => $request->signed_by_pm,
             'signed_date_pm'      => $request->signed_date_pm,
         ]);
+
+        $now = now();
+
+        // Buat findings dari item X yang punya catatan
+        $session->results()->where('result', 'X')->whereNotNull('notes')->where('notes', '!=', '')->each(function ($result) use ($session, $now) {
+            Finding::updateOrCreate(
+                [
+                    'source_type'           => 'checksheet',
+                    'checksheet_session_id' => $session->id,
+                    'title'                 => substr('Anomali: ' . $result->item_name, 0, 255),
+                ],
+                [
+                    'item_name'    => $result->item_name,
+                    'description'  => $result->notes,
+                    'found_date'   => $now->toDateString(),
+                    'finding_time' => $now,
+                    'location_id'  => $session->schedule?->location_id,
+                    'reported_by'  => Auth::id(),
+                    'status'       => 'open',
+                ]
+            );
+        });
+
+        // Buat findings dari section abnormal
+        $session->abnormals()->each(function ($ab) use ($session, $now) {
+            $isResolved = !empty($ab->tgl_selesai);
+            Finding::updateOrCreate(
+                [
+                    'source_type'           => 'checksheet',
+                    'checksheet_session_id' => $session->id,
+                    'title'                 => substr($ab->abnormal_description, 0, 255),
+                ],
+                [
+                    'description'   => $ab->penanganan,
+                    'action_taken'  => $ab->penanganan,
+                    'found_date'    => $ab->tanggal ?? $now->toDateString(),
+                    'finding_time'  => $now,
+                    'resolved_date' => $ab->tgl_selesai,
+                    'close_time'    => $isResolved ? $now : null,
+                    'location_id'   => $session->schedule?->location_id,
+                    'reported_by'   => Auth::id(),
+                    'status'        => $isResolved ? 'resolved' : 'open',
+                ]
+            );
+        });
 
         return redirect()->route('checksheet.show', $session)
             ->with('success', 'Checksheet berhasil disubmit.');
