@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  app:
+    image: php:8.3-fpm
+    container_name: cmms-app
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/vendor
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: cmms_dev
+      DB_USERNAME: cmms_user
+      DB_PASSWORD: secret
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - cmms
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y curl git libzip-dev libxml2-dev &&
+        docker-php-ext-install pdo pdo_mysql zip dom session tokenizer fileinfo &&
+        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+        composer install --no-interaction --prefer-dist &&
+        php artisan config:cache &&
+        php-fpm
+      "
+
+  mysql:
+    image: mysql:8.0
+    container_name: cmms-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cmms_dev
+      MYSQL_USER: cmms_user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cmms_user", "-psecret"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - cmms
+
+  redis:
+    image: redis:7-alpine
+    container_name: cmms-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - cmms
+
+  nginx:
+    image: nginx:alpine
+    container_name: cmms-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/app
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - cmms
+
+volumes:
+  mysql_data:
+
+networks:
+  cmms:
+    driver: bridge
