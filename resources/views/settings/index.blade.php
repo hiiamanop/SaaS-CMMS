@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null, editingPermissions: null, showPvMapModal: $store.pvMap.showPvMapModal, pvMapStage: $store.pvMap.pvMapStage, locationId: $store.pvMap.locationId, locationName: $store.pvMap.locationName, csvPreview: $store.pvMap.csvPreview, editingModules: $store.pvMap.editingModules, selectedModule: $store.pvMap.selectedModule, loadingPvMap: $store.pvMap.loadingPvMap, handleFileUpload: $store.pvMap.handleFileUpload.bind($store.pvMap), uploadCsv: $store.pvMap.uploadCsv.bind($store.pvMap), savePvMap: $store.pvMap.savePvMap.bind($store.pvMap) }">
+<div class="space-y-6" x-data="{ tab: '{{ request('tab', 'users') }}', editRole: null, editingPermissions: null }">
 
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>

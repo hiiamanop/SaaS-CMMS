@@ -113,7 +113,7 @@
 </div>
 
 <script>
-document.addEventListener('alpine:init', () => {
+if (typeof Alpine !== 'undefined') {
     Alpine.store('pvMap', {
         showPvMapModal: false,
         pvMapStage: 'import',
@@ -191,18 +191,16 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        init() {
-            Alpine.bind(document, {
-                '@open-pv-map'({ detail }) {
-                    this.locationId = detail.location_id;
-                    this.locationName = detail.location_name;
-                    this.pvMapStage = 'import';
-                    this.csvPreview = null;
-                    this.selectedModule = null;
-                    this.showPvMapModal = true;
-                }
-            });
-        }
     });
-});
+
+    // Listen for open event
+    document.addEventListener('open-pv-map', (e) => {
+        Alpine.store('pvMap').locationId = e.detail.location_id;
+        Alpine.store('pvMap').locationName = e.detail.location_name;
+        Alpine.store('pvMap').pvMapStage = 'import';
+        Alpine.store('pvMap').csvPreview = null;
+        Alpine.store('pvMap').selectedModule = null;
+        Alpine.store('pvMap').showPvMapModal = true;
+    });
+}
 </script>
