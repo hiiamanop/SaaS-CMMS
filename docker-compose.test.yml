@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:8.0-alpine
+    image: mysql:8.0
     container_name: cmms-mysql-test
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -21,7 +21,7 @@ services:
       start_period: 10s
 
   app:
-    image: php:8.3-fpm-alpine
+    image: php:8.3-cli
     container_name: cmms-test
     working_dir: /app
     volumes:
@@ -39,15 +39,17 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: >
-      sh -c "
-        echo '📦 Installing dependencies...' &&
-        apk add --no-cache composer curl mysql-client &&
-        composer install --no-interaction &&
-        echo '🗄️  Running migrations...' &&
-        php artisan migrate:fresh --seed &&
-        echo '🧪 Running tests...' &&
-        php artisan test --no-coverage
+    command: bash -c "
+      apt-get update &&
+      apt-get install -y curl libzip-dev libxml2-dev &&
+      docker-php-ext-install pdo pdo_mysql zip dom session tokenizer fileinfo &&
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+      echo '📦 Installing dependencies...' &&
+      composer install --no-interaction --prefer-dist &&
+      echo '🗄️  Running migrations...' &&
+      php artisan migrate:fresh &&
+      echo '🧪 Running tests...' &&
+      php artisan test --no-coverage
       "
 
 volumes:
