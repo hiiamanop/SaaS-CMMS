@@ -1,31 +1,35 @@
-FROM php:8.4-fpm
+FROM php:8.3-fpm
 
 WORKDIR /app
 
-# Install system dependencies
+# Install all required PHP extensions
 RUN apt-get update && apt-get install -y \
-    curl \
     git \
+    curl \
+    libpq-dev \
     libxml2-dev \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip dom \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_mysql \
+    zip \
+    dom \
+    gd \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy application files first
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-req=php
-
-# Copy rest of application
+# Copy application
 COPY . .
 
-# Fix permissions
-RUN chown -R www-data:www-data /app
+# Set permissions
+RUN chown -R www-data:www-data /app && chmod -R 755 /app/storage /app/bootstrap/cache
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD ["sh", "-c", "if [ ! -d vendor ]; then composer install --no-interaction --ignore-platform-req=php; fi && php-fpm"]
