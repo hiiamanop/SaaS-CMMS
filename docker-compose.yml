@@ -2,13 +2,14 @@ version: '3.8'
 
 services:
   app:
-    image: php:8.3-fpm
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     container_name: cmms-app
     working_dir: /app
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/vendor
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -18,10 +19,6 @@ services:
       DB_DATABASE: cmms_dev
       DB_USERNAME: cmms_user
       DB_PASSWORD: secret
-      CACHE_DRIVER: redis
-      SESSION_DRIVER: redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     depends_on:
       mysql:
         condition: service_healthy
@@ -29,16 +26,6 @@ services:
         condition: service_healthy
     networks:
       - cmms
-    command: >
-      bash -c "
-        apt-get update &&
-        apt-get install -y curl git libzip-dev libxml2-dev &&
-        docker-php-ext-install pdo pdo_mysql zip dom session tokenizer fileinfo &&
-        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
-        composer install --no-interaction --prefer-dist &&
-        php artisan config:cache &&
-        php-fpm
-      "
 
   mysql:
     image: mysql:8.0
