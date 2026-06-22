@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     dom \
     gd \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
