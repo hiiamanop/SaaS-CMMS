@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\SparePart;
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\StockService;
+use App\Exceptions\OutOfStockException;
 use Illuminate\Http\Request;
 
 class SparePartController extends Controller
@@ -100,13 +102,14 @@ class SparePartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        if ($request->type === 'add') {
-            $sparePart->increment('qty_actual', $request->quantity);
-        } else {
-            if ($request->quantity > $sparePart->qty_actual) {
-                return back()->with('error', 'Cannot reduce more than current stock.');
+        try {
+            if ($request->type === 'add') {
+                StockService::add($sparePart, $request->quantity, 'stock_adjustment', auth()->id());
+            } else {
+                StockService::deduct($sparePart, $request->quantity, 'stock_adjustment', auth()->id());
             }
-            $sparePart->decrement('qty_actual', $request->quantity);
+        } catch (OutOfStockException $e) {
+            return back()->with('error', $e->getMessage());
         }
 
         $this->checkAndNotifyLowStock($sparePart->fresh());

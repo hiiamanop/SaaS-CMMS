@@ -9,6 +9,8 @@ use App\Models\WorkOrder;
 use App\Models\Asset;
 use App\Models\SparePart;
 use App\Models\User;
+use App\Services\StockService;
+use App\Exceptions\OutOfStockException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -175,15 +177,24 @@ class MaintenanceRecordController extends Controller
             }
 
             if (!empty($validated['parts'])) {
-                foreach ($validated['parts'] as $part) {
-                    $sparePart = SparePart::find($part['spare_part_id']);
-                    MaintenanceRecordPart::create([
-                        'maintenance_record_id' => $record->id,
-                        'spare_part_id' => $part['spare_part_id'],
-                        'qty_used' => $part['qty_used'],
-                        'unit_price' => $sparePart->unit_price,
-                    ]);
-                    $sparePart->decrement('qty_actual', $part['qty_used']);
+                try {
+                    foreach ($validated['parts'] as $part) {
+                        $sparePart = SparePart::find($part['spare_part_id']);
+                        MaintenanceRecordPart::create([
+                            'maintenance_record_id' => $record->id,
+                            'spare_part_id' => $part['spare_part_id'],
+                            'qty_used' => $part['qty_used'],
+                            'unit_price' => $sparePart->unit_price,
+                        ]);
+                        StockService::deduct(
+                            $sparePart,
+                            $part['qty_used'],
+                            'maintenance_record',
+                            auth()->id()
+                        );
+                    }
+                } catch (OutOfStockException $e) {
+                    throw $e;
                 }
             }
 
