@@ -191,9 +191,18 @@ docker-compose stop
 docker-compose down -v
 ```
 
+## Access Points
+
+- **App:** http://localhost:8000
+- **PHPMyAdmin:** http://localhost:8001
+  - Server: mysql
+  - Username: cmms_user
+  - Password: secret
+- **MySQL CLI:** `docker-compose exec mysql mysql -u cmms_user -psecret cmms_dev`
+- **Redis CLI:** `docker-compose exec redis redis-cli`
+
 ## Notes
 
-- App runs on **http://localhost:8000**
 - MySQL accessible on **localhost:3306** (user: cmms_user, pass: secret)
 - Redis accessible on **localhost:6379**
 - All containers share network `cmms`

@@ -86,6 +86,22 @@ services:
     networks:
       - cmms
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: cmms-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: cmms_user
+      PMA_PASSWORD: secret
+      PMA_ROOT_PASSWORD: root
+    ports:
+      - "8001:80"
+    depends_on:
+      - mysql
+    networks:
+      - cmms
+
 volumes:
   mysql_data:
 
