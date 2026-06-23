@@ -127,14 +127,22 @@ class PvMapController extends Controller
                 ]
             );
 
-            // Update Assets with new positions
+            // Upsert assets — create if not exists, update position if exists
             foreach ($modules as $module) {
-                Asset::where('asset_code', $module['asset_code'])
-                    ->where('location_id', $location->id)
-                    ->update([
-                        'visual_row' => $module['visual_row'],
-                        'visual_col' => $module['visual_col'],
-                    ]);
+                Asset::updateOrCreate(
+                    ['asset_code' => $module['asset_code'], 'location_id' => $location->id],
+                    [
+                        'name'              => $module['asset_code'],
+                        'category'          => 'PV Module',
+                        'status'            => $module['status'] ?? 'active',
+                        'location'          => $location->name,
+                        'transformer_block' => $module['transformer_block'],
+                        'string_number'     => $module['string_number'],
+                        'module_slot'       => $module['module_slot'],
+                        'visual_row'        => $module['visual_row'],
+                        'visual_col'        => $module['visual_col'],
+                    ]
+                );
             }
         });
 
