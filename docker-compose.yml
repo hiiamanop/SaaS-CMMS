@@ -1,0 +1,98 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: cmms-app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./storage/app/public:/var/www/html/storage/app/public
+    env_file:
+      - .env
+    environment:
+      PHP_MEMORY_LIMIT: 512M
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    networks:
+      - cmms
+
+  mysql:
+    image: mysql:8.0
+    container_name: cmms-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cmms_dev
+      MYSQL_USER: cmms_user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - cmms
+
+  redis:
+    image: redis:7-alpine
+    container_name: cmms-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - cmms
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cmms-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - cmms
+
+  node:
+    image: node:22-alpine
+    container_name: cmms-node
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - cmms
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: cmms-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 500M
+    ports:
+      - "8001:80"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    networks:
+      - cmms
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  cmms:
+    driver: bridge

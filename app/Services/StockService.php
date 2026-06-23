@@ -15,23 +15,31 @@ class StockService
      */
     public static function deduct(SparePart $sparePart, int $qty, string $reason, int $userId): void
     {
-        DB::transaction(function () use ($sparePart, $qty, $reason, $userId) {
-            $sparePart = SparePart::lockForUpdate()->findOrFail($sparePart->id);
+        try {
+            DB::transaction(function () use ($sparePart, $qty, $reason, $userId) {
+                $sparePart = SparePart::lockForUpdate()->findOrFail($sparePart->id);
 
-            if ($sparePart->qty_actual < $qty) {
-                throw new OutOfStockException($sparePart, $sparePart->qty_actual, $qty);
+                if ($sparePart->qty_actual < $qty) {
+                    throw new OutOfStockException($sparePart, $sparePart->qty_actual, $qty);
+                }
+
+                $sparePart->decrement('qty_actual', $qty);
+
+                StockMovement::create([
+                    'spare_part_id' => $sparePart->id,
+                    'mutation_type' => 'deduct',
+                    'qty' => $qty,
+                    'reason' => $reason,
+                    'created_by_user_id' => $userId,
+                ]);
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'lock wait timeout')) {
+                \Log::warning("Stock lock timeout for spare_part_id={$sparePart->id}");
+                throw new \Exception('Database temporarily locked. Please try again.', 503);
             }
-
-            $sparePart->decrement('qty_actual', $qty);
-
-            StockMovement::create([
-                'spare_part_id' => $sparePart->id,
-                'mutation_type' => 'deduct',
-                'qty' => $qty,
-                'reason' => $reason,
-                'created_by_user_id' => $userId,
-            ]);
-        });
+            throw $e;
+        }
     }
 
     /**

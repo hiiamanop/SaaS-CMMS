@@ -375,6 +375,10 @@
                                 </div>
                             </form>
                             <div class="flex items-center justify-end gap-2" x-show="!editing">
+                                <button type="button" @click="$dispatch('open-pv-map', {location_id: {{ $loc->id }}, location_name: '{{ addslashes($loc->name) }}'})"
+                                        class="text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded-lg border border-blue-200 hover:bg-blue-50">
+                                    Peta
+                                </button>
                                 <button type="button" @click="editing=true"
                                         class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-opacity-90">
                                     Edit
@@ -479,5 +483,7 @@
     </div>
     @endif
 
+    {{-- PV Map Modal --}}
+    @include('components.pv-map-modal')
 </div>
 @endsection

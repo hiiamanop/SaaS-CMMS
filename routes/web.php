@@ -18,6 +18,7 @@ use App\Http\Controllers\ConsumableController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ItemImportController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\PvMapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -113,6 +114,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('settings/locations', [SettingsController::class, 'storeLocation'])->name('settings.locations.store');
     Route::put('settings/locations/{location}', [SettingsController::class, 'updateLocation'])->name('settings.locations.update');
     Route::delete('settings/locations/{location}', [SettingsController::class, 'destroyLocation'])->name('settings.locations.destroy');
+
+    // PV Maps
+    Route::get('settings/locations/{location}/pv-maps', [PvMapController::class, 'show'])->name('pv-maps.show');
+    Route::post('settings/locations/{location}/pv-maps/upload', [PvMapController::class, 'uploadCsv'])->name('pv-maps.upload');
+    Route::post('settings/locations/{location}/pv-maps/save', [PvMapController::class, 'save'])->name('pv-maps.save');
+    Route::get('settings/locations/{location}/pv-maps/{transformerBlock}', [PvMapController::class, 'getMap'])->name('pv-maps.get');
 
     // Daily Reports (Personal Notes)
     Route::resource('daily-reports', DailyReportController::class)->only(['index', 'store', 'destroy']);

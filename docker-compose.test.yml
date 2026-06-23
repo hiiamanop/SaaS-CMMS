@@ -1,8 +1,27 @@
 version: '3.8'
 
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: cmms-mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cmms_test
+      MYSQL_USER: cmms_user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cmms_user", "-psecret"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   app:
-    image: php:8.3-fpm-alpine
+    image: php:8.3-cli
     container_name: cmms-test
     working_dir: /app
     volumes:
@@ -18,21 +37,20 @@ services:
       - DB_USERNAME=cmms_user
       - DB_PASSWORD=secret
     depends_on:
-      - mysql
-    command: sh -c "apk add --no-cache composer curl mysql-client && composer install && php artisan migrate:fresh && php artisan test"
-
-  mysql:
-    image: mysql:8.0-alpine
-    container_name: cmms-mysql-test
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cmms_test
-      MYSQL_USER: cmms_user
-      MYSQL_PASSWORD: secret
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_test_data:/var/lib/mysql
+      mysql:
+        condition: service_healthy
+    command: bash -c "
+      apt-get update &&
+      apt-get install -y curl libzip-dev libxml2-dev &&
+      docker-php-ext-install pdo pdo_mysql zip dom session tokenizer fileinfo &&
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+      echo '📦 Installing dependencies...' &&
+      composer install --no-interaction --prefer-dist &&
+      echo '🗄️  Running migrations...' &&
+      php artisan migrate:fresh &&
+      echo '🧪 Running tests...' &&
+      php artisan test --no-coverage
+      "
 
 volumes:
   mysql_test_data:
