@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('locations', function (Blueprint $table) {
+            $table->dropUnique('locations_code_unique');
             $table->dropColumn('code');
             $table->renameColumn('capacity_kwp', 'capacity_mwp');
         });
