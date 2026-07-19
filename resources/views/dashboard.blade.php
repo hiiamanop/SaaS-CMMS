@@ -420,7 +420,7 @@
         @endphp
         <div x-show="activeBlock === '{{ $block }}'" x-cloak
              x-data="{ editMode: false }"
-             class="px-6 pb-6 overflow-x-auto">
+             class="px-6 pb-6">
 
             @if(!$useVisual)
             <p class="text-[10px] text-amber-500 font-medium mb-2 pt-2">
@@ -549,8 +549,22 @@
                 </div>
             </div>
 
-            <div class="pt-1 flex justify-center">
-                <table class="border-separate" style="border-spacing:3px;" id="pvGrid_{{ $block }}">
+            <div class="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 mt-1 cursor-grab"
+                 style="height: 480px;"
+                 data-pv-viewport="{{ $block }}">
+
+                <div class="absolute top-3 right-3 z-20 flex flex-col gap-1">
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'in')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">+</button>
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'out')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">&minus;</button>
+                    <button type="button" onclick="pvResetView('{{ $block }}')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-500 hover:bg-gray-50 text-[9px] font-bold">RST</button>
+                </div>
+
+                <div class="flex justify-center" data-pv-canvas="{{ $block }}"
+                     style="width: max-content; padding-top: 4px; transform-origin: 0 0;">
+                    <table class="border-separate" style="border-spacing:3px;" id="pvGrid_{{ $block }}">
                     @if(!$useVisual)
                     <thead>
                         <tr>
@@ -630,6 +644,7 @@
                     @endfor
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {{-- Summary strip --}}
@@ -853,5 +868,56 @@
         window.location.href = window.location.pathname + '#peta-pv';
         window.location.reload();
     }
+
+    // PV Pan & Zoom
+    window.pvMapView = {}; // { [block]: { x, y, scale } }
+    const PV_MIN_SCALE = 0.3;
+    const PV_MAX_SCALE = 3;
+    const PV_ZOOM_STEP = 1.15;
+
+    function pvGetView(block) {
+        if (!window.pvMapView[block]) window.pvMapView[block] = { x: 0, y: 0, scale: 1 };
+        return window.pvMapView[block];
+    }
+
+    function pvClampScale(scale) {
+        return Math.min(PV_MAX_SCALE, Math.max(PV_MIN_SCALE, scale));
+    }
+
+    function pvApplyTransform(block) {
+        const canvas = document.querySelector(`[data-pv-canvas="${block}"]`);
+        if (!canvas) return;
+        const v = pvGetView(block);
+        canvas.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.scale})`;
+    }
+
+    // Zoom so the viewport-relative point (cx, cy) stays visually fixed.
+    function pvZoomAt(block, factor, cx, cy) {
+        const v = pvGetView(block);
+        const newScale = pvClampScale(v.scale * factor);
+        const appliedFactor = newScale / v.scale;
+        v.x = cx - (cx - v.x) * appliedFactor;
+        v.y = cy - (cy - v.y) * appliedFactor;
+        v.scale = newScale;
+        pvApplyTransform(block);
+    }
+
+    function pvZoomBy(block, direction) {
+        const viewport = document.querySelector(`[data-pv-viewport="${block}"]`);
+        if (!viewport) return;
+        const rect = viewport.getBoundingClientRect();
+        const factor = direction === 'in' ? PV_ZOOM_STEP : 1 / PV_ZOOM_STEP;
+        pvZoomAt(block, factor, rect.width / 2, rect.height / 2);
+    }
+
+    function pvResetView(block) {
+        window.pvMapView[block] = { x: 0, y: 0, scale: 1 };
+        pvApplyTransform(block);
+    }
+
+    // Apply the identity transform to every rendered block's canvas on load.
+    document.querySelectorAll('[data-pv-canvas]').forEach(el => {
+        pvApplyTransform(el.dataset.pvCanvas);
+    });
 </script>
 @endpush
