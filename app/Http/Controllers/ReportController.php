@@ -17,4 +17,20 @@ class ReportController extends Controller
 
         return view('reports.index', array_merge($data, compact('year', 'month', 'years')));
     }
+
+    public function exportPdf(Request $request)
+    {
+        $year  = (int) $request->get('year', now()->year);
+        $month = (int) $request->get('month', now()->month);
+
+        $data = ReportService::forMonth($year, $month);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'reports.pdf.monthly',
+            array_merge($data, compact('year', 'month'))
+        )->setPaper('a4', 'portrait');
+
+        $monthName = \Carbon\Carbon::create()->month($month)->format('F');
+        return $pdf->download("LAPORAN_BULANAN_{$monthName}_{$year}.pdf");
+    }
 }
