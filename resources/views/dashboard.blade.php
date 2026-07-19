@@ -920,19 +920,6 @@
         pvApplyTransform(el.dataset.pvCanvas);
     });
 
-    // Wheel zoom, anchored at the cursor.
-    document.addEventListener('wheel', e => {
-        const viewport = e.target.closest('[data-pv-viewport]');
-        if (!viewport) return;
-        e.preventDefault();
-        const block = viewport.dataset.pvViewport;
-        const rect = viewport.getBoundingClientRect();
-        const cx = e.clientX - rect.left;
-        const cy = e.clientY - rect.top;
-        const factor = e.deltaY < 0 ? PV_ZOOM_STEP : 1 / PV_ZOOM_STEP;
-        pvZoomAt(block, factor, cx, cy);
-    }, { passive: false });
-
     // Mouse drag-to-pan (background only — never on a .pv-asset, so the
     // existing Atur Posisi native drag-and-drop and normal click-through
     // to an asset's detail page are unaffected).
