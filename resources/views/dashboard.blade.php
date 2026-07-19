@@ -932,5 +932,116 @@
         const factor = e.deltaY < 0 ? PV_ZOOM_STEP : 1 / PV_ZOOM_STEP;
         pvZoomAt(block, factor, cx, cy);
     }, { passive: false });
+
+    // Mouse drag-to-pan (background only — never on a .pv-asset, so the
+    // existing Atur Posisi native drag-and-drop and normal click-through
+    // to an asset's detail page are unaffected).
+    const PV_DRAG_THRESHOLD = 4;
+    let pvPan = null; // { block, viewport, startX, startY, origX, origY, moved }
+    let pvSuppressClick = false;
+
+    document.addEventListener('mousedown', e => {
+        const viewport = e.target.closest('[data-pv-viewport]');
+        if (!viewport) return;
+        if (e.target.closest('.pv-asset')) return;
+        const block = viewport.dataset.pvViewport;
+        const v = pvGetView(block);
+        pvPan = { block, viewport, startX: e.clientX, startY: e.clientY, origX: v.x, origY: v.y, moved: false };
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!pvPan) return;
+        const dx = e.clientX - pvPan.startX;
+        const dy = e.clientY - pvPan.startY;
+        if (!pvPan.moved && Math.hypot(dx, dy) < PV_DRAG_THRESHOLD) return;
+        pvPan.moved = true;
+        pvPan.viewport.style.cursor = 'grabbing';
+        const v = pvGetView(pvPan.block);
+        v.x = pvPan.origX + dx;
+        v.y = pvPan.origY + dy;
+        pvApplyTransform(pvPan.block);
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (pvPan) {
+            pvPan.viewport.style.cursor = '';
+            if (pvPan.moved) pvSuppressClick = true;
+        }
+        pvPan = null;
+    });
+
+    // A pan that actually moved would otherwise still fire a native click on
+    // mouseup's target (e.g. re-opening the Edit Data modal for whatever
+    // empty cell the drag ended over) — swallow exactly that one click.
+    document.addEventListener('click', e => {
+        if (pvSuppressClick) {
+            pvSuppressClick = false;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    // Touch: one-finger pan, two-finger pinch-zoom.
+    let pvTouchPan = null; // same shape as pvPan
+    let pvPinch = null; // { block, startDist, startScale, midX, midY }
+
+    function pvTouchDist(t0, t1) {
+        return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    }
+
+    document.addEventListener('touchstart', e => {
+        const viewport = e.target.closest('[data-pv-viewport]');
+        if (!viewport) return;
+        const block = viewport.dataset.pvViewport;
+
+        if (e.touches.length === 1) {
+            if (e.target.closest('.pv-asset')) return;
+            const v = pvGetView(block);
+            const t = e.touches[0];
+            pvTouchPan = { block, viewport, startX: t.clientX, startY: t.clientY, origX: v.x, origY: v.y, moved: false };
+        } else if (e.touches.length === 2) {
+            pvTouchPan = null;
+            const v = pvGetView(block);
+            const rect = viewport.getBoundingClientRect();
+            const [t0, t1] = e.touches;
+            pvPinch = {
+                block,
+                startDist: pvTouchDist(t0, t1),
+                startScale: v.scale,
+                midX: (t0.clientX + t1.clientX) / 2 - rect.left,
+                midY: (t0.clientY + t1.clientY) / 2 - rect.top,
+            };
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+        if (pvPinch && e.touches.length === 2) {
+            const [t0, t1] = e.touches;
+            const dist = pvTouchDist(t0, t1);
+            const v = pvGetView(pvPinch.block);
+            const targetScale = pvClampScale(pvPinch.startScale * (dist / pvPinch.startDist));
+            const factor = targetScale / v.scale;
+            pvZoomAt(pvPinch.block, factor, pvPinch.midX, pvPinch.midY);
+            e.preventDefault();
+            return;
+        }
+        if (pvTouchPan && e.touches.length === 1) {
+            const t = e.touches[0];
+            const dx = t.clientX - pvTouchPan.startX;
+            const dy = t.clientY - pvTouchPan.startY;
+            if (!pvTouchPan.moved && Math.hypot(dx, dy) < PV_DRAG_THRESHOLD) return;
+            pvTouchPan.moved = true;
+            const v = pvGetView(pvTouchPan.block);
+            v.x = pvTouchPan.origX + dx;
+            v.y = pvTouchPan.origY + dy;
+            pvApplyTransform(pvTouchPan.block);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+        pvTouchPan = null;
+        pvPinch = null;
+    });
 </script>
 @endpush
