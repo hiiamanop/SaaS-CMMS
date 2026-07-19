@@ -19,6 +19,7 @@ use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ItemImportController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PvMapController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -98,6 +99,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('schedule-report', [ScheduleReportController::class, 'index'])->name('schedule-report.index');
     Route::post('schedule-report/override', [ScheduleReportController::class, 'overrideOnTime'])->name('schedule-report.override');
     Route::get('schedule-report/pdf/{tab}', [ScheduleReportController::class, 'exportPdf'])->name('schedule-report.pdf');
+
+    // Reports (monthly activity & item usage)
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
     // Settings (admin only)
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
