@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\OutOfStockException;
+use App\Models\Consumable;
 use App\Models\SparePart;
 use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +61,23 @@ class StockService
                 'reason' => $reason,
                 'created_by_user_id' => $userId,
             ]);
+        });
+    }
+
+    /**
+     * Deduct consumable stock (pemakaian). No ledger table — line items are the audit trail.
+     * @throws OutOfStockException if insufficient stock
+     */
+    public static function deductConsumable(Consumable $consumable, int $qty, int $userId): void
+    {
+        DB::transaction(function () use ($consumable, $qty) {
+            $consumable = Consumable::lockForUpdate()->findOrFail($consumable->id);
+
+            if ($consumable->qty_actual < $qty) {
+                throw new OutOfStockException($consumable, $consumable->qty_actual, $qty);
+            }
+
+            $consumable->decrement('qty_actual', $qty);
         });
     }
 }

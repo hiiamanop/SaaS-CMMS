@@ -25,6 +25,8 @@ class MaintenanceRecord extends Model
     public function asset() { return $this->belongsTo(Asset::class); }
     public function technician() { return $this->belongsTo(User::class, 'technician_id'); }
     public function parts() { return $this->hasMany(MaintenanceRecordPart::class); }
+    public function consumables() { return $this->hasMany(MaintenanceRecordConsumable::class); }
+    public function tools() { return $this->hasMany(MaintenanceRecordTool::class); }
     public function photos() { return $this->hasMany(MaintenanceRecordPhoto::class); }
 
     public static function generateNumber(): string

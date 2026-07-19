@@ -6,9 +6,9 @@ use Exception;
 
 class OutOfStockException extends Exception
 {
-    public function __construct($sparePart, $availableQty, $requestedQty)
+    public function __construct($item, $availableQty, $requestedQty)
     {
-        $message = "Spare part \"{$sparePart->name}\" tidak cukup. Tersedia: {$availableQty}, Diminta: {$requestedQty}";
+        $message = "Stok \"{$item->name}\" tidak cukup. Tersedia: {$availableQty}, Diminta: {$requestedQty}";
         parent::__construct($message);
     }
 

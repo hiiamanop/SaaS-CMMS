@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\MaintenanceRecord;
 use App\Models\MaintenanceRecordPart;
 use App\Models\MaintenanceRecordPhoto;
+use App\Models\MaintenanceRecordConsumable;
+use App\Models\MaintenanceRecordTool;
 use App\Models\WorkOrder;
 use App\Models\Asset;
 use App\Models\SparePart;
+use App\Models\Consumable;
+use App\Models\Tool;
 use App\Models\User;
 use App\Services\StockService;
 use App\Exceptions\OutOfStockException;
@@ -53,8 +57,10 @@ class MaintenanceRecordController extends Controller
             ->get();
         $technicians = User::where('role', 'technician')->get();
         $spareParts = SparePart::orderBy('name')->get();
+        $consumables = Consumable::orderBy('name')->get();
+        $tools = Tool::orderBy('name')->get();
 
-        return view('maintenance-records.create', compact('workOrder', 'workOrders', 'technicians', 'spareParts'));
+        return view('maintenance-records.create', compact('workOrder', 'workOrders', 'technicians', 'spareParts', 'consumables', 'tools'));
     }
 
     public function store(Request $request)
@@ -69,6 +75,15 @@ class MaintenanceRecordController extends Controller
         if ($request->has('parts')) {
             $parts = collect($request->parts)->filter(fn($p) => !empty($p['spare_part_id']))->values()->all();
             $request->merge(['parts' => $parts]);
+        }
+
+        if ($request->has('consumables')) {
+            $consumables = collect($request->consumables)->filter(fn($c) => !empty($c['consumable_id']))->values()->all();
+            $request->merge(['consumables' => $consumables]);
+        }
+        if ($request->has('tools')) {
+            $tools = collect($request->tools)->filter(fn($t) => !empty($t['tool_id']))->values()->all();
+            $request->merge(['tools' => $tools]);
         }
 
         $validated = $request->validate([
@@ -87,6 +102,11 @@ class MaintenanceRecordController extends Controller
             'parts' => 'nullable|array',
             'parts.*.spare_part_id' => 'required|exists:spare_parts,id',
             'parts.*.qty_used' => 'required|integer|min:1',
+            'consumables' => 'nullable|array',
+            'consumables.*.consumable_id' => 'required|exists:consumables,id',
+            'consumables.*.qty_used' => 'required|integer|min:1',
+            'tools' => 'nullable|array',
+            'tools.*.tool_id' => 'required|exists:tools,id',
             'photos' => 'nullable|array',
             'photos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
         ]);
@@ -198,6 +218,28 @@ class MaintenanceRecordController extends Controller
                 }
             }
 
+            if (!empty($validated['consumables'])) {
+                foreach ($validated['consumables'] as $row) {
+                    $consumable = Consumable::find($row['consumable_id']);
+                    MaintenanceRecordConsumable::create([
+                        'maintenance_record_id' => $record->id,
+                        'consumable_id' => $row['consumable_id'],
+                        'qty_used' => $row['qty_used'],
+                        'unit_price' => $consumable->unit_price,
+                    ]);
+                    StockService::deductConsumable($consumable, $row['qty_used'], auth()->id());
+                }
+            }
+
+            if (!empty($validated['tools'])) {
+                foreach ($validated['tools'] as $row) {
+                    MaintenanceRecordTool::create([
+                        'maintenance_record_id' => $record->id,
+                        'tool_id' => $row['tool_id'],
+                    ]);
+                }
+            }
+
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $photo) {
                     $path = $photo->store('maintenance-records', 'public');
@@ -214,7 +256,7 @@ class MaintenanceRecordController extends Controller
 
     public function show(MaintenanceRecord $maintenanceRecord)
     {
-        $maintenanceRecord->load(['asset', 'technician', 'workOrder', 'parts.sparePart', 'photos']);
+        $maintenanceRecord->load(['asset', 'technician', 'workOrder', 'parts.sparePart', 'consumables.consumable', 'tools.tool', 'photos']);
         return view('maintenance-records.show', compact('maintenanceRecord'));
     }
 
