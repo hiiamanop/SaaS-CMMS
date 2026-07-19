@@ -256,7 +256,7 @@ class MaintenanceRecordController extends Controller
 
     public function show(MaintenanceRecord $maintenanceRecord)
     {
-        $maintenanceRecord->load(['asset', 'technician', 'workOrder', 'parts.sparePart', 'photos']);
+        $maintenanceRecord->load(['asset', 'technician', 'workOrder', 'parts.sparePart', 'consumables.consumable', 'tools.tool', 'photos']);
         return view('maintenance-records.show', compact('maintenanceRecord'));
     }
 

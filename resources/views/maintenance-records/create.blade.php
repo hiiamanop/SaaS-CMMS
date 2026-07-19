@@ -14,8 +14,10 @@
     @endif
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <form action="{{ route('maintenance-records.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5"
-              x-data="{ 
-                parts: {{ old('parts') ? json_encode(old('parts')) : '[{spare_part_id:\'\',qty_used:1}]' }}, 
+              x-data="{
+                parts: {{ old('parts') ? json_encode(old('parts')) : '[{spare_part_id:\'\',qty_used:1}]' }},
+                consumables: {{ old('consumables') ? json_encode(old('consumables')) : '[]' }},
+                tools: {{ old('tools') ? json_encode(old('tools')) : '[]' }},
                 statusAfter: '{{ old('status_after', 'solved') }}',
                 showShutdown: {{ old('work_order_id', $workOrder?->id) ? ($workOrder?->shutdown_required ? 'true' : 'false') : 'false' }},
                 photos: [],
@@ -139,6 +141,45 @@
                 </div>
                 <button type="button" @click="parts.push({spare_part_id:'',qty_used:1})" class="mt-2 inline-flex items-center gap-1.5 text-sm text-brand hover:text-blue-700 font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add part
+                </button>
+            </div>
+
+            {{-- Consumables used --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Consumables Used</label>
+                <div class="space-y-2">
+                    <template x-for="(c, index) in consumables" :key="index">
+                        <div class="flex gap-2 items-center">
+                            <select :name="'consumables['+index+'][consumable_id]'" x-model="c.consumable_id" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                                <option value="">Select consumable...</option>
+                                @foreach($consumables as $cItem)<option value="{{ $cItem->id }}">{{ $cItem->name }} ({{ $cItem->qty_actual }} {{ $cItem->unit }} available)</option>@endforeach
+                            </select>
+                            <input :name="'consumables['+index+'][qty_used]'" x-model="c.qty_used" type="number" min="1" placeholder="Qty" class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                            <button type="button" @click="consumables.splice(index,1)" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
+                        </div>
+                    </template>
+                </div>
+                <button type="button" @click="consumables.push({consumable_id:'',qty_used:1})" class="mt-2 inline-flex items-center gap-1.5 text-sm text-brand hover:text-blue-700 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add consumable
+                </button>
+            </div>
+
+            {{-- Tools used (log only) --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tools Used</label>
+                <div class="space-y-2">
+                    <template x-for="(t, index) in tools" :key="index">
+                        <div class="flex gap-2 items-center">
+                            <select :name="'tools['+index+'][tool_id]'" x-model="t.tool_id" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                                <option value="">Select tool...</option>
+                                @foreach($tools as $tItem)<option value="{{ $tItem->id }}">{{ $tItem->name }}</option>@endforeach
+                            </select>
+                            <button type="button" @click="tools.splice(index,1)" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
+                        </div>
+                    </template>
+                </div>
+                <button type="button" @click="tools.push({tool_id:''})" class="mt-2 inline-flex items-center gap-1.5 text-sm text-brand hover:text-blue-700 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add tool
                 </button>
             </div>
 

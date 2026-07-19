@@ -68,6 +68,39 @@
     </div>
     @endif
 
+    @if($mr->consumables->count())
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100"><h2 class="font-semibold text-gray-900">Consumables Used</h2></div>
+        <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase"><th class="px-5 py-3 text-left">Consumable</th><th class="px-5 py-3 text-left">Qty Used</th><th class="px-5 py-3 text-left">Unit Price</th><th class="px-5 py-3 text-left">Total</th></tr></thead>
+            <tbody class="divide-y divide-gray-50">
+            @foreach($mr->consumables as $c)
+            <tr>
+                <td class="px-5 py-3 font-medium text-gray-900">{{ $c->consumable->name }}</td>
+                <td class="px-5 py-3 text-gray-600">{{ $c->qty_used }} {{ $c->consumable->unit }}</td>
+                <td class="px-5 py-3 text-gray-600">{{ $c->unit_price ? 'IDR '.number_format($c->unit_price) : '—' }}</td>
+                <td class="px-5 py-3 text-gray-700 font-medium">{{ $c->unit_price ? 'IDR '.number_format($c->unit_price * $c->qty_used) : '—' }}</td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    @if($mr->tools->count())
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100"><h2 class="font-semibold text-gray-900">Tools Used</h2></div>
+        <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase"><th class="px-5 py-3 text-left">Tool</th></tr></thead>
+            <tbody class="divide-y divide-gray-50">
+            @foreach($mr->tools as $t)
+            <tr><td class="px-5 py-3 font-medium text-gray-900">{{ $t->tool->name }}</td></tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
     @if($mr->photos->count())
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <h2 class="font-semibold text-gray-900 mb-4">Photos</h2>
