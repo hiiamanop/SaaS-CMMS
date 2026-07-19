@@ -420,7 +420,7 @@
         @endphp
         <div x-show="activeBlock === '{{ $block }}'" x-cloak
              x-data="{ editMode: false }"
-             class="px-6 pb-6 overflow-x-auto">
+             class="px-6 pb-6">
 
             @if(!$useVisual)
             <p class="text-[10px] text-amber-500 font-medium mb-2 pt-2">
@@ -549,8 +549,22 @@
                 </div>
             </div>
 
-            <div class="pt-1 flex justify-center">
-                <table class="border-separate" style="border-spacing:3px;" id="pvGrid_{{ $block }}">
+            <div class="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 mt-1 cursor-grab"
+                 style="height: 480px;"
+                 data-pv-viewport="{{ $block }}">
+
+                <div class="absolute top-3 right-3 z-20 flex flex-col gap-1">
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'in')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">+</button>
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'out')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">&minus;</button>
+                    <button type="button" onclick="pvResetView('{{ $block }}')"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-500 hover:bg-gray-50 text-[9px] font-bold">RST</button>
+                </div>
+
+                <div class="flex justify-center" data-pv-canvas="{{ $block }}"
+                     style="width: max-content; padding-top: 4px; transform-origin: 0 0;">
+                    <table class="border-separate" style="border-spacing:3px;" id="pvGrid_{{ $block }}">
                     @if(!$useVisual)
                     <thead>
                         <tr>
@@ -630,6 +644,7 @@
                     @endfor
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {{-- Summary strip --}}
@@ -853,5 +868,167 @@
         window.location.href = window.location.pathname + '#peta-pv';
         window.location.reload();
     }
+
+    // PV Pan & Zoom
+    window.pvMapView = {}; // { [block]: { x, y, scale } }
+    const PV_MIN_SCALE = 0.3;
+    const PV_MAX_SCALE = 3;
+    const PV_ZOOM_STEP = 1.15;
+
+    function pvGetView(block) {
+        if (!window.pvMapView[block]) window.pvMapView[block] = { x: 0, y: 0, scale: 1 };
+        return window.pvMapView[block];
+    }
+
+    function pvClampScale(scale) {
+        return Math.min(PV_MAX_SCALE, Math.max(PV_MIN_SCALE, scale));
+    }
+
+    function pvApplyTransform(block) {
+        const canvas = document.querySelector(`[data-pv-canvas="${block}"]`);
+        if (!canvas) return;
+        const v = pvGetView(block);
+        canvas.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.scale})`;
+    }
+
+    // Zoom so the viewport-relative point (cx, cy) stays visually fixed.
+    function pvZoomAt(block, factor, cx, cy) {
+        const v = pvGetView(block);
+        const newScale = pvClampScale(v.scale * factor);
+        const appliedFactor = newScale / v.scale;
+        v.x = cx - (cx - v.x) * appliedFactor;
+        v.y = cy - (cy - v.y) * appliedFactor;
+        v.scale = newScale;
+        pvApplyTransform(block);
+    }
+
+    function pvZoomBy(block, direction) {
+        const viewport = document.querySelector(`[data-pv-viewport="${block}"]`);
+        if (!viewport) return;
+        const rect = viewport.getBoundingClientRect();
+        const factor = direction === 'in' ? PV_ZOOM_STEP : 1 / PV_ZOOM_STEP;
+        pvZoomAt(block, factor, rect.width / 2, rect.height / 2);
+    }
+
+    function pvResetView(block) {
+        window.pvMapView[block] = { x: 0, y: 0, scale: 1 };
+        pvApplyTransform(block);
+    }
+
+    // Apply the identity transform to every rendered block's canvas on load.
+    document.querySelectorAll('[data-pv-canvas]').forEach(el => {
+        pvApplyTransform(el.dataset.pvCanvas);
+    });
+
+    // Mouse drag-to-pan (background only — never on a .pv-asset, so the
+    // existing Atur Posisi native drag-and-drop and normal click-through
+    // to an asset's detail page are unaffected).
+    const PV_DRAG_THRESHOLD = 4;
+    let pvPan = null; // { block, viewport, startX, startY, origX, origY, moved }
+    let pvSuppressClick = false;
+
+    document.addEventListener('mousedown', e => {
+        const viewport = e.target.closest('[data-pv-viewport]');
+        if (!viewport) return;
+        if (e.target.closest('.pv-asset')) return;
+        const block = viewport.dataset.pvViewport;
+        const v = pvGetView(block);
+        pvPan = { block, viewport, startX: e.clientX, startY: e.clientY, origX: v.x, origY: v.y, moved: false };
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!pvPan) return;
+        const dx = e.clientX - pvPan.startX;
+        const dy = e.clientY - pvPan.startY;
+        if (!pvPan.moved && Math.hypot(dx, dy) < PV_DRAG_THRESHOLD) return;
+        pvPan.moved = true;
+        pvPan.viewport.style.cursor = 'grabbing';
+        const v = pvGetView(pvPan.block);
+        v.x = pvPan.origX + dx;
+        v.y = pvPan.origY + dy;
+        pvApplyTransform(pvPan.block);
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (pvPan) {
+            pvPan.viewport.style.cursor = '';
+            if (pvPan.moved) pvSuppressClick = true;
+        }
+        pvPan = null;
+    });
+
+    // A pan that actually moved would otherwise still fire a native click on
+    // mouseup's target (e.g. re-opening the Edit Data modal for whatever
+    // empty cell the drag ended over) — swallow exactly that one click.
+    document.addEventListener('click', e => {
+        if (pvSuppressClick) {
+            pvSuppressClick = false;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    // Touch: one-finger pan, two-finger pinch-zoom.
+    let pvTouchPan = null; // same shape as pvPan
+    let pvPinch = null; // { block, startDist, startScale, midX, midY }
+
+    function pvTouchDist(t0, t1) {
+        return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    }
+
+    document.addEventListener('touchstart', e => {
+        const viewport = e.target.closest('[data-pv-viewport]');
+        if (!viewport) return;
+        const block = viewport.dataset.pvViewport;
+
+        if (e.touches.length === 1) {
+            if (e.target.closest('.pv-asset')) return;
+            const v = pvGetView(block);
+            const t = e.touches[0];
+            pvTouchPan = { block, viewport, startX: t.clientX, startY: t.clientY, origX: v.x, origY: v.y, moved: false };
+        } else if (e.touches.length === 2) {
+            pvTouchPan = null;
+            const v = pvGetView(block);
+            const rect = viewport.getBoundingClientRect();
+            const [t0, t1] = e.touches;
+            pvPinch = {
+                block,
+                startDist: pvTouchDist(t0, t1),
+                startScale: v.scale,
+                midX: (t0.clientX + t1.clientX) / 2 - rect.left,
+                midY: (t0.clientY + t1.clientY) / 2 - rect.top,
+            };
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+        if (pvPinch && e.touches.length === 2) {
+            const [t0, t1] = e.touches;
+            const dist = pvTouchDist(t0, t1);
+            const v = pvGetView(pvPinch.block);
+            const targetScale = pvClampScale(pvPinch.startScale * (dist / pvPinch.startDist));
+            const factor = targetScale / v.scale;
+            pvZoomAt(pvPinch.block, factor, pvPinch.midX, pvPinch.midY);
+            e.preventDefault();
+            return;
+        }
+        if (pvTouchPan && e.touches.length === 1) {
+            const t = e.touches[0];
+            const dx = t.clientX - pvTouchPan.startX;
+            const dy = t.clientY - pvTouchPan.startY;
+            if (!pvTouchPan.moved && Math.hypot(dx, dy) < PV_DRAG_THRESHOLD) return;
+            pvTouchPan.moved = true;
+            const v = pvGetView(pvTouchPan.block);
+            v.x = pvTouchPan.origX + dx;
+            v.y = pvTouchPan.origY + dy;
+            pvApplyTransform(pvTouchPan.block);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+        pvTouchPan = null;
+        pvPinch = null;
+    });
 </script>
 @endpush
