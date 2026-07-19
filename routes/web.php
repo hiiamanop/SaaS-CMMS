@@ -103,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Reports (monthly activity & item usage)
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+    Route::get('reports/{monthlyReport}/download', [ReportController::class, 'download'])->name('reports.download');
 
     // Settings (admin only)
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

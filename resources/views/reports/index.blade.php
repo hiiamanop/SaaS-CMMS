@@ -83,6 +83,27 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Archived monthly reports --}}
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100"><h2 class="font-semibold text-gray-900">Arsip Laporan Bulanan</h2></div>
+            <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+                    <th class="px-5 py-3 text-left">Period</th><th class="px-5 py-3 text-left">Generated</th><th class="px-5 py-3 text-left"></th>
+                </tr></thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($archives as $a)
+                        <tr>
+                            <td class="px-5 py-3">{{ \Carbon\Carbon::create()->month($a->month)->format('F') }} {{ $a->year }}</td>
+                            <td class="px-5 py-3 text-gray-500">{{ optional($a->generated_at)->format('d M Y H:i') }}</td>
+                            <td class="px-5 py-3"><a href="{{ route('reports.download', $a) }}" class="text-brand font-medium">Download</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="px-5 py-3 text-gray-400 text-center">No archived reports yet</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
 @endsection

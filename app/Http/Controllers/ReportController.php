@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MonthlyReport;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,9 @@ class ReportController extends Controller
 
         $data = ReportService::forMonth($year, $month);
 
-        return view('reports.index', array_merge($data, compact('year', 'month', 'years')));
+        $archives = MonthlyReport::orderByDesc('year')->orderByDesc('month')->get();
+
+        return view('reports.index', array_merge($data, compact('year', 'month', 'years', 'archives')));
     }
 
     public function exportPdf(Request $request)
@@ -32,5 +35,11 @@ class ReportController extends Controller
 
         $monthName = \Carbon\Carbon::create()->month($month)->format('F');
         return $pdf->download("LAPORAN_BULANAN_{$monthName}_{$year}.pdf");
+    }
+
+    public function download(\App\Models\MonthlyReport $monthlyReport)
+    {
+        abort_unless(\Illuminate\Support\Facades\Storage::exists($monthlyReport->pdf_path), 404);
+        return \Illuminate\Support\Facades\Storage::download($monthlyReport->pdf_path);
     }
 }
