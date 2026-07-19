@@ -14,3 +14,4 @@ Schedule::command('cmms:check-schedules')->dailyAt('06:00')->description('Auto-c
 Schedule::command('cmms:check-overdue')->dailyAt('07:00')->description('Flag overdue WOs and notify');
 Schedule::command('cmms:check-stock')->dailyAt('07:00')->description('Check low spare parts and notify');
 Schedule::command('cmms:check-checksheets')->dailyAt('17:00')->description('Remind about unfilled checksheets');
+Schedule::command('cmms:generate-monthly-report')->monthlyOn(1, '00:30')->description('Archive previous month activity & item-usage report');
