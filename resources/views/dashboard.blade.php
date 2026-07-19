@@ -930,7 +930,12 @@
     document.addEventListener('mousedown', e => {
         const viewport = e.target.closest('[data-pv-viewport]');
         if (!viewport) return;
-        if (e.target.closest('.pv-asset')) return;
+        // Only skip panning here in Atur Posisi mode, where mousedown on a
+        // module must be left free for native drag-to-reposition. Outside
+        // that mode, native drag is already suppressed elsewhere (see the
+        // dragstart handler above), so panning over a module is safe and
+        // necessary — densely packed blocks have little/no empty background.
+        if (window.pvEditMode && e.target.closest('.pv-asset')) return;
         const block = viewport.dataset.pvViewport;
         const v = pvGetView(block);
         pvPan = { block, viewport, startX: e.clientX, startY: e.clientY, origX: v.x, origY: v.y, moved: false };
@@ -982,7 +987,7 @@
         const block = viewport.dataset.pvViewport;
 
         if (e.touches.length === 1) {
-            if (e.target.closest('.pv-asset')) return;
+            if (window.pvEditMode && e.target.closest('.pv-asset')) return;
             const v = pvGetView(block);
             const t = e.touches[0];
             pvTouchPan = { block, viewport, startX: t.clientX, startY: t.clientY, origX: v.x, origY: v.y, moved: false };
