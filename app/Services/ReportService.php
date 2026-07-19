@@ -39,7 +39,7 @@ class ReportService
                 'unit'  => $rows->first()->sparePart->unit ?? '',
                 'qty'   => $rows->sum('qty_used'),
                 'value' => $rows->sum(fn ($r) => $r->qty_used * ($r->unit_price ?? 0)),
-            ])->values()->toArray();
+            ])->values();
 
         $consumables = MaintenanceRecordConsumable::with('consumable')
             ->whereIn('maintenance_record_id', $recordIds)->get()
@@ -49,7 +49,7 @@ class ReportService
                 'unit'  => $rows->first()->consumable->unit ?? '',
                 'qty'   => $rows->sum('qty_used'),
                 'value' => $rows->sum(fn ($r) => $r->qty_used * ($r->unit_price ?? 0)),
-            ])->values()->toArray();
+            ])->values();
 
         $tools = MaintenanceRecordTool::with('tool')
             ->whereIn('maintenance_record_id', $recordIds)->get()
@@ -57,7 +57,7 @@ class ReportService
             ->map(fn ($rows) => [
                 'name'  => $rows->first()->tool->name ?? '—',
                 'count' => $rows->count(),
-            ])->values()->toArray();
+            ])->values();
 
         return compact('workOrders', 'records', 'checksheets', 'findings', 'spareParts', 'consumables', 'tools');
     }

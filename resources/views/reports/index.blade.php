@@ -77,7 +77,7 @@
                     @foreach($tools as $it)
                         <tr><td class="px-5 py-3">{{ $it['name'] }}</td><td class="px-5 py-3 text-gray-500">Tool</td><td class="px-5 py-3">{{ $it['count'] }}x used</td><td class="px-5 py-3">—</td></tr>
                     @endforeach
-                    @if(empty($spareParts) && empty($consumables) && empty($tools))
+                    @if($spareParts->isEmpty() && $consumables->isEmpty() && $tools->isEmpty())
                         <tr><td colspan="4" class="px-5 py-3 text-gray-400 text-center">No items used this month</td></tr>
                     @endif
                 </tbody>
