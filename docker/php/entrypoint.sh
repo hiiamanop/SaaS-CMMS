@@ -51,6 +51,7 @@ fi
 
 echo "Running php artisan optimize..."
 php artisan optimize --no-interaction
+rm -f public/hot 2>/dev/null || true
 
 echo "Running php artisan storage:link..."
 php artisan storage:link --no-interaction || true
