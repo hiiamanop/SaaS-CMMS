@@ -12,6 +12,11 @@ abstract class TestCase extends BaseTestCase
         $_ENV['APP_ENV'] = 'testing';
         $_SERVER['APP_ENV'] = 'testing';
 
+        $testKey = 'base64:' . base64_encode(str_repeat('t', 32));
+        putenv('APP_KEY=' . $testKey);
+        $_ENV['APP_KEY'] = $testKey;
+        $_SERVER['APP_KEY'] = $testKey;
+
         putenv('DB_CONNECTION=sqlite');
         $_ENV['DB_CONNECTION'] = 'sqlite';
         $_SERVER['DB_CONNECTION'] = 'sqlite';

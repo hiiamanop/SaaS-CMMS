@@ -70,10 +70,8 @@ Buka browser dan buka:
 👉 **[http://localhost:8000](http://localhost:8000)**
 
 **Akun Login Default:**
-- **Email:** `wakwaw@gmail.com`
-- **Password:** `ayamgoyengenak`
-
-*(Atau akun bawaan: `admin@arunahijaupower.com` / `password`)*
+- **Super Admin:** `wakwaw@gmail.com` (Sandi: `ayamgoyengenak`)
+- **Alternatif:** `admin@arunahijaupower.com` (Sandi: `password`)
 
 ---
 

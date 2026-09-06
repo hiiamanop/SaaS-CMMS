@@ -106,10 +106,11 @@ echo  Akses Web        : http://localhost:8000
 echo  Database Admin   : http://localhost:8001 (PHPMyAdmin)
 echo.
 echo  AKUN LOGIN:
-echo  - Email          : wakwaw@gmail.com
-echo  - Password       : ayamgoyengenak
+echo  - Super Admin    : wakwaw@gmail.com
+echo  - Sandi Masuk    : ayamgoyengenak
 echo.
-echo  - Alternatif     : admin@arunahijaupower.com / password
+echo  - Alternatif     : admin@arunahijaupower.com
+echo  - Sandi Masuk    : password
 echo.
 echo  Aset PV Layout   : Blok T01 s/d T07 sudah terisi lengkap otomatis!
 echo.
