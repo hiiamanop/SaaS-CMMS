@@ -15,12 +15,25 @@
                 <p class="text-sm text-gray-500 mt-0.5">{{ $asset->asset_code }} · {{ $asset->category }}</p>
             </div>
         </div>
-        @if(!auth()->user()->isTechnician())
         <div class="flex gap-2">
+            <button type="button"
+                    onclick="printQrLabel({
+                        title: '{{ addslashes($asset->name) }}',
+                        code: '{{ $asset->asset_code }}',
+                        category: '{{ addslashes($asset->category) }}',
+                        location: '{{ addslashes($asset->location ?: $asset->transformer_block) }}',
+                        qrValue: '{{ route('assets.show', $asset) }}'
+                    })"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all"
+                    title="Cetak Label QR Code Aset">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="6" height="6" x="3" y="3" rx="1"/><rect width="6" height="6" x="15" y="3" rx="1"/><rect width="6" height="6" x="3" y="15" rx="1"/><path d="M15 15h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM19 15h2v2h-2z"/></svg>
+                <span>Print QR Label</span>
+            </button>
+            @if(auth()->user()->isAdminOrSupervisor())
             <a href="{{ route('assets.edit', $asset) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</a>
-            <button @click="$dispatch('open-delete',{action:'{{ route('assets.destroy',$asset) }}',message:'Delete asset {{ addslashes($asset->name) }}?'})" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</button>
+            <button @click="$dispatch('open-delete',{action:'{{ route('assets.destroy',$asset) }}',message:'Delete asset {{ addslashes($asset->name) }}?'})" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</button>
+            @endif
         </div>
-        @endif
     </div>
 
     {{-- Stats --}}
@@ -60,6 +73,30 @@
             @if($asset->photo)
             <div class="mt-6"><img src="{{ Storage::url($asset->photo) }}" class="h-48 rounded-xl object-cover"></div>
             @endif
+
+            {{-- QR Code Asset Tag --}}
+            <div class="mt-6 pt-5 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/80 p-4 rounded-xl">
+                <div class="flex items-center gap-4">
+                    <canvas id="asset-qr-canvas" class="w-20 h-20 bg-white p-1 rounded-lg border border-gray-200"></canvas>
+                    <div>
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Scannable Asset Tag</span>
+                        <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">{{ $asset->asset_code }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Scan via smartphone untuk akses cepat halaman riwayat aset ini.</p>
+                    </div>
+                </div>
+                <button type="button"
+                        onclick="printQrLabel({
+                            title: '{{ addslashes($asset->name) }}',
+                            code: '{{ $asset->asset_code }}',
+                            category: '{{ addslashes($asset->category) }}',
+                            location: '{{ addslashes($asset->location ?: $asset->transformer_block) }}',
+                            qrValue: '{{ route('assets.show', $asset) }}'
+                        })"
+                        class="px-3.5 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg text-xs font-bold shadow-sm flex items-center gap-2 self-start sm:self-auto transition-all">
+                    <svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                    Print Label QR
+                </button>
+            </div>
         </div>
 
         {{-- Work Orders --}}
@@ -111,3 +148,16 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.QRCode) {
+            const canvas = document.getElementById('asset-qr-canvas');
+            if (canvas) {
+                QRCode.toCanvas(canvas, '{{ route('assets.show', $asset) }}', { width: 80, margin: 1 });
+            }
+        }
+    });
+</script>
+@endpush

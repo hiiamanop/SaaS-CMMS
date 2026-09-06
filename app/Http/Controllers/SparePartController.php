@@ -39,6 +39,52 @@ class SparePartController extends Controller
         return view('spare-parts.index', compact('parts', 'categories', 'lowStockCount'));
     }
 
+    public function exportCsv(Request $request)
+    {
+        $filename = 'spare_parts_export_' . now()->format('Ymd_His') . '.csv';
+        $query = SparePart::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('part_code', 'like', '%'.$request->search.'%');
+            });
+        }
+        if ($request->category) $query->where('category', $request->category);
+        if ($request->filter === 'low_stock') $query->whereRaw('qty_actual <= qty_minimum');
+
+        $parts = $query->orderBy('part_code')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($parts) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, ['Code', 'Name', 'Category', 'Unit', 'Qty Actual', 'Qty Minimum', 'Unit Price', 'Supplier', 'Location', 'Description'], ';');
+
+            foreach ($parts as $p) {
+                fputcsv($handle, [
+                    $p->part_code,
+                    $p->name,
+                    $p->category,
+                    $p->unit,
+                    $p->qty_actual,
+                    $p->qty_minimum,
+                    $p->unit_price,
+                    $p->supplier,
+                    $p->location,
+                    $p->description,
+                ], ';');
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create()
     {
         $this->authorizeManager();

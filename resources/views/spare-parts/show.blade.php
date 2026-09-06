@@ -27,12 +27,50 @@
             </div>
         </div>
         @if($sparePart->description)<div class="pt-4 border-t border-gray-100"><p class="text-xs font-medium text-gray-500 uppercase mb-1">Description</p><p class="text-sm text-gray-700">{{ $sparePart->description }}</p></div>@endif
+
+        {{-- QR Code Card --}}
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/70 p-4 rounded-xl">
+            <div class="flex items-center gap-4">
+                <canvas id="part-qr-canvas" class="w-16 h-16 bg-white p-1 rounded-lg border border-gray-200"></canvas>
+                <div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Label Rak Gudang</span>
+                    <p class="font-mono text-sm font-bold text-gray-900">{{ $sparePart->part_code }}</p>
+                    <p class="text-xs text-gray-500">{{ $sparePart->location ?: 'Gudang' }}</p>
+                </div>
+            </div>
+            <button type="button"
+                    onclick="printQrLabel({
+                        title: '{{ addslashes($sparePart->name) }}',
+                        code: '{{ $sparePart->part_code }}',
+                        category: '{{ addslashes($sparePart->category ?? 'Spare Part') }}',
+                        location: '{{ addslashes($sparePart->location ?? 'Gudang') }}',
+                        qrValue: '{{ route('spare-parts.show', $sparePart) }}'
+                    })"
+                    class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all">
+                <svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                Print Label QR
+            </button>
+        </div>
+
         @if(!auth()->user()->isTechnician())
         <div class="flex gap-3 pt-4 border-t border-gray-100">
             <a href="{{ route('spare-parts.edit', $sparePart) }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
-            <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$sparePart) }}',message:'Delete part {{ addslashes($sparePart->name) }}?'})" class="px-4 py-2 bg-red-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
+            <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$sparePart) }}',message:'Delete part {{ addslashes($sparePart->name) }}?'})" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">Delete</button>
         </div>
         @endif
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.QRCode) {
+            const canvas = document.getElementById('part-qr-canvas');
+            if (canvas) {
+                QRCode.toCanvas(canvas, '{{ route('spare-parts.show', $sparePart) }}', { width: 64, margin: 1 });
+            }
+        }
+    });
+</script>
+@endpush

@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
             FieldConfigurationSeeder::class,
             LestariPertiwiSeeder::class,
             StockOpnameSeeder::class,
+            MaintenanceScheduleSeeder::class,
+            ChecksheetTemplateSeeder::class,
+            WorkOrderSeeder::class,
+            MaintenanceRecordSeeder::class,
         ]);
     }
 }

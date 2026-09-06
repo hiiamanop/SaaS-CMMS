@@ -36,6 +36,53 @@ class ToolController extends Controller
         return view('tools.index', compact('tools', 'conditions'));
     }
 
+    public function exportCsv(Request $request)
+    {
+        $filename = 'tools_export_' . now()->format('Ymd_His') . '.csv';
+        $query = Tool::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('tool_code', 'like', '%'.$request->search.'%')
+                  ->orWhere('brand', 'like', '%'.$request->search.'%');
+            });
+        }
+        if ($request->condition) {
+            $query->where('condition', $request->condition);
+        }
+
+        $tools = $query->orderBy('tool_code')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($tools) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, ['Tool Code', 'Name', 'Brand', 'Category', 'Condition', 'Qty Available', 'Qty Total', 'Location', 'Description'], ';');
+
+            foreach ($tools as $t) {
+                fputcsv($handle, [
+                    $t->tool_code,
+                    $t->name,
+                    $t->brand,
+                    $t->category,
+                    $t->condition,
+                    $t->qty_available,
+                    $t->qty_total,
+                    $t->location,
+                    $t->description,
+                ], ';');
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create()
     {
         $this->authorizeManager();

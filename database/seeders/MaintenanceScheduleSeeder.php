@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\ChecksheetSession;
+use App\Models\Location;
 use App\Models\MaintenanceSchedule;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class MaintenanceScheduleSeeder extends Seeder
@@ -10,6 +13,13 @@ class MaintenanceScheduleSeeder extends Seeder
     public function run(): void
     {
         $now = now();
+        $location = Location::where('name', 'Lestari Pertiwi')->first() ?? Location::first();
+        $locId = $location?->id ?? 1;
+
+        $techs = User::where('role', 'technician')->pluck('id')->all();
+        $tech1 = $techs[0] ?? 1;
+        $tech2 = $techs[1] ?? $tech1;
+        $spvId = User::where('role', 'supervisor')->value('id') ?? User::where('email', 'wakwaw@gmail.com')->value('id') ?? 1;
 
         // Helper: buat array planned_weeks dari pasangan [month, week]
         $weeks = fn(array $pairs) => collect($pairs)
@@ -164,7 +174,40 @@ class MaintenanceScheduleSeeder extends Seeder
         ];
 
         foreach ($schedules as $data) {
-            MaintenanceSchedule::create($data);
+            unset($data['asset_id']);
+            $data['location_id'] = $locId;
+            $data['item_pekerjaan'] = (array) $data['item_pekerjaan'];
+            if ($data['technician_id'] == 3) {
+                $data['technician_id'] = $tech1;
+            } else {
+                $data['technician_id'] = $tech2;
+            }
+            $schedule = MaintenanceSchedule::create($data);
+            $schedule->generateYearSessions(2026);
+        }
+
+        // Simulate realistic historical completions for months 1 through 8 of 2026
+        $sessions = ChecksheetSession::where('year', 2026)->get();
+        $completedCount = 0;
+
+        foreach ($sessions as $session) {
+            $month = (int) $session->month;
+            if ($month >= 1 && $month <= 8) {
+                // ~88% submitted for great operational compliance metrics
+                if (($session->id % 8) !== 0) {
+                    $sessionDate = \Carbon\Carbon::create(2026, $month, min(28, max(1, ($session->week_number ?? 1) * 7 - 2)), 10, 0, 0);
+                    $session->update([
+                        'status'              => 'submitted',
+                        'submitted_at'        => $sessionDate,
+                        'submitted_by'        => $session->schedule->technician_id ?? $tech1,
+                        'signed_by_teknisi'   => 'Teknisi PLTS',
+                        'signed_date_teknisi' => $sessionDate->toDateString(),
+                        'signed_by_spv'       => 'Supervisor',
+                        'signed_date_spv'     => $sessionDate->copy()->addHours(4)->toDateString(),
+                    ]);
+                    $completedCount++;
+                }
+            }
         }
     }
 }

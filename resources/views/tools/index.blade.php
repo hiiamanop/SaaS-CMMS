@@ -8,15 +8,23 @@
             <h1 class="text-2xl font-bold text-gray-900">Tools</h1>
             <p class="text-sm text-gray-500 mt-0.5">Measurement and hand tools management</p>
         </div>
-        @if(auth()->user()->isAdminOrSupervisor())
+        <div class="flex flex-col items-end gap-1" x-data="{ uploading: false }">
             <div class="flex items-center gap-2">
+                {{-- Export CSV (Available for ALL users) --}}
+                <a href="{{ route('tools.export', request()->query()) }}"
+                   class="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]" title="Export to CSV">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Export CSV</span>
+                </a>
+
+                @if(auth()->user()->isAdminOrSupervisor())
                 <form action="{{ route('items.import') }}" method="POST" enctype="multipart/form-data" class="hidden" id="import-form">
                     @csrf
                     <input type="hidden" name="type" value="tool">
                     <input type="file" name="file" id="import-file" @change="uploading = true; $el.form.submit()" accept=".csv, .xlsx, .xls">
                 </form>
 
-                <button @click="document.getElementById('import-file').click()" 
+                <button @click="document.getElementById('import-file').click()"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]"
                         :disabled="uploading">
                     <svg x-show="!uploading" class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9m-4-4l4 4 4-4"/></svg>
@@ -24,13 +32,13 @@
                     <span x-text="uploading ? 'Importing...' : 'Import Tools'"></span>
                 </button>
 
-                <a href="{{ route('tools.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-opacity-90 shadow-sm transition-all h-[38px]">
-                    <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Tool
+                <a href="{{ route('tools.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-dark text-white rounded-lg text-sm font-bold hover:bg-gray-700 shadow-sm transition-all h-[38px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Add Tool</span>
                 </a>
+                @endif
             </div>
-            <span class="text-[10px] text-gray-400 font-medium italic">Support: .xlsx, .csv</span>
         </div>
-        @endif
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -140,11 +148,25 @@
                 <span class="text-xs font-medium text-gray-500 block mb-1">Keterangan / Spesifikasi</span>
                 <p class="text-gray-700 text-xs leading-relaxed" x-text="selectedTool?.description"></p>
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                <button @click="selectedTool = null" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50">Tutup</button>
-                @if(auth()->user()->isAdminOrSupervisor())
-                <a :href="'/tools/' + selectedTool?.id + '/edit'" class="px-4 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Edit Tool</a>
-                @endif
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                <button type="button"
+                        @click="printQrLabel({
+                            title: selectedTool?.name,
+                            code: selectedTool?.tool_code,
+                            category: selectedTool?.category || 'Tool',
+                            location: selectedTool?.location || 'Rak Tools',
+                            qrValue: selectedTool?.tool_code
+                        })"
+                        class="px-3.5 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all">
+                    <svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                    Print Label QR
+                </button>
+                <div class="flex gap-2">
+                    <button @click="selectedTool = null" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50">Tutup</button>
+                    @if(auth()->user()->isAdminOrSupervisor())
+                    <a :href="'/tools/' + selectedTool?.id + '/edit'" class="px-4 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Edit Tool</a>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

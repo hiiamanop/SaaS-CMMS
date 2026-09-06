@@ -8,16 +8,23 @@
             <h1 class="text-2xl font-bold text-gray-900">Spare Parts</h1>
             <p class="text-sm text-gray-500 mt-0.5">Inventory management</p>
         </div>
-        @if(!auth()->user()->isTechnician())
         <div class="flex flex-col items-end gap-1" x-data="{ uploading: false }">
             <div class="flex items-center gap-2">
+                {{-- Export CSV (Available for ALL users) --}}
+                <a href="{{ route('spare-parts.export', request()->query()) }}"
+                   class="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]" title="Export to CSV">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Export CSV</span>
+                </a>
+
+                @if(auth()->user()->isAdminOrSupervisor())
                 <form action="{{ route('items.import') }}" method="POST" enctype="multipart/form-data" class="hidden" id="import-form">
                     @csrf
                     <input type="hidden" name="type" value="sparepart">
                     <input type="file" name="file" id="import-file" @change="uploading = true; $el.form.submit()" accept=".csv, .xlsx, .xls">
                 </form>
 
-                <button @click="document.getElementById('import-file').click()" 
+                <button @click="document.getElementById('import-file').click()"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]"
                         :disabled="uploading">
                     <svg x-show="!uploading" class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9m-4-4l4 4 4-4"/></svg>
@@ -28,10 +35,10 @@
                 <a href="{{ route('spare-parts.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg text-sm font-bold hover:bg-opacity-90 shadow-sm transition-all h-[38px]">
                     <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>Add Part
                 </a>
+                @endif
             </div>
             <span class="text-[10px] text-gray-400 font-medium italic">Support: .xlsx, .csv</span>
         </div>
-        @endif
     </div>
 
     @if($lowStockCount > 0)

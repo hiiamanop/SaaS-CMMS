@@ -133,7 +133,21 @@ class MaintenanceRecordSeeder extends Seeder
             ],
         ];
 
+        $techs = \App\Models\User::where('role', 'technician')->pluck('id')->all();
+        $tech1 = $techs[0] ?? 1;
+        $firstPart = SparePart::first()?->id ?? 1;
+
         foreach ($records as $record) {
+            $wo = \App\Models\WorkOrder::find($record['work_order_id']);
+            if ($wo) {
+                $record['asset_id'] = $wo->asset_id;
+                $record['technician_id'] = $wo->assigned_to ?: $tech1;
+            }
+            if (isset($record['downtime_minutes'])) {
+                $record['shutdown_minutes'] = $record['downtime_minutes'];
+                unset($record['downtime_minutes']);
+            }
+            $record['status_after'] = 'solved';
             MaintenanceRecord::create($record);
         }
 
@@ -174,11 +188,14 @@ class MaintenanceRecordSeeder extends Seeder
         ];
 
         foreach ($partsUsed as $part) {
-            $sparePart = SparePart::find($part['spare_part_id']);
+            $sparePart = SparePart::find($part['spare_part_id']) ?? SparePart::first();
             if ($sparePart) {
+                $part['spare_part_id'] = $sparePart->id;
                 $sparePart->decrement('qty_actual', $part['qty_used']);
             }
-            MaintenanceRecordPart::create($part);
+            if (MaintenanceRecord::where('id', $part['maintenance_record_id'])->exists()) {
+                MaintenanceRecordPart::create($part);
+            }
         }
     }
 }

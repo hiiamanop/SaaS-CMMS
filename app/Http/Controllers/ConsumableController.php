@@ -35,6 +35,53 @@ class ConsumableController extends Controller
         return view('consumables.index', compact('items', 'lowStockCount'));
     }
 
+    public function exportCsv(Request $request)
+    {
+        $filename = 'consumables_export_' . now()->format('Ymd_His') . '.csv';
+        $query = Consumable::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                  ->orWhere('item_code', 'like', '%'.$request->search.'%');
+            });
+        }
+        if ($request->filter === 'low_stock') {
+            $query->whereRaw('qty_actual <= qty_minimum');
+        }
+
+        $items = $query->orderBy('item_code')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($items) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, ['Item Code', 'Name', 'Category', 'Unit', 'Qty Actual', 'Qty Minimum', 'Location', 'Supplier', 'Unit Price', 'Description'], ';');
+
+            foreach ($items as $c) {
+                fputcsv($handle, [
+                    $c->item_code,
+                    $c->name,
+                    $c->category,
+                    $c->unit,
+                    $c->qty_actual,
+                    $c->qty_minimum,
+                    $c->location,
+                    $c->supplier,
+                    $c->unit_price,
+                    $c->description,
+                ], ';');
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create()
     {
         $this->authorizeManager();
