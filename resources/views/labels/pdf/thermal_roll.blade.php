@@ -20,22 +20,18 @@
             background: #fff;
         }
         .sticker-page {
-            width: 100%;
-            height: 100%;
-            padding: 2.2mm 2.8mm;
+            padding: 1.2mm 1.5mm;
             page-break-after: always;
-            position: relative;
+            box-sizing: border-box;
         }
         .sticker-page:last-child {
             page-break-after: avoid;
         }
         .card {
-            width: 100%;
-            height: 100%;
-            border: 1.2pt solid #000;
-            border-radius: 2mm;
-            padding: 1.8mm 2.2mm;
-            position: relative;
+            border: 1pt solid #000;
+            border-radius: 1.5mm;
+            padding: 1.2mm 1.5mm;
+            box-sizing: border-box;
         }
         .brand-header {
             border-bottom: 0.8pt solid #000;
@@ -46,7 +42,7 @@
         }
         .brand-title {
             display: table-cell;
-            font-size: 7.5pt;
+            font-size: 7pt;
             font-weight: bold;
             letter-spacing: 0.3pt;
             text-transform: uppercase;
@@ -54,7 +50,7 @@
         .brand-sub {
             display: table-cell;
             text-align: right;
-            font-size: 5.5pt;
+            font-size: 5pt;
             font-weight: bold;
             color: #333;
         }
@@ -64,34 +60,34 @@
         }
         .col-info {
             vertical-align: top;
-            padding-right: 2mm;
+            padding-right: 1.5mm;
         }
         .col-qr {
-            width: 26mm;
-            text-align: center;
+            width: 22mm;
+            text-align: right;
             vertical-align: middle;
         }
         .item-name {
-            font-size: 8.5pt;
+            font-size: 7.5pt;
             font-weight: bold;
             line-height: 1.15;
-            max-height: 2.4em;
+            height: 18pt;
             overflow: hidden;
-            margin-bottom: 1.5mm;
+            margin-bottom: 0.8mm;
         }
         .badge-code {
             display: inline-block;
             font-family: 'Courier', monospace;
-            font-size: 8pt;
+            font-size: 7pt;
             font-weight: bold;
             background: #000;
             color: #fff;
-            padding: 0.6mm 1.6mm;
-            border-radius: 1mm;
-            margin-bottom: 1.2mm;
+            padding: 0.3mm 1.2mm;
+            border-radius: 0.6mm;
+            margin-bottom: 0.8mm;
         }
         .meta-text {
-            font-size: 6pt;
+            font-size: 5.5pt;
             line-height: 1.2;
             color: #222;
         }
@@ -100,22 +96,93 @@
             color: #000;
         }
         .qr-image {
-            width: 24mm;
-            height: 24mm;
+            width: 21mm;
+            height: 21mm;
             display: block;
-            margin: 0 auto;
+            margin-left: auto;
         }
-        /* Format 50x30 Compact adjustments */
+
+        /* ── Format 50 x 30 mm (Mini / String Tag) ── */
         @if($format === 'roll_50x30')
-        .sticker-page { padding: 1.5mm 1.8mm; }
-        .card { padding: 1.2mm 1.5mm; border-width: 0.9pt; }
-        .brand-title { font-size: 6pt; }
-        .brand-sub { font-size: 5pt; }
-        .col-qr { width: 18mm; }
-        .qr-image { width: 16.5mm; height: 16.5mm; }
-        .item-name { font-size: 6.8pt; }
-        .badge-code { font-size: 6.5pt; padding: 0.4mm 1.2mm; }
-        .meta-text { font-size: 5pt; }
+        .sticker-page {
+            padding: 1mm 1.2mm;
+        }
+        .card {
+            border-width: 0.8pt;
+            border-radius: 1mm;
+            padding: 0.8mm 1mm;
+        }
+        .brand-header {
+            border-bottom-width: 0.4pt;
+            padding-bottom: 0.3mm;
+            margin-bottom: 0.6mm;
+        }
+        .brand-title {
+            font-size: 5.5pt;
+        }
+        .brand-sub {
+            font-size: 4.5pt;
+        }
+        .col-qr {
+            width: 16mm;
+        }
+        .qr-image {
+            width: 15mm;
+            height: 15mm;
+        }
+        .item-name {
+            font-size: 6.2pt;
+            height: 14pt;
+            margin-bottom: 0.5mm;
+        }
+        .badge-code {
+            font-size: 5.8pt;
+            padding: 0.2mm 0.8mm;
+            margin-bottom: 0.5mm;
+        }
+        .meta-text {
+            font-size: 4.8pt;
+            line-height: 1.15;
+        }
+        @endif
+
+        /* ── Format 100 x 50 mm (Besar / Trafo / Inverter) ── */
+        @if($format === 'roll_100x50')
+        .sticker-page {
+            padding: 2mm 2.5mm;
+        }
+        .card {
+            border-width: 1.2pt;
+            border-radius: 2mm;
+            padding: 1.8mm 2.2mm;
+        }
+        .brand-title {
+            font-size: 9.5pt;
+        }
+        .brand-sub {
+            font-size: 6.5pt;
+        }
+        .col-qr {
+            width: 32mm;
+        }
+        .qr-image {
+            width: 30mm;
+            height: 30mm;
+        }
+        .item-name {
+            font-size: 10.5pt;
+            height: 24pt;
+            margin-bottom: 1.5mm;
+        }
+        .badge-code {
+            font-size: 9pt;
+            padding: 0.5mm 1.8mm;
+            margin-bottom: 1.5mm;
+        }
+        .meta-text {
+            font-size: 7pt;
+            line-height: 1.25;
+        }
         @endif
     </style>
 </head>
