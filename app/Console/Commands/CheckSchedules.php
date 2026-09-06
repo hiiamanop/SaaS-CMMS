@@ -28,24 +28,38 @@ class CheckSchedules extends Command
                 if (($planned['month'] ?? null) == $currentMonth && ($planned['week'] ?? null) == $currentWeek) {
                     // Check if work order already exists for this week
                     $exists = WorkOrder::where('maintenance_schedule_id', $schedule->id)
-                        ->where('type', $schedule->type === 'mingguan' ? 'preventive_mingguan' : 'preventive_' . $schedule->type)
                         ->whereYear('due_date', $now->year)
                         ->whereMonth('due_date', $currentMonth)
                         ->exists();
 
                     if (!$exists) {
                         $admin = User::where('role', 'admin')->first();
+
+                        $itemsList = is_array($schedule->item_pekerjaan)
+                            ? implode(', ', array_filter(array_map(fn($i) => is_array($i) ? ($i['name'] ?? '') : (string)$i, $schedule->item_pekerjaan)))
+                            : (string) $schedule->item_pekerjaan;
+
+                        $woType = match($schedule->frequency) {
+                            'weekly'    => 'preventive_mingguan',
+                            'monthly'   => 'preventive_bulanan',
+                            'quarterly' => 'preventive_semesteran',
+                            'annually'  => 'preventive_tahunan',
+                            default     => 'preventive',
+                        };
+
+                        $title = 'Preventive - ' . $schedule->equipment_name . ($itemsList ? ' - ' . \Illuminate\Support\Str::limit($itemsList, 50) : '');
+
                         WorkOrder::create([
-                            'wo_number' => WorkOrder::generateNumber(),
-                            'title' => "Preventive - {$schedule->equipment_name} - {$schedule->item_pekerjaan}",
-                            'asset_id' => $schedule->asset_id,
+                            'wo_number'               => WorkOrder::generateNumber(),
+                            'title'                   => $title,
+                            'asset_id'                => $schedule->asset_id,
                             'maintenance_schedule_id' => $schedule->id,
-                            'created_by' => $admin?->id ?? 1,
-                            'type' => 'preventive_' . $schedule->type,
-                            'priority' => 'medium',
-                            'status' => 'open',
-                            'due_date' => $now->endOfWeek()->toDateString(),
-                            'description' => $schedule->item_pekerjaan,
+                            'created_by'              => $admin?->id ?? 1,
+                            'type'                    => $woType,
+                            'priority'                => 'medium',
+                            'status'                  => 'open',
+                            'due_date'                => $now->endOfWeek()->toDateString(),
+                            'description'             => $itemsList ?: 'Preventive maintenance based on schedule.',
                         ]);
                         $this->info("Created WO for schedule #{$schedule->id}: {$schedule->equipment_name}");
                     }

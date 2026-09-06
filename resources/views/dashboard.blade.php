@@ -258,6 +258,31 @@
              blockLocationIds: {{ json_encode($blockLocationIds) }},
              showBlockDropdown: false,
              editDataMode: false,
+             editMode: false,
+             detailModal: { show: false, id: null, code: '', name: '', status: '', block: '', inverter: '', string: '', row: 1, col: 1, brand: '', model: '', serial: '', desc: '', showUrl: '', woUrl: '' },
+             openDetailModal(item) {
+                 this.detailModal = {
+                     show: true,
+                     id: item.id,
+                     code: item.code,
+                     name: item.name,
+                     status: item.status,
+                     block: item.block,
+                     inverter: 'INV' + String(item.string_number).padStart(2, '0'),
+                     string: 'S' + String(item.module_slot).padStart(2, '0'),
+                     row: item.row,
+                     col: item.col,
+                     brand: item.brand || 'Jinko Solar',
+                     model: item.model || 'JKM550M-72HL4-V',
+                     serial: item.serial || ('SN-' + item.code),
+                     desc: item.desc || '',
+                     showUrl: '/assets/' + item.id,
+                     woUrl: '/work-orders/create?from_asset=' + item.id,
+                 };
+             },
+             closeDetailModal() {
+                 this.detailModal.show = false;
+             },
              modal: { show: false, mode: '', assetId: null, row: 1, col: 1, x: 0, y: 0 },
              assetList: [], assetSearch: '', selectedCategory: '', selectedAssetId: null, selectedAsset: null, showDropdown: false,
              get activeIndex() { return this.blocks.indexOf(this.activeBlock); },
@@ -306,6 +331,12 @@
                  const csrf = document.querySelector('meta[name=csrf-token]').content;
                  await fetch(`/assets/${assetId}/pv`, { method: 'DELETE', headers: {'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json'} });
                  this.closeModal(); window.location.href = window.location.pathname + '#peta-pv'; window.location.reload();
+             },
+             init() {
+                 this.$watch('activeBlock', b => {
+                     this.$nextTick(() => { if (typeof pvFitView === 'function') pvFitView(b); });
+                 });
+                 this.$nextTick(() => { if (typeof pvFitView === 'function') pvFitView(this.activeBlock); });
              }
          }">
 
@@ -375,10 +406,10 @@
         @php
             $useVisual = $modules->whereNotNull('visual_row')->whereNotNull('visual_col')->count() > 0;
             $statusColors = [
-                'active'            => 'bg-emerald-400 hover:bg-emerald-500 ring-emerald-300',
-                'replaced'          => 'bg-amber-400 hover:bg-amber-500 ring-amber-300',
-                'inactive'          => 'bg-gray-300 hover:bg-gray-400 ring-gray-200',
-                'retired'           => 'bg-red-400 hover:bg-red-500 ring-red-300',
+                'active'            => 'bg-emerald-500 hover:bg-emerald-600 text-white ring-emerald-300 shadow-sm shadow-emerald-500/20',
+                'replaced'          => 'bg-amber-500 hover:bg-amber-600 text-white ring-amber-300 shadow-sm shadow-amber-500/20',
+                'inactive'          => 'bg-gray-300 hover:bg-gray-400 text-gray-700 ring-gray-200',
+                'retired'           => 'bg-rose-500 hover:bg-rose-600 text-white ring-rose-300 shadow-sm shadow-rose-500/20',
             ];
 
             if ($useVisual) {
@@ -419,7 +450,6 @@
             }
         @endphp
         <div x-show="activeBlock === '{{ $block }}'" x-cloak
-             x-data="{ editMode: false }"
              class="px-6 pb-6">
 
             @if(!$useVisual)
@@ -429,40 +459,52 @@
             </p>
             @endif
 
-            <div class="flex items-center justify-end gap-2 mb-2">
-                {{-- Edit Data button --}}
-                <template x-if="!editDataMode && !editMode">
-                    <button @click="editDataMode = true; closeModal()"
-                            class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                        ✎ Edit Data
-                    </button>
-                </template>
-                <template x-if="editDataMode">
-                    <button @click="editDataMode = false; closeModal()"
-                            class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all">
-                        ✕ Selesai Edit
-                    </button>
-                </template>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pt-1">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-100 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>{{ $modules->count() }} String Terpasang</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium">
+                        <span>Grid: {{ $maxRow }} Baris &times; {{ $maxCol }} Kolom</span>
+                    </span>
+                </div>
 
-                {{-- Atur Posisi buttons --}}
-                <template x-if="!editMode && !editDataMode">
-                    <button @click="editMode = true; window.pvEditMode = true; pvInitPositions()"
-                            class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
-                        ✎ Atur Posisi
-                    </button>
-                </template>
-                <template x-if="editMode">
-                    <div class="flex gap-2">
-                        <button @click="pvSave().then(() => { editMode = false; window.pvEditMode = false; })"
-                                class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all">
-                            ✓ Simpan
+                <div class="flex items-center gap-2">
+                    {{-- Edit Data button --}}
+                    <template x-if="!editDataMode && !editMode">
+                        <button @click="editDataMode = true; closeModal()"
+                                class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
+                            ✎ Edit Data
                         </button>
-                        <button @click="editMode = false; window.pvEditMode = false; window.location.href = window.location.pathname + '#peta-pv'; window.location.reload()"
-                                class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
-                            ✕ Batal
+                    </template>
+                    <template x-if="editDataMode">
+                        <button @click="editDataMode = false; closeModal()"
+                                class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all">
+                            ✕ Selesai Edit
                         </button>
-                    </div>
-                </template>
+                    </template>
+
+                    {{-- Atur Posisi buttons --}}
+                    <template x-if="!editMode && !editDataMode">
+                        <button @click="editMode = true; window.pvEditMode = true; pvInitPositions()"
+                                class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+                            ✎ Atur Posisi
+                        </button>
+                    </template>
+                    <template x-if="editMode">
+                        <div class="flex gap-2">
+                            <button @click="pvSave().then(() => { editMode = false; window.pvEditMode = false; })"
+                                    class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all">
+                                ✓ Simpan
+                            </button>
+                            <button @click="editMode = false; window.pvEditMode = false; window.location.href = window.location.pathname + '#peta-pv'; window.location.reload()"
+                                    class="px-3 py-1 rounded-lg text-xs font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
+                                ✕ Batal
+                            </button>
+                        </div>
+                    </template>
+                </div>
             </div>
 
             {{-- Hover Modal --}}
@@ -550,16 +592,18 @@
             </div>
 
             <div class="relative overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/50 mt-1 cursor-grab"
-                 style="height: 480px;"
+                 style="height: 540px;"
                  data-pv-viewport="{{ $block }}">
 
-                <div class="absolute top-3 right-3 z-20 flex flex-col gap-1">
-                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'in')"
-                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">+</button>
-                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'out')"
-                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base leading-none">&minus;</button>
-                    <button type="button" onclick="pvResetView('{{ $block }}')"
-                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 text-gray-500 hover:bg-gray-50 text-[9px] font-bold">RST</button>
+                <div class="absolute top-3 right-3 z-20 flex flex-col gap-1 shadow-sm">
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'in')" title="Zoom In"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-base leading-none transition-transform active:scale-95">+</button>
+                    <button type="button" onclick="pvZoomBy('{{ $block }}', 'out')" title="Zoom Out"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-base leading-none transition-transform active:scale-95">&minus;</button>
+                    <button type="button" onclick="pvFitView('{{ $block }}')" title="Pas ke Layar (Fit)"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 shadow border border-emerald-200 hover:bg-emerald-100 text-[9px] font-black tracking-tight transition-transform active:scale-95">FIT</button>
+                    <button type="button" onclick="pvResetView('{{ $block }}')" title="Reset 100%"
+                            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white shadow border border-gray-200 text-gray-500 hover:bg-gray-50 text-[9px] font-bold transition-transform active:scale-95">RST</button>
                 </div>
 
                 <div class="flex justify-center" data-pv-canvas="{{ $block }}"
@@ -589,13 +633,13 @@
                             $supportingAsset = $supportingGrid[$row][$col] ?? null;
                             $isDivider       = in_array($col, $dividerCols);
                         @endphp
-                        <td class="p-0 align-middle {{ $isDivider ? 'border-r-2 border-gray-300' : '' }}"
-                            style="width:52px;height:30px;"
+                        <td class="p-0.5 align-middle {{ $isDivider ? 'border-r-2 border-gray-300' : '' }}"
+                            style="width:56px;height:34px;"
                             data-row="{{ $row }}" data-col="{{ $col }}">
                             @if($asset)
                             @php
                                 $hierarchyCode = $asset->transformer_block . '-INV' . str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) . '-S' . str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT);
-                                $colorClass    = $statusColors[$asset->status] ?? 'bg-gray-200 ring-gray-200';
+                                $colorClass    = $statusColors[$asset->status] ?? 'bg-emerald-500 text-white';
                             @endphp
                             <a href="{{ route('assets.show', $asset->id) }}"
                                draggable="true"
@@ -603,11 +647,14 @@
                                data-tip-code="{{ $hierarchyCode }}"
                                data-tip-name="{{ addslashes($asset->name) }}"
                                data-tip-status="{{ $asset->status }}"
-                               @click="if(editDataMode){ $event.preventDefault(); openModal($event, {{ $row }}, {{ $col }}, {{ $asset->id }}, 'PV Module') }"
-                               :class="editDataMode ? 'cursor-pointer ring-2 ring-blue-300' : 'hover:scale-[1.2] hover:z-10'"
-                               class="pv-asset flex items-center justify-center w-[52px] h-[30px] rounded-[3px] transition-all duration-100 relative hover:ring-2 {{ $colorClass }}">
-                                <span class="text-[7px] font-bold text-gray-800 leading-none select-none pointer-events-none">
-                                    INV{{ str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) }}-S{{ str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT) }}
+                               @click.prevent="if(editDataMode){ openModal($event, {{ $row }}, {{ $col }}, {{ $asset->id }}, 'PV Module') } else { openDetailModal({ id: {{ $asset->id }}, code: '{{ $hierarchyCode }}', name: '{{ addslashes($asset->name) }}', status: '{{ $asset->status }}', block: '{{ $asset->transformer_block }}', string_number: {{ $asset->string_number }}, module_slot: {{ $asset->module_slot }}, row: {{ $row }}, col: {{ $col }}, brand: '{{ addslashes($asset->brand ?? 'Jinko Solar') }}', model: '{{ addslashes($asset->model ?? 'JKM550M-72HL4-V') }}', serial: '{{ addslashes($asset->serial_number ?? '') }}', desc: '{{ addslashes($asset->description ?? '') }}' }) }"
+                               :class="editDataMode ? 'cursor-pointer ring-2 ring-blue-400 ring-offset-1' : 'hover:scale-[1.18] hover:z-20'"
+                               class="pv-asset group flex flex-col items-center justify-center w-[54px] h-[32px] rounded-[5px] transition-all duration-150 relative shadow-sm border border-black/10 hover:ring-2 {{ $colorClass }}">
+                                <span class="text-[6.5px] font-bold opacity-80 leading-none select-none tracking-tight">
+                                    INV{{ str_pad($asset->string_number, 2, '0', STR_PAD_LEFT) }}
+                                </span>
+                                <span class="text-[8px] font-black leading-tight select-none tracking-wide">
+                                    S{{ str_pad($asset->module_slot, 2, '0', STR_PAD_LEFT) }}
                                 </span>
                             </a>
                             @elseif($supportingAsset)
@@ -670,6 +717,100 @@
 
         </div>
         @endforeach
+
+        {{-- Detail Modal for Selected PV Module --}}
+        <div x-show="detailModal.show" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             @keydown.escape.window="closeDetailModal()">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity" @click="closeDetailModal()"></div>
+
+            <div class="min-h-full flex items-center justify-center p-4 text-center">
+                <div @click.stop class="relative bg-white rounded-2xl max-w-md w-full p-6 text-left shadow-2xl border border-gray-100 transform transition-all">
+                    {{-- Modal Header --}}
+                    <div class="flex items-start justify-between pb-4 border-b border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm">
+                                PV
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                                    <span x-text="detailModal.code"></span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                          :class="{
+                                              'bg-emerald-100 text-emerald-800': detailModal.status === 'active',
+                                              'bg-amber-100 text-amber-800': detailModal.status === 'replaced',
+                                              'bg-gray-100 text-gray-800': detailModal.status === 'inactive',
+                                              'bg-rose-100 text-rose-800': detailModal.status === 'retired',
+                                          }"
+                                          x-text="detailModal.status">
+                                    </span>
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5" x-text="detailModal.name"></p>
+                            </div>
+                        </div>
+                        <button @click="closeDetailModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body Grid --}}
+                    <div class="py-4 space-y-3">
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Blok Trafo</span>
+                                <span class="font-bold text-gray-800 text-sm font-mono" x-text="detailModal.block"></span>
+                            </div>
+                            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Posisi Grid</span>
+                                <span class="font-bold text-gray-800 text-sm font-mono">Row <span x-text="detailModal.row"></span>, Col <span x-text="detailModal.col"></span></span>
+                            </div>
+                            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Inverter Terhubung</span>
+                                <span class="font-bold text-blue-600 text-sm font-mono" x-text="detailModal.inverter"></span>
+                            </div>
+                            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Nomor String</span>
+                                <span class="font-bold text-emerald-600 text-sm font-mono" x-text="detailModal.string"></span>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50/60 p-3 rounded-xl border border-gray-100 space-y-1.5 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Merek / Tipe:</span>
+                                <span class="font-semibold text-gray-800" x-text="detailModal.brand + ' (' + detailModal.model + ')'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Kapasitas String:</span>
+                                <span class="font-semibold text-gray-800">28 Panel Seri &times; 550Wp (15.4 kWp)</span>
+                            </div>
+                            <div class="flex justify-between" x-show="detailModal.serial">
+                                <span class="text-gray-500">Serial Number:</span>
+                                <span class="font-mono text-gray-700" x-text="detailModal.serial"></span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-gray-500 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100 flex items-start gap-2">
+                            <svg class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-text="detailModal.desc || 'String PV aktif terhubung ke MPPT inverter pendukung di blok gardu.'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Modal Actions --}}
+                    <div class="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+                        <a :href="detailModal.woUrl"
+                           class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shadow-amber-500/20">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                            Buat Work Order
+                        </a>
+                        <a :href="detailModal.showUrl"
+                           class="px-3.5 py-2 rounded-xl bg-gray-900 hover:bg-black text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm">
+                            Lihat Detail Lengkap
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     @endif
 
@@ -915,10 +1056,36 @@
         pvApplyTransform(block);
     }
 
-    // Apply the identity transform to every rendered block's canvas on load.
+    function pvFitView(block) {
+        const viewport = document.querySelector(`[data-pv-viewport="${block}"]`);
+        const canvas = document.querySelector(`[data-pv-canvas="${block}"]`);
+        if (!viewport || !canvas) return;
+        const vpRect = viewport.getBoundingClientRect();
+        const table = canvas.querySelector('table');
+        if (!table) return;
+        const tWidth = table.offsetWidth;
+        const tHeight = table.offsetHeight;
+        if (tWidth <= 0 || tHeight <= 0) return;
+        const pad = 24;
+        const scaleX = (vpRect.width - pad * 2) / tWidth;
+        const scaleY = (vpRect.height - pad * 2) / tHeight;
+        const fitScale = pvClampScale(Math.min(scaleX, scaleY, 1.0));
+        const v = pvGetView(block);
+        v.scale = fitScale;
+        v.x = Math.max(10, (vpRect.width - tWidth * fitScale) / 2);
+        v.y = Math.max(10, (vpRect.height - tHeight * fitScale) / 2);
+        pvApplyTransform(block);
+    }
+
+    // Apply auto-fit transform to every rendered block's canvas on load.
     document.querySelectorAll('[data-pv-canvas]').forEach(el => {
-        pvApplyTransform(el.dataset.pvCanvas);
+        pvFitView(el.dataset.pvCanvas);
     });
+    setTimeout(() => {
+        document.querySelectorAll('[data-pv-canvas]').forEach(el => {
+            pvFitView(el.dataset.pvCanvas);
+        });
+    }, 250);
 
     // Mouse drag-to-pan (background only — never on a .pv-asset, so the
     // existing Atur Posisi native drag-and-drop and normal click-through

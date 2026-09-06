@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
+    private function authorizeManager(): void
+    {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Asset::query();
@@ -35,12 +42,14 @@ class AssetController extends Controller
 
     public function create()
     {
+        $this->authorizeManager();
         $pltsList = \App\Models\Location::where('is_active', true)->orderBy('name')->get();
         return view('assets.create', compact('pltsList'));
     }
 
     public function store(Request $request)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'asset_code' => 'nullable|string|unique:assets',
             'name' => 'required|string|max:255',
@@ -81,12 +90,14 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
+        $this->authorizeManager();
         $pltsList = \App\Models\Location::where('is_active', true)->orderBy('name')->get();
         return view('assets.edit', compact('asset', 'pltsList'));
     }
 
     public function update(Request $request, Asset $asset)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'asset_code' => 'nullable|string|unique:assets,asset_code,' . $asset->id,
             'name' => 'required|string|max:255',
@@ -119,6 +130,7 @@ class AssetController extends Controller
 
     public function destroy(Asset $asset)
     {
+        $this->authorizeManager();
         if ($asset->photo)
             Storage::disk('public')->delete($asset->photo);
         $asset->delete();
@@ -127,6 +139,7 @@ class AssetController extends Controller
 
     public function updatePosition(Request $request)
     {
+        $this->authorizeManager();
         $request->validate([
             'asset_id' => 'required|integer|exists:assets,id',
             'row'      => 'required|integer|min:1',
@@ -143,6 +156,7 @@ class AssetController extends Controller
 
     public function swapPosition(Request $request)
     {
+        $this->authorizeManager();
         $request->validate([
             'asset_a' => 'required|integer|exists:assets,id',
             'asset_b' => 'nullable|integer|exists:assets,id',
@@ -150,16 +164,18 @@ class AssetController extends Controller
             'col_b'   => 'required|integer|min:1',
         ]);
 
-        $assetA = Asset::findOrFail($request->asset_a);
-        $rowA   = $assetA->visual_row;
-        $colA   = $assetA->visual_col;
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $assetA = Asset::findOrFail($request->asset_a);
+            $rowA   = $assetA->visual_row;
+            $colA   = $assetA->visual_col;
 
-        if ($request->asset_b) {
-            $assetB = Asset::findOrFail($request->asset_b);
-            $assetB->update(['visual_row' => $rowA, 'visual_col' => $colA]);
-        }
+            if ($request->asset_b) {
+                $assetB = Asset::findOrFail($request->asset_b);
+                $assetB->update(['visual_row' => $rowA, 'visual_col' => $colA]);
+            }
 
-        $assetA->update(['visual_row' => $request->row_b, 'visual_col' => $request->col_b]);
+            $assetA->update(['visual_row' => $request->row_b, 'visual_col' => $request->col_b]);
+        });
 
         return response()->json(['ok' => true]);
     }
@@ -175,6 +191,7 @@ class AssetController extends Controller
 
     public function quickSavePv(Request $request)
     {
+        $this->authorizeManager();
         $request->validate([
             'asset_id'          => 'required|integer|exists:assets,id',
             'transformer_block' => 'required|string|max:100',
@@ -193,6 +210,7 @@ class AssetController extends Controller
 
     public function destroyPv(Asset $asset)
     {
+        $this->authorizeManager();
         // Hapus dari grid (bersihkan posisi visual), tidak hapus asset
         $asset->update(['visual_row' => null, 'visual_col' => null, 'transformer_block' => null]);
         return response()->json(['ok' => true]);

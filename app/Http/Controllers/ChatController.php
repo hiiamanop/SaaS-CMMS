@@ -270,6 +270,9 @@ class ChatController extends Controller
                 return $list;
 
             case 'create_maintenance_schedule':
+                if (!Auth::user()->isAdminOrSupervisor()) {
+                    return "⛔ **Akses Ditolak**: Anda tidak memiliki hak akses untuk membuat jadwal maintenance.";
+                }
                 try {
                     $schedule = MaintenanceSchedule::create([
                         'location_id' => $args['location_id'],
@@ -292,6 +295,10 @@ class ChatController extends Controller
 
     protected function handleAssetCrud($action, $data)
     {
+        if (in_array($action, ['create', 'update', 'delete']) && !Auth::user()->isAdmin()) {
+            return "⛔ **Akses Ditolak**: Anda tidak memiliki izin untuk mengubah data aset.";
+        }
+
         switch ($action) {
             case 'create':
                 $asset = Asset::create($data);
@@ -338,21 +345,24 @@ class ChatController extends Controller
         if (!$model) return "Tipe item $type tidak valid.";
 
         if ($action === 'create') {
+            if (!Auth::user()->isAdmin()) {
+                return "⛔ **Akses Ditolak**: Anda tidak memiliki izin untuk menambahkan item baru.";
+            }
             $item = $model::create($data);
             return "✅ **".ucfirst($type)." Berhasil Dibuat**: **{$item->name}**";
         }
-        
+
         if ($action === 'search') {
             $query = $data['query'] ?? ($data['name'] ?? '');
             $items = $model::where('name', 'like', "%$query%")->take(6)->get();
             $total = $model::where('name', 'like', "%$query%")->count();
-            
+
             if ($items->isEmpty()) return "Tidak menemukan $type '$query'.";
-            
+
             $res = "Daftar ".ucfirst($type)." yang ditemukan:\n";
             $displayItems = $items->take(5);
             foreach ($displayItems as $i) $res .= "- **ID {$i->id}**: {$i->name} (Stok: **{$i->qty_actual}**)\n";
-            
+
             if ($total > 5) {
                 $remaining = $total - 5;
                 $res .= "\n*Dan masih ada **$remaining** item ".ucfirst($type)." lainnya di database.*";
@@ -373,13 +383,37 @@ class ChatController extends Controller
             foreach ($wos as $wo) $res .= "- **{$wo->wo_number}**: {$wo->title} (Aset: ".($wo->asset->name ?? 'N/A').") - Status: **{$wo->status}**\n";
             return $res;
         }
-        
+
         if ($action === 'update_status') {
             $woNumber = $data['wo_number'] ?? '';
             $wo = WorkOrder::where('wo_number', $woNumber)->first();
             if (!$wo) return "Work Order **$woNumber** tidak ditemukan.";
-            $wo->update(['status' => $data['status']]);
-            return "✅ **Status Work Order {$wo->wo_number} diperbarui menjadi**: **{$data['status']}**";
+
+            $allowedStatuses = ['open', 'in_progress', 'pending_review', 'closed', 'canceled', 'solved'];
+            $newStatus = $data['status'] ?? '';
+            if (!in_array($newStatus, $allowedStatuses)) {
+                return "Status '$newStatus' tidak valid.";
+            }
+
+            if (!Auth::user()->isAdminOrSupervisor()) {
+                $isAssigned = $wo->assigned_to === Auth::id() || $wo->assignees()->where('users.id', Auth::id())->exists();
+                if (!$isAssigned) {
+                    return "⛔ **Akses Ditolak**: Anda hanya dapat memperbarui Work Order yang ditugaskan kepada Anda.";
+                }
+            }
+
+            $oldStatus = $wo->status;
+            $wo->update(['status' => $newStatus]);
+
+            \App\Models\WorkOrderActivityLog::create([
+                'work_order_id' => $wo->id,
+                'user_id'       => Auth::id(),
+                'from_status'   => $oldStatus,
+                'to_status'     => $newStatus,
+                'notes'         => 'Status updated via AI Chatbot by ' . Auth::user()->name,
+            ]);
+
+            return "✅ **Status Work Order {$wo->wo_number} diperbarui menjadi**: **" . strtoupper($newStatus) . "**";
         }
 
         return "Aksi $action pada Work Order belum didukung.";
@@ -390,15 +424,15 @@ class ChatController extends Controller
         if ($type === 'kpi') {
             $totalAssets = Asset::count();
             $activeWos = WorkOrder::whereIn('status', ['open', 'in_progress'])->count();
-            $completedWos = WorkOrder::where('status', 'completed', 'closed')->count();
-            
+            $completedWos = WorkOrder::whereIn('status', ['closed', 'solved'])->count();
+
             return "📊 **Analisa KPI ($period)**:\n" .
                    "- Total Aset Terdaftar: **$totalAssets**\n" .
                    "- Work Order Aktif: **$activeWos**\n" .
                    "- Work Order Selesai: **$completedWos**\n\n" .
                    "**Kesimpulan**: Performa pemeliharaan cukup stabil. Terdapat $activeWos tugas yang sedang berjalan, disarankan untuk memprioritaskan yang sudah mendekati deadline.";
         }
-        
+
         return "📅 **Analisa Timeline ($period)**:\n" .
                "- Menunjukkan tren peningkatan aktivitas pemeliharaan di pertengahan bulan.\n" .
                "- Penggunaan sparepart terbanyak ada pada kategori Elektrikal.";
@@ -406,11 +440,25 @@ class ChatController extends Controller
 
     protected function handleRecordSearch($query)
     {
-        $records = MaintenanceRecord::where('equipment_name', 'like', "%$query%")->orWhere('maintenance_description', 'like', "%$query%")->take(5)->get();
+        $records = MaintenanceRecord::with('asset')
+            ->where(function($q) use ($query) {
+                $q->where('record_number', 'like', "%$query%")
+                  ->orWhere('findings', 'like', "%$query%")
+                  ->orWhere('actions_taken', 'like', "%$query%")
+                  ->orWhereHas('asset', fn($sq) => $sq->where('name', 'like', "%$query%"));
+            })
+            ->latest('maintenance_date')
+            ->take(5)
+            ->get();
+
         if ($records->isEmpty()) return "Tidak menemukan riwayat pemeliharaan untuk '$query'.";
-        
+
         $res = "Daftar Riwayat Pemeliharaan Terakhir:\n";
-        foreach ($records as $r) $res .= "- **" . ($r->completed_at ? $r->completed_at->format('d/m/Y') : 'N/A') . "**: {$r->equipment_name} - {$r->maintenance_type}\n";
+        foreach ($records as $r) {
+            $date = $r->maintenance_date ? $r->maintenance_date->format('d/m/Y') : 'N/A';
+            $assetName = $r->asset->name ?? '—';
+            $res .= "- **{$date}**: [{$r->record_number}] {$assetName} ({$r->type}) - Hasil: **{$r->status_after}**\n";
+        }
         return $res;
     }
 
@@ -421,7 +469,7 @@ class ChatController extends Controller
             if ($notifs->isEmpty()) return "Tidak ada notifikasi baru.";
             $res = "Notifikasi Terbaru Anda:\n";
             foreach ($notifs as $n) {
-                $msg = $n->data['message'] ?? $n->title;
+                $msg = $n->message ?? $n->title;
                 $res .= "- $msg (" . $n->created_at->diffForHumans() . ")\n";
             }
             return $res;
@@ -471,6 +519,10 @@ class ChatController extends Controller
 
     protected function handleSettingsManagement($action)
     {
+        if (!Auth::user()->isAdmin()) {
+            return "⛔ **Akses Ditolak**: Pengaturan hanya dapat diakses oleh Admin.";
+        }
+
         if ($action === 'list_users') {
             $users = User::take(10)->get();
             $res = "Daftar Pengguna Sistem:\n";

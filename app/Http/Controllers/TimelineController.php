@@ -57,8 +57,8 @@ class TimelineController extends Controller
             $query_sch->where('deleted_at', '<=', $request->date_to.' 23:59:59');
         }
 
-        $workOrders = ($workType === 'all' || $workType === 'work_order') 
-            ? $query_wo->get()->map(function($wo) {
+        $workOrders = ($workType === 'all' || $workType === 'work_order')
+            ? $query_wo->latest()->take(100)->get()->map(function($wo) {
                 $deleted = $wo->trashed();
                 return [
                     'id'      => $wo->id,
@@ -77,7 +77,7 @@ class TimelineController extends Controller
             : collect();
 
         $maintenanceRecords = ($workType === 'all' || $workType === 'maint_schedule')
-            ? $query_mr->get()->map(function($mr) {
+            ? $query_mr->latest('maintenance_date')->take(100)->get()->map(function($mr) {
                 $deleted = $mr->trashed();
                 return [
                     'id'      => $mr->id,
@@ -96,7 +96,7 @@ class TimelineController extends Controller
             : collect();
 
         $checksheets = ($workType === 'all' || $workType === 'maint_schedule')
-            ? $query_cs->get()->map(function($cs) {
+            ? $query_cs->latest('submitted_at')->take(100)->get()->map(function($cs) {
                 return [
                     'id'       => $cs->id,
                     'type'     => 'checksheet',

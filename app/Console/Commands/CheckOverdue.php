@@ -15,7 +15,7 @@ class CheckOverdue extends Command
 
     public function handle(): void
     {
-        $overdueWOs = WorkOrder::whereNotIn('status', ['closed'])
+        $overdueWOs = WorkOrder::whereNotIn('status', ['closed', 'canceled', 'solved'])
             ->where('due_date', '<', Carbon::today())
             ->get();
 
@@ -25,8 +25,8 @@ class CheckOverdue extends Command
             foreach ($adminsAndSpvs as $user) {
                 $alreadyNotified = Notification::where('user_id', $user->id)
                     ->where('type', 'work_order_overdue')
+                    ->where('url', '/work-orders/' . $wo->id)
                     ->whereDate('created_at', Carbon::today())
-                    ->where('data->work_order_id', $wo->id)
                     ->exists();
 
                 if (!$alreadyNotified) {
@@ -35,7 +35,7 @@ class CheckOverdue extends Command
                         'type' => 'work_order_overdue',
                         'title' => 'Work Order Overdue',
                         'message' => "Work order {$wo->wo_number} - {$wo->title} sudah melewati batas waktu.",
-                        'data' => ['work_order_id' => $wo->id],
+                        'url' => '/work-orders/' . $wo->id,
                         'is_read' => false,
                     ]);
                 }

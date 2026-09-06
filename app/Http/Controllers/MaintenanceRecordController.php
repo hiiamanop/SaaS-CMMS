@@ -111,8 +111,9 @@ class MaintenanceRecordController extends Controller
             'photos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
         ]);
 
-        DB::transaction(function() use ($validated, $request) {
-            // Auto-derive type: if linked to WO → corrective; else fallback to submitted value or preventive
+        try {
+            DB::transaction(function() use ($validated, $request) {
+                // Auto-derive type: if linked to WO → corrective; else fallback to submitted value or preventive
             $type = $validated['type'] ?? 'preventive';
             if (!empty($validated['work_order_id'])) {
                 $type = 'corrective';
@@ -250,6 +251,11 @@ class MaintenanceRecordController extends Controller
                 }
             }
         });
+        } catch (OutOfStockException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Gagal menyimpan maintenance record: ' . $e->getMessage());
+        }
 
         return redirect()->route('work-orders.index', ['tab' => 'records'])->with('success', 'Maintenance record created successfully.');
     }
@@ -304,10 +310,43 @@ class MaintenanceRecordController extends Controller
 
     public function destroy(MaintenanceRecord $maintenanceRecord)
     {
-        foreach ($maintenanceRecord->photos as $photo) {
-            Storage::disk('public')->delete($photo->file_path);
+        if (!auth()->user()->isAdminOrSupervisor() && $maintenanceRecord->technician_id !== auth()->id()) {
+            abort(403, 'Unauthorized.');
         }
-        $maintenanceRecord->delete();
-        return redirect()->route('maintenance-records.index')->with('success', 'Record deleted.');
+
+        DB::transaction(function () use ($maintenanceRecord) {
+            $maintenanceRecord->load(['parts.sparePart', 'consumables.consumable', 'photos']);
+
+            // Refund spare parts to stock
+            foreach ($maintenanceRecord->parts as $part) {
+                if ($part->sparePart) {
+                    StockService::add(
+                        $part->sparePart,
+                        $part->qty_used,
+                        'record_deletion_refund',
+                        auth()->id() ?? 1
+                    );
+                }
+            }
+
+            // Refund consumables to stock
+            foreach ($maintenanceRecord->consumables as $row) {
+                if ($row->consumable) {
+                    StockService::addConsumable(
+                        $row->consumable,
+                        $row->qty_used,
+                        auth()->id() ?? 1
+                    );
+                }
+            }
+
+            foreach ($maintenanceRecord->photos as $photo) {
+                Storage::disk('public')->delete($photo->file_path);
+            }
+
+            $maintenanceRecord->delete();
+        });
+
+        return redirect()->route('work-orders.index', ['tab' => 'records'])->with('success', 'Record deleted and stock refunded.');
     }
 }

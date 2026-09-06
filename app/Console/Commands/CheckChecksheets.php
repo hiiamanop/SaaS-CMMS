@@ -37,14 +37,22 @@ class CheckChecksheets extends Command
 
         foreach ($drafts as $session) {
             foreach ($adminsAndSpvs as $user) {
-                Notification::create([
-                    'user_id' => $user->id,
-                    'type' => 'checksheet_reminder',
-                    'title' => 'Checksheet Belum Disubmit',
-                    'message' => "Checksheet {$session->schedule->equipment_name} periode {$session->period_label} belum disubmit.",
-                    'data' => ['session_id' => $session->id],
-                    'is_read' => false,
-                ]);
+                $alreadyNotified = Notification::where('user_id', $user->id)
+                    ->where('type', 'checksheet_reminder')
+                    ->where('url', '/checksheet/' . $session->id)
+                    ->whereDate('created_at', Carbon::today())
+                    ->exists();
+
+                if (!$alreadyNotified) {
+                    Notification::create([
+                        'user_id' => $user->id,
+                        'type'    => 'checksheet_reminder',
+                        'title'   => 'Checksheet Belum Disubmit',
+                        'message' => "Checksheet {$session->schedule->equipment_name} periode {$session->period_label} belum disubmit.",
+                        'url'     => '/checksheet/' . $session->id,
+                        'is_read' => false,
+                    ]);
+                }
             }
         }
 

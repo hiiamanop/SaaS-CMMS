@@ -195,12 +195,22 @@ class WorkOrderController extends Controller
 
     public function destroy(WorkOrder $workOrder)
     {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            abort(403, 'Unauthorized.');
+        }
         $workOrder->delete();
         return redirect()->route('work-orders.index')->with('success', 'Work order deleted.');
     }
 
     public function updateStatus(Request $request, WorkOrder $workOrder)
     {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            $isAssigned = $workOrder->assigned_to === auth()->id() || $workOrder->assignees()->where('users.id', auth()->id())->exists();
+            if (!$isAssigned) {
+                abort(403, 'Unauthorized. Anda hanya dapat mengubah status Work Order yang ditugaskan kepada Anda.');
+            }
+        }
+
         $request->validate([
             'status' => 'required|in:open,in_progress,canceled,closed',
             'notes' => 'required_if:status,canceled|nullable|string',

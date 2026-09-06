@@ -22,15 +22,13 @@ class CheckStock extends Command
                 Notification::firstOrCreate(
                     [
                         'user_id' => $user->id,
-                        'type' => 'low_stock',
-                        'data->spare_part_id' => $part->id,
+                        'type'    => 'low_stock',
+                        'url'     => '/spare-parts/' . $part->id,
                         'is_read' => false,
                     ],
                     [
-                        'title' => 'Stok Spare Part Rendah',
-                        'message' => "Stok {$part->name} ({$part->code}) tersisa {$part->qty_actual} {$part->unit} (minimum: {$part->qty_minimum}).",
-                        'data' => ['spare_part_id' => $part->id],
-                        'is_read' => false,
+                        'title'   => 'Stok Spare Part Rendah',
+                        'message' => "Stok {$part->name} ({$part->part_code}) tersisa {$part->qty_actual} {$part->unit} (minimum: {$part->qty_minimum}).",
                     ]
                 );
             }

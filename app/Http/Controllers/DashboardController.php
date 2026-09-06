@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         $totalAssets = Asset::count();
         $openWorkOrders = WorkOrder::whereIn('status', ['open', 'in_progress'])->count();
-        $overdueWorkOrders = WorkOrder::whereNotIn('status', ['closed'])
+        $overdueWorkOrders = WorkOrder::whereNotIn('status', ['closed', 'canceled', 'solved'])
             ->where('due_date', '<', now())->count();
         $lowStockCount = SparePart::whereRaw('qty_actual <= qty_minimum')->count();
         $pendingChecksheets = ChecksheetSession::where('status', 'draft')
@@ -53,7 +53,11 @@ class DashboardController extends Controller
             ->whereNotNull('module_slot')
             ->where('category', 'PV Module')
             ->with('locationId:id,name')
-            ->select(['id', 'name', 'asset_code', 'transformer_block', 'string_number', 'module_slot', 'visual_row', 'visual_col', 'status', 'location_id'])
+            ->select([
+                'id', 'name', 'asset_code', 'transformer_block', 'string_number',
+                'module_slot', 'visual_row', 'visual_col', 'status', 'location_id',
+                'brand', 'model', 'serial_number', 'description'
+            ])
             ->orderBy('transformer_block')
             ->orderBy('string_number')
             ->orderBy('module_slot')

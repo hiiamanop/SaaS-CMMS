@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class ConsumableController extends Controller
 {
+    private function authorizeManager(): void
+    {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Consumable::query();
@@ -30,11 +37,13 @@ class ConsumableController extends Controller
 
     public function create()
     {
+        $this->authorizeManager();
         return view('consumables.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'item_code'   => 'nullable|string|unique:consumables',
             'name'        => 'required|string|max:255',
@@ -55,11 +64,13 @@ class ConsumableController extends Controller
 
     public function edit(Consumable $consumable)
     {
+        $this->authorizeManager();
         return view('consumables.edit', compact('consumable'));
     }
 
     public function update(Request $request, Consumable $consumable)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'item_code'   => 'nullable|string|unique:consumables,item_code,' . $consumable->id,
             'name'        => 'required|string|max:255',
@@ -80,6 +91,7 @@ class ConsumableController extends Controller
 
     public function destroy(Consumable $consumable)
     {
+        $this->authorizeManager();
         $consumable->delete();
         return redirect()->route('consumables.index')->with('success', 'Consumable deleted successfully.');
     }

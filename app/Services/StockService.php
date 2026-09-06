@@ -7,6 +7,7 @@ use App\Models\Consumable;
 use App\Models\SparePart;
 use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StockService
 {
@@ -36,7 +37,7 @@ class StockService
             });
         } catch (\Illuminate\Database\QueryException $e) {
             if (str_contains($e->getMessage(), 'lock wait timeout')) {
-                \Log::warning("Stock lock timeout for spare_part_id={$sparePart->id}");
+                Log::warning("Stock lock timeout for spare_part_id={$sparePart->id}");
                 throw new \Exception('Database temporarily locked. Please try again.', 503);
             }
             throw $e;
@@ -78,6 +79,17 @@ class StockService
             }
 
             $consumable->decrement('qty_actual', $qty);
+        });
+    }
+
+    /**
+     * Add consumable stock (penerimaan / refund).
+     */
+    public static function addConsumable(Consumable $consumable, int $qty, int $userId): void
+    {
+        DB::transaction(function () use ($consumable, $qty) {
+            $consumable = Consumable::lockForUpdate()->findOrFail($consumable->id);
+            $consumable->increment('qty_actual', $qty);
         });
     }
 }

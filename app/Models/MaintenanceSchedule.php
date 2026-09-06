@@ -100,12 +100,13 @@ class MaintenanceSchedule extends Model
     public function periodLabel(array $data): string
     {
         return match($this->frequency) {
-            'weekly'    => 'Week ' . ($data['week_number'] ?? 1) . ' - ' . Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('M Y'),
-            'monthly'   => Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('F Y'),
-            'triwulan'  => 'Kuartal ' . ($data['quarter'] ?? 1) . ' ' . $data['year'],
-            'quarterly' => 'Semester ' . ($data['semester'] ?? 1) . ' ' . $data['year'],
-            'annually'  => (string) $data['year'],
-            default     => (string) $data['year'],
+            'weekly'             => 'Week ' . ($data['week_number'] ?? 1) . ' - ' . Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('M Y'),
+            'monthly'            => Carbon::createFromDate($data['year'], $data['month'] ?? 1, 1)->format('F Y'),
+            'triwulan'           => 'Triwulan ' . ($data['quarter'] ?? 1) . ' ' . $data['year'],
+            'quarterly'          => 'Semester ' . ($data['semester'] ?? 1) . ' ' . $data['year'],
+            'semester'           => 'Semester ' . ($data['semester'] ?? 1) . ' ' . $data['year'],
+            'annually', 'yearly' => (string) $data['year'],
+            default              => (string) $data['year'],
         };
     }
 

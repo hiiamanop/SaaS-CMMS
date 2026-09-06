@@ -67,10 +67,10 @@ class ChecksheetSession extends Model
                 3 => \Carbon\Carbon::createFromDate($year, 9, 30)->endOfDay(),
                 default => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
             },
-            'quarterly' => ($this->semester == 1)
+            'quarterly', 'semester' => ($this->semester == 1)
                 ? \Carbon\Carbon::createFromDate($year, 6, 30)->endOfDay()
                 : \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
-            'annually'  => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
+            'annually', 'yearly'  => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
             default     => \Carbon\Carbon::createFromDate($year, 12, 31)->endOfDay(),
         };
     }

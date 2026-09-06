@@ -24,19 +24,32 @@ class KpiController extends Controller
             ? round($correctiveRecords->avg('duration_minutes') / 60, 2)
             : 0;
 
-        $closedCorrective = $workOrders->where('type', 'corrective')->where('status', 'closed')->sortBy('completed_at');
-        $mtbf = 0;
-        if ($closedCorrective->count() > 1) {
-            $diffs = [];
-            $prev = null;
-            foreach ($closedCorrective as $wo) {
-                if ($prev && $prev->completed_at && ($wo->started_at ?? $wo->created_at)) {
-                    $diffs[] = $prev->completed_at->diffInHours($wo->started_at ?? $wo->created_at);
+        $closedCorrectiveGrouped = $workOrders->where('type', 'corrective')
+            ->where('status', 'closed')
+            ->whereNotNull('asset_id')
+            ->groupBy('asset_id');
+
+        $assetMtbfs = [];
+        foreach ($closedCorrectiveGrouped as $assetId => $assetWos) {
+            $sorted = $assetWos->sortBy('completed_at');
+            if ($sorted->count() > 1) {
+                $diffs = [];
+                $prev = null;
+                foreach ($sorted as $wo) {
+                    if ($prev && $prev->completed_at && ($wo->started_at ?? $wo->created_at)) {
+                        $diff = $prev->completed_at->diffInHours($wo->started_at ?? $wo->created_at, false);
+                        if ($diff > 0) {
+                            $diffs[] = $diff;
+                        }
+                    }
+                    $prev = $wo;
                 }
-                $prev = $wo;
+                if (count($diffs) > 0) {
+                    $assetMtbfs[] = array_sum($diffs) / count($diffs);
+                }
             }
-            $mtbf = count($diffs) > 0 ? round(array_sum($diffs) / count($diffs), 2) : 0;
         }
+        $mtbf = count($assetMtbfs) > 0 ? round(array_sum($assetMtbfs) / count($assetMtbfs), 2) : 0;
 
         $pmCompliance = ChecksheetSession::whereBetween('created_at', [$dateFrom, $dateTo])
             ->whereIn('status', ['submitted', 'signed_teknisi', 'signed_spv', 'signed_pm'])
@@ -46,16 +59,18 @@ class KpiController extends Controller
         $closedWo = $workOrders->where('status', 'closed')->count();
         $completionRate = $totalWo > 0 ? round(($closedWo / $totalWo) * 100, 1) : 0;
 
-        $overdueWo = WorkOrder::whereNotIn('status', ['closed'])->where('due_date', '<', now())->count();
+        $overdueWo = WorkOrder::whereNotIn('status', ['closed', 'canceled', 'solved'])->where('due_date', '<', now())->count();
 
-        // Shutdown: maintenance record manual entry + WO auto-calculated
+        // Shutdown: avoid double-counting by only counting WO shutdown when record does not exist
         $shutdownWos = $workOrders->filter(fn($wo) =>
             $wo->shutdown_required &&
             $wo->status === 'closed' &&
             $wo->started_at &&
             $wo->completed_at
         );
-        $woShutdownMinutes  = $shutdownWos->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at));
+        $recordWoIds = $records->pluck('work_order_id')->filter()->unique();
+        $standaloneShutdownWos = $shutdownWos->filter(fn($wo) => !$recordWoIds->contains($wo->id));
+        $woShutdownMinutes  = $standaloneShutdownWos->sum(fn($wo) => $wo->started_at->diffInMinutes($wo->completed_at));
         $mrShutdownMinutes  = $records->sum('shutdown_minutes');
         $totalShutdownHours = round(($woShutdownMinutes + $mrShutdownMinutes) / 60, 2);
 
@@ -96,7 +111,7 @@ class KpiController extends Controller
         while ($current <= $dateTo) {
             $monthKey = $current->format('Y-m');
             $monthRecords = $records->filter(fn($r) => $r->maintenance_date->format('Y-m') === $monthKey);
-            $monthWoShutdown = $shutdownWos->filter(fn($wo) => $wo->completed_at->format('Y-m') === $monthKey);
+            $monthWoShutdown = $standaloneShutdownWos->filter(fn($wo) => $wo->completed_at->format('Y-m') === $monthKey);
             $shutdownTrend[] = [
                 'label' => $current->format('M Y'),
                 'value' => round(

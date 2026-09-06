@@ -13,8 +13,10 @@ services:
     environment:
       PHP_MEMORY_LIMIT: 512M
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
     networks:
       - cmms
@@ -31,6 +33,12 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cmms_user", "-psecret"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
     restart: unless-stopped
     networks:
       - cmms

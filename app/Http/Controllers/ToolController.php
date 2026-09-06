@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class ToolController extends Controller
 {
+    private function authorizeManager(): void
+    {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Tool::query();
@@ -31,11 +38,13 @@ class ToolController extends Controller
 
     public function create()
     {
+        $this->authorizeManager();
         return view('tools.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'tool_code'     => 'nullable|string|unique:tools',
             'name'          => 'required|string|max:255',
@@ -55,11 +64,13 @@ class ToolController extends Controller
 
     public function edit(Tool $tool)
     {
+        $this->authorizeManager();
         return view('tools.edit', compact('tool'));
     }
 
     public function update(Request $request, Tool $tool)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'tool_code'     => 'nullable|string|unique:tools,tool_code,' . $tool->id,
             'name'          => 'required|string|max:255',
@@ -79,6 +90,7 @@ class ToolController extends Controller
 
     public function destroy(Tool $tool)
     {
+        $this->authorizeManager();
         $tool->delete();
         return redirect()->route('tools.index')->with('success', 'Tool deleted successfully.');
     }

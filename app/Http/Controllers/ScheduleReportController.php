@@ -16,8 +16,10 @@ class ScheduleReportController extends Controller
         $category     = $request->get('category');
 
         $years         = range(now()->year - 2, now()->year + 1);
-        $pltsLocations = ['PLTS Pertiwi Lestari', 'PLTS Rengiat', 'PLTS Demo Site'];
-        $categories    = ['PV Module', 'Inverter', 'Panel LV', 'Transformer'];
+        $dbLocations   = \App\Models\Location::where('is_active', true)->pluck('name')->all();
+        $pltsLocations = !empty($dbLocations) ? $dbLocations : ['PLTS Pertiwi Lestari', 'PLTS Rengiat', 'PLTS Demo Site'];
+        $dbCategories  = MaintenanceSchedule::distinct()->whereNotNull('category')->pluck('category')->all();
+        $categories    = !empty($dbCategories) ? $dbCategories : ['PV Module', 'Inverter', 'Panel LV', 'Transformer'];
 
         $schedules = MaintenanceSchedule::with('location')
             ->when($category, fn($q) => $q->where('category', $category))

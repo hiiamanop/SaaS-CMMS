@@ -69,7 +69,7 @@ class WorkOrder extends Model
 
     public function isOverdue(): bool
     {
-        return $this->due_date->isPast() && !in_array($this->status, ['closed', 'solved']);
+        return $this->due_date->isPast() && !in_array($this->status, ['closed', 'solved', 'canceled']);
     }
 
     public function getPriorityColorAttribute(): string

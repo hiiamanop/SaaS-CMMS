@@ -36,6 +36,10 @@ class PvMapController extends Controller
     // Upload & parse CSV for preview
     public function uploadCsv(Request $request, Location $location)
     {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
@@ -50,12 +54,15 @@ class PvMapController extends Controller
 
         $transformerBlock = $matches[1];
 
-        // Parse CSV
+        // Parse CSV with auto delimiter detection (, or ;)
         $modules = [];
         $handle = fopen($file->getRealPath(), 'r');
-        fgetcsv($handle); // skip header
+        $firstLine = fgets($handle);
+        $delimiter = str_contains($firstLine, ';') ? ';' : ',';
+        rewind($handle);
+        fgetcsv($handle, 0, $delimiter); // skip header
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
             if (count($row) < 5) continue;
 
             [$block, $string, $slot, $visualRow, $visualCol] = array_map('trim', $row);
@@ -103,6 +110,10 @@ class PvMapController extends Controller
     // Save map & update assets
     public function save(Request $request, Location $location)
     {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'transformer_block' => 'required|string',
             'modules' => 'required|array',

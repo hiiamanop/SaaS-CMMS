@@ -11,6 +11,13 @@ use Illuminate\Http\Request;
 
 class SparePartController extends Controller
 {
+    private function authorizeManager(): void
+    {
+        if (!auth()->user()->isAdminOrSupervisor()) {
+            abort(403, 'Unauthorized.');
+        }
+    }
+
     public function index(Request $request)
     {
         $query = SparePart::query();
@@ -34,11 +41,13 @@ class SparePartController extends Controller
 
     public function create()
     {
+        $this->authorizeManager();
         return view('spare-parts.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'part_code' => 'nullable|string|unique:spare_parts',
             'name' => 'required|string|max:255',
@@ -65,11 +74,13 @@ class SparePartController extends Controller
 
     public function edit(SparePart $sparePart)
     {
+        $this->authorizeManager();
         return view('spare-parts.edit', compact('sparePart'));
     }
 
     public function update(Request $request, SparePart $sparePart)
     {
+        $this->authorizeManager();
         $validated = $request->validate([
             'part_code' => 'nullable|string|unique:spare_parts,part_code,'.$sparePart->id,
             'name' => 'required|string|max:255',
@@ -83,7 +94,22 @@ class SparePartController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $oldQty = (int) $sparePart->qty_actual;
         $sparePart->update($validated);
+        $newQty = (int) $sparePart->fresh()->qty_actual;
+
+        if ($newQty !== $oldQty) {
+            $diff = abs($newQty - $oldQty);
+            $mutationType = $newQty > $oldQty ? 'add' : 'deduct';
+            \App\Models\StockMovement::create([
+                'spare_part_id' => $sparePart->id,
+                'mutation_type' => $mutationType,
+                'qty' => $diff,
+                'reason' => 'manual_edit',
+                'created_by_user_id' => auth()->id() ?? 1,
+            ]);
+        }
+
         $this->checkAndNotifyLowStock($sparePart->fresh());
 
         return redirect()->route('spare-parts.index')->with('success', 'Spare part updated successfully.');
@@ -91,12 +117,14 @@ class SparePartController extends Controller
 
     public function destroy(SparePart $sparePart)
     {
+        $this->authorizeManager();
         $sparePart->delete();
         return redirect()->route('spare-parts.index')->with('success', 'Spare part deleted successfully.');
     }
 
     public function adjustStock(Request $request, SparePart $sparePart)
     {
+        $this->authorizeManager();
         $request->validate([
             'type' => 'required|in:add,reduce',
             'quantity' => 'required|integer|min:1',
