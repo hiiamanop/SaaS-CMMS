@@ -19,6 +19,12 @@
                 <option value="">All Categories</option>
                 @foreach($categories as $cat)<option value="{{ $cat }}" {{ request('category')==$cat?'selected':'' }}>{{ $cat }}</option>@endforeach
             </select>
+            @if(isset($blocks) && count($blocks) > 0)
+            <select name="transformer_block" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                <option value="">All Transformer Blocks</option>
+                @foreach($blocks as $blk)<option value="{{ $blk }}" {{ request('transformer_block')==$blk?'selected':'' }}>Block {{ $blk }}</option>@endforeach
+            </select>
+            @endif
             <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                 <option value="">All Statuses</option>
                 <option value="active" {{ request('status')=='active'?'selected':'' }}>Active</option>
@@ -61,7 +67,12 @@
 
             <tr class="hover:bg-opacity-90 transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-gray-600">{{ $asset->asset_code }}</td>
-                <td class="px-5 py-3"><a href="{{ route('assets.show', $asset) }}" class="font-medium text-gray-900 hover:text-brand">{{ $asset->name }}</a></td>
+                <td class="px-5 py-3">
+                    <a href="{{ route('assets.show', $asset) }}" class="font-medium text-gray-900 hover:text-brand">{{ $asset->name }}</a>
+                    @if($asset->transformer_block)
+                    <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-amber-700 border border-amber-200">{{ $asset->transformer_block }}</span>
+                    @endif
+                </td>
                 <td class="px-5 py-3 text-gray-500">{{ $asset->category }}</td>
                 <td class="px-5 py-3 text-gray-500 italic text-xs">{{ $asset->location }}</td>
                 <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$asset->status]??'bg-gray-100 text-gray-600' }}">{{ ucwords(str_replace('_',' ',$asset->status)) }}</span></td>

@@ -32,12 +32,15 @@ class AssetController extends Controller
             $query->where('status', $request->status);
         if ($request->location)
             $query->where('location', 'like', '%' . $request->location . '%');
+        if ($request->transformer_block)
+            $query->where('transformer_block', $request->transformer_block);
 
         $assets = $query->orderBy('location')->orderBy('name')->paginate(15)->withQueryString();
         $categories = Asset::distinct()->pluck('category');
         $locations = Asset::distinct()->pluck('location');
+        $blocks = Asset::whereNotNull('transformer_block')->distinct()->orderBy('transformer_block')->pluck('transformer_block');
 
-        return view('assets.index', compact('assets', 'categories', 'locations'));
+        return view('assets.index', compact('assets', 'categories', 'locations', 'blocks'));
     }
 
     public function create()

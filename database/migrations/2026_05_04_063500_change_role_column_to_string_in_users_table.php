@@ -17,7 +17,7 @@ return new class extends Migration
         }
 
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->change();
+            $table->string('role')->default('technician')->change();
         });
     }
 

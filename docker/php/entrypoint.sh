@@ -4,10 +4,10 @@ set -e
 cd /var/www/html
 
 echo "Fixing permissions..."
-mkdir -p storage bootstrap/cache
+mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data public/storage 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 
 # Auto-create .env if not exists
 if [ ! -f .env ]; then
@@ -54,6 +54,9 @@ php artisan optimize --no-interaction
 
 echo "Running php artisan storage:link..."
 php artisan storage:link --no-interaction || true
+
+# Ensure web server has write access to runtime cache & logs
+chmod -R 777 storage/framework storage/logs bootstrap/cache 2>/dev/null || true
 
 if [ "$#" -gt 0 ]; then
     exec "$@"
