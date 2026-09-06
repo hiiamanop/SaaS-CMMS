@@ -2,7 +2,16 @@
 @section('title','Consumables')
 @section('breadcrumb')<span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Consumables</span>@endsection
 @section('content')
-<div class="space-y-5" x-data="{ selectedItem: null }">
+<div class="space-y-5" x-data="{
+    selectedItem: null,
+    showPrintModal: false,
+    printFormat: 'roll_70x40',
+    triggerPrint() {
+        let url = '{{ route('labels.print') }}?type=consumable&format=' + this.printFormat;
+        window.open(url, '_blank');
+        this.showPrintModal = false;
+    }
+}">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Consumables</h1>
@@ -10,6 +19,13 @@
         </div>
         <div class="flex flex-col items-end gap-1" x-data="{ uploading: false }">
             <div class="flex items-center gap-2">
+                {{-- Print QR Labels Button --}}
+                <button type="button" @click="showPrintModal = true"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]" title="Cetak Stiker Label QR Consumables">
+                    <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="6" height="6" x="3" y="3" rx="1"/><rect width="6" height="6" x="15" y="3" rx="1"/><rect width="6" height="6" x="3" y="15" rx="1"/><path d="M15 15h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM19 15h2v2h-2z"/></svg>
+                    <span>Print Stiker QR</span>
+                </button>
+
                 {{-- Export CSV (Available for ALL users) --}}
                 <a href="{{ route('consumables.export', request()->query()) }}"
                    class="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 shadow-sm transition-all h-[38px]" title="Export to CSV">
@@ -178,6 +194,70 @@
                     <a :href="'/consumables/' + selectedItem?.id + '/edit'" class="px-4 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Edit Item</a>
                     @endif
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Bulk Print Modal for Consumables --}}
+    <div x-show="showPrintModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display:none">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-gray-100"
+             @click.outside="showPrintModal = false"
+             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100">
+            <div class="flex items-start justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Cetak Label QR Consumables</h3>
+                        <p class="text-xs text-gray-500">Stiker label rak penyimpanan barang habis pakai</p>
+                    </div>
+                </div>
+                <button @click="showPrintModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Pilih Ukuran / Format Printer Stiker</label>
+                    <div class="space-y-2">
+                        <label class="flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all"
+                               :class="printFormat === 'roll_70x40' ? 'border-brand bg-brand/5 ring-2 ring-brand/30' : 'border-gray-200 hover:bg-gray-50'">
+                            <input type="radio" value="roll_70x40" x-model="printFormat" class="mt-0.5 text-brand focus:ring-brand">
+                            <div>
+                                <span class="font-bold text-gray-900 text-xs block">Stiker Roll 70 x 40 mm (Standar Rak / Lemari)</span>
+                                <span class="text-[11px] text-gray-500">1 stiker per halaman. Cocok untuk rak janitor, lemari APD, dan chemical.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all"
+                               :class="printFormat === 'roll_50x30' ? 'border-brand bg-brand/5 ring-2 ring-brand/30' : 'border-gray-200 hover:bg-gray-50'">
+                            <input type="radio" value="roll_50x30" x-model="printFormat" class="mt-0.5 text-brand focus:ring-brand">
+                            <div>
+                                <span class="font-bold text-gray-900 text-xs block">Stiker Roll 50 x 30 mm (Label Mini Kotak / Botol)</span>
+                                <span class="text-[11px] text-gray-500">Cocok untuk botol kimia, kotak sarung tangan, atau kaleng cat.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all"
+                               :class="printFormat === 'sheet_a4' ? 'border-brand bg-brand/5 ring-2 ring-brand/30' : 'border-gray-200 hover:bg-gray-50'">
+                            <input type="radio" value="sheet_a4" x-model="printFormat" class="mt-0.5 text-brand focus:ring-brand">
+                            <div>
+                                <span class="font-bold text-gray-900 text-xs block">Kertas Stiker A4 Grid (24 Stiker per Lembar A4)</span>
+                                <span class="text-[11px] text-gray-500">Cetak banyak sekaligus menggunakan kertas stiker A4 biasa.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                <button type="button" @click="showPrintModal = false" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50">Batal</button>
+                <button type="button" @click="triggerPrint()" class="px-5 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600 shadow-md flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                    <span>Download / Cetak PDF Stiker ({{ $items->total() }} Item)</span>
+                </button>
             </div>
         </div>
     </div>

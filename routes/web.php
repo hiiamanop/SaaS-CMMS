@@ -49,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('assets/{asset}/pv', [AssetController::class, 'destroyPv'])->name('assets.destroy-pv');
     Route::resource('assets', AssetController::class);
 
+    // Label & QR Code Printing (Thermal Rolls & A4 Sheets)
+    Route::get('labels/print', [\App\Http\Controllers\LabelPrintController::class, 'print'])->name('labels.print');
+
     Route::get('spare-parts/export', [SparePartController::class, 'exportCsv'])->name('spare-parts.export');
     Route::resource('spare-parts', SparePartController::class);
     Route::post('spare-parts/{sparePart}/adjust-stock', [SparePartController::class, 'adjustStock'])->name('spare-parts.adjust-stock');
