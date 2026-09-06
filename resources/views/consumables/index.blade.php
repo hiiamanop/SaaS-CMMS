@@ -2,14 +2,13 @@
 @section('title','Consumables')
 @section('breadcrumb')<span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Consumables</span>@endsection
 @section('content')
-<div class="space-y-5">
+<div class="space-y-5" x-data="{ selectedItem: null }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Consumables</h1>
             <p class="text-sm text-gray-500 mt-0.5">Cleaning and safety materials management</p>
         </div>
-        @if(!auth()->user()->isTechnician())
-        <div class="flex flex-col items-end gap-1" x-data="{ uploading: false }">
+        @if(auth()->user()->isAdminOrSupervisor())
             <div class="flex items-center gap-2">
                 <form action="{{ route('items.import') }}" method="POST" enctype="multipart/form-data" class="hidden" id="import-form">
                     @csrf
@@ -69,19 +68,30 @@
                 <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $item->item_code }}</td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-900">{{ $item->name }}</span>
+                        <button type="button" @click="selectedItem = {{ json_encode($item) }}" class="text-left font-medium text-gray-900 hover:text-brand transition-colors">
+                            {{ $item->name }}
+                        </button>
                         @if($item->qty_actual <= $item->qty_minimum)
                             <span class="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs rounded-full font-medium">Low Stock</span>
                         @endif
                     </div>
                 </td>
                 <td class="px-5 py-3 text-gray-600 font-medium">{{ $item->qty_actual }} {{ $item->unit }} <span class="text-xs text-gray-400 font-normal">/ Min: {{ $item->qty_minimum }}</span></td>
-                <td class="px-5 py-3 text-gray-500 text-xs">{{ $item->location }}</td>
+                <td class="px-5 py-3 text-gray-500 text-xs">{{ $item->location ?: '—' }}</td>
                 <td class="px-5 py-3 text-right">
-                    <div class="flex items-center justify-end gap-1">
-                        @if(!auth()->user()->isTechnician())
-                        <a href="{{ route('consumables.edit', $item) }}" class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
-                        <button @click="$dispatch('open-delete',{action:'{{ route('consumables.destroy',$item) }}',message:'Delete item {{ addslashes($item->name) }}?'})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+                    <div class="flex items-center justify-end gap-1.5">
+                        {{-- View Details (Available for ALL users) --}}
+                        <button type="button" @click="selectedItem = {{ json_encode($item) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-emerald-50 rounded-lg transition-colors" title="View Details">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                        {{-- Edit & Delete (Admin & Supervisor) --}}
+                        @if(auth()->user()->isAdminOrSupervisor())
+                        <a href="{{ route('consumables.edit', $item) }}" class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                        <button @click="$dispatch('open-delete',{action:'{{ route('consumables.destroy',$item) }}',message:'Delete item {{ addslashes($item->name) }}?'})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
                         @endif
                     </div>
                 </td>
@@ -92,6 +102,62 @@
         </div>
         <div class="px-5 py-4 border-t border-gray-100">{{ $items->links() }}</div>
         @endif
+    </div>
+
+    {{-- Consumable Quick Detail Modal --}}
+    <div x-show="selectedItem" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display:none">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-gray-100"
+             @click.outside="selectedItem = null"
+             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100">
+            <div class="flex items-start justify-between border-b border-gray-100 pb-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600" x-text="selectedItem?.item_code"></span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                              :class="selectedItem?.qty_actual <= selectedItem?.qty_minimum ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'"
+                              x-text="selectedItem?.qty_actual <= selectedItem?.qty_minimum ? 'Low Stock' : 'In Stock'"></span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900" x-text="selectedItem?.name"></h3>
+                </div>
+                <button @click="selectedItem = null" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <span class="text-xs font-medium text-gray-500 block">Kategori</span>
+                    <span class="font-semibold text-gray-900" x-text="selectedItem?.category || '—'"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <span class="text-xs font-medium text-gray-500 block">Satuan Unit</span>
+                    <span class="font-semibold text-gray-900" x-text="selectedItem?.unit || 'pcs'"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <span class="text-xs font-medium text-gray-500 block">Stok Aktual / Minimum</span>
+                    <span class="font-semibold text-gray-900"><span x-text="selectedItem?.qty_actual"></span> / Min: <span x-text="selectedItem?.qty_minimum"></span></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <span class="text-xs font-medium text-gray-500 block">Lokasi Penyimpanan</span>
+                    <span class="font-semibold text-gray-900" x-text="selectedItem?.location || '—'"></span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl col-span-2">
+                    <span class="text-xs font-medium text-gray-500 block">Pengadaan / Supplier</span>
+                    <span class="font-semibold text-gray-900" x-text="selectedItem?.supplier || '—'"></span>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl text-sm" x-show="selectedItem?.description">
+                <span class="text-xs font-medium text-gray-500 block mb-1">Keterangan / Spesifikasi</span>
+                <p class="text-gray-700 text-xs leading-relaxed" x-text="selectedItem?.description"></p>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button @click="selectedItem = null" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50">Tutup</button>
+                @if(auth()->user()->isAdminOrSupervisor())
+                <a :href="'/consumables/' + selectedItem?.id + '/edit'" class="px-4 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Edit Item</a>
+                @endif
+            </div>
+        </div>
     </div>
 </div>
 @endsection

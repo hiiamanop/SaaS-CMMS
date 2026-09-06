@@ -73,7 +73,7 @@
                 <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $part->part_code }}</td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-900">{{ $part->name }}</span>
+                        <a href="{{ route('spare-parts.show', $part) }}" class="font-medium text-gray-900 hover:text-brand transition-colors">{{ $part->name }}</a>
                         @if($part->qty_actual == 0)<span class="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded-full font-medium">Out of Stock</span>
                         @elseif($part->isLowStock())<span class="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs rounded-full font-medium">Low Stock</span>@endif
                     </div>
@@ -92,25 +92,39 @@
                 <td class="px-5 py-3 text-gray-500">{{ $part->unit_price ? 'IDR '.number_format($part->unit_price) : '—' }}</td>
                 <td class="px-5 py-3 text-gray-500 text-xs">{{ $part->location }}</td>
                 <td class="px-5 py-3 text-right">
-                    <div class="flex items-center justify-end gap-1">
-                        @if(!auth()->user()->isTechnician())
+                    <div class="flex items-center justify-end gap-1.5">
+                        {{-- View Details --}}
+                        <a href="{{ route('spare-parts.show', $part) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-emerald-50 rounded-lg transition-colors" title="View Details">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </a>
+
+                        {{-- Adjust Stock (All Users) --}}
                         <div x-data="{open:false}" class="relative">
-                            <button @click="open=!open" class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100">Adjust Stock</button>
-                            <div x-show="open" @click.outside="open=false" x-transition class="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-20" style="display:none">
-                                <p class="text-sm font-medium text-gray-900 mb-3">Adjust Stock</p>
-                                <form action="{{ route('spare-parts.adjust-stock', $part) }}" method="POST" class="space-y-3">
+                            <button @click="open=!open" class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors" title="Adjust Stock">
+                                Adjust
+                            </button>
+                            <div x-show="open" @click.outside="open=false" x-transition class="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 p-3.5 z-30 text-left" style="display:none">
+                                <p class="text-xs font-bold text-gray-900 mb-2">Adjust Stock</p>
+                                <form action="{{ route('spare-parts.adjust-stock', $part) }}" method="POST" class="space-y-2.5">
                                     @csrf
                                     <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand">
                                         <option value="add">Add Stock</option>
                                         <option value="reduce">Reduce Stock</option>
                                     </select>
                                     <input name="quantity" type="number" min="1" placeholder="Quantity" required class="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-brand">
-                                    <button type="submit" class="w-full px-3 py-1.5 bg-brand text-gray-900 rounded-lg text-xs font-medium hover:bg-brand-600">Update</button>
+                                    <button type="submit" class="w-full px-3 py-1.5 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Update</button>
                                 </form>
                             </div>
                         </div>
-                        <a href="{{ route('spare-parts.edit', $part) }}" class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>
-                        <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$part) }}',message:'Delete part {{ addslashes($part->name) }}?'})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+
+                        {{-- Edit & Delete (Admin & Supervisor) --}}
+                        @if(auth()->user()->isAdminOrSupervisor())
+                        <a href="{{ route('spare-parts.edit', $part) }}" class="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                        <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$part) }}',message:'Delete part {{ addslashes($part->name) }}?'})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
                         @endif
                     </div>
                 </td>
