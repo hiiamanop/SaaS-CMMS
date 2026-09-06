@@ -15,14 +15,19 @@ Hanya butuh **1 software**:
 
 ## 2. Cara Menjalankan
 
-### Cara A — Menggunakan Script Otomatis (Paling Mudah)
+### Cara A — Menggunakan Script Otomatis (1-Klik)
 
 **Di Windows:**
 Cukup klik ganda (double-click) file:
 ```
-docker-setup.bat
+START.bat
 ```
-*(atau jalankan `.\docker-setup.bat` di Command Prompt / PowerShell)*
+*(atau `docker-setup.bat`)*
+
+Script ini akan otomatis memeriksa Docker, menyiapkan `.env`, menjalankan build container, menunggu seeding database selesai, dan **langsung membuka browser ke `http://localhost:8000`**.
+
+Untuk mematikan:
+Klik ganda file `STOP.bat`.
 
 **Di Linux / macOS / Git Bash:**
 Jalankan di terminal:

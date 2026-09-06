@@ -5,9 +5,19 @@ cd /var/www/html
 
 echo "Fixing permissions..."
 mkdir -p storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data public/storage 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+# Auto-create .env if not exists
+if [ ! -f .env ]; then
+    echo "Creating .env from .env.docker..."
+    if [ -f .env.docker ]; then
+        cp .env.docker .env
+    elif [ -f .env.example ]; then
+        cp .env.example .env
+    fi
+fi
 
 echo "Running composer install..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
