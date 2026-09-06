@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             FieldConfigurationSeeder::class,
             LestariPertiwiSeeder::class,
+            StockOpnameSeeder::class,
         ]);
     }
 }
