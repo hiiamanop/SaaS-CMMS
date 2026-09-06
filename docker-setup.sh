@@ -6,6 +6,16 @@ echo "🐳 Aruna CMMS Docker Setup"
 echo "=========================="
 echo ""
 
+# Detect docker compose command
+if docker compose version >/dev/null 2>&1; then
+    DC="docker compose"
+elif docker-compose version >/dev/null 2>&1; then
+    DC="docker-compose"
+else
+    echo "❌ Error: Docker / Docker Compose tidak ditemukan. Harap install Docker Desktop terlebih dahulu."
+    exit 1
+fi
+
 # Check if .env exists
 if [ ! -f .env ]; then
     echo "📋 Creating .env from .env.docker..."
@@ -16,46 +26,49 @@ else
 fi
 
 # Generate app key if needed
-if grep -q "APP_KEY=$" .env; then
+if grep -q "APP_KEY=$" .env || grep -q "APP_KEY=base64:YOUR_APP_KEY_HERE" .env; then
     echo "🔑 Generating APP_KEY..."
-    APP_KEY=$(php -r "echo 'base64:' . base64_encode(random_bytes(32));")
-    sed -i "s|APP_KEY=$|APP_KEY=$APP_KEY|" .env
-    echo "✓ APP_KEY generated"
+    if command -v openssl >/dev/null 2>&1; then
+        APP_KEY="base64:$(openssl rand -base64 32)"
+        sed -i "s|APP_KEY=.*|APP_KEY=$APP_KEY|" .env
+        echo "✓ APP_KEY generated via openssl"
+    elif command -v php >/dev/null 2>&1; then
+        APP_KEY=$(php -r "echo 'base64:' . base64_encode(random_bytes(32));")
+        sed -i "s|APP_KEY=.*|APP_KEY=$APP_KEY|" .env
+        echo "✓ APP_KEY generated via php"
+    fi
 fi
 
 # Start docker containers
 echo ""
-echo "🚀 Starting Docker containers..."
-docker-compose up -d
-
-# Wait for MySQL to be ready
-echo "⏳ Waiting for MySQL to be ready..."
-docker-compose exec -T mysql mysqladmin ping -h localhost -u cmms_user -psecret --wait=10
+echo "🚀 Starting Docker containers (build & up)..."
+$DC up -d --build
 
 echo ""
-echo "📦 Installing dependencies..."
-docker-compose exec -T app composer install --no-interaction
-
-echo ""
-echo "🗄️  Running migrations..."
-docker-compose exec -T app php artisan migrate --force
-
-echo ""
-echo "🌱 Seeding database..."
-docker-compose exec -T app php artisan db:seed --force
+echo "⏳ Waiting for application container to finish initialization & seeding..."
+sleep 5
+$DC logs -f app | while read -r line; do
+    echo "$line"
+    if echo "$line" | grep -q "Starting PHP-FPM"; then
+        pkill -P $$ docker 2>/dev/null || true
+        break
+    fi
+done || true
 
 echo ""
 echo "✅ Setup Complete!"
 echo ""
 echo "Access points:"
 echo "   App:          http://localhost:8000"
-echo "   PHPMyAdmin:   http://localhost:8001"
 echo "   MySQL:        localhost:3306 (cmms_user / secret)"
 echo "   Redis:        localhost:6379"
 echo ""
-echo "📝 Useful commands:"
-echo "   docker-compose exec app php artisan tinker     # Laravel REPL"
-echo "   docker-compose exec app php artisan test       # Run tests"
-echo "   docker-compose logs -f app                     # View app logs"
-echo "   docker-compose down -v                         # Stop & clean up"
+echo "Akun Login Default:"
+echo "   Admin:        wakwaw@gmail.com / ayamgoyengenak"
+echo "   Alternative:  admin@arunahijaupower.com / password"
+echo ""
+echo "📝 Perintah Berguna:"
+echo "   $DC exec app php artisan tinker     # Laravel REPL"
+echo "   $DC logs -f app                     # Pantau log container"
+echo "   $DC down                            # Stop container"
 echo ""

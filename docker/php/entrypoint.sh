@@ -12,6 +12,12 @@ chmod -R 775 storage bootstrap/cache
 echo "Running composer install..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
 
+# Ensure APP_KEY exists and is valid
+if [ -f .env ] && { ! grep -q "^APP_KEY=base64:.\{40,\}" .env || grep -q "APP_KEY=base64:YOUR_APP_KEY_HERE" .env; }; then
+    echo "Generating application key..."
+    php artisan key:generate --force
+fi
+
 echo "Waiting for database connection..."
 MAX_TRIES=30
 COUNT=0
