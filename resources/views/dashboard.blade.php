@@ -13,33 +13,34 @@
 
 @section('content')
 <div class="space-y-8 pb-10" x-data="{ showActiveTools: false }">
-    {{-- Header / Welcome Section --}}
-    <div class="relative overflow-hidden bg-emerald-900 rounded-3xl p-8 lg:p-12 text-white shadow-2xl shadow-emerald-900/20">
+{{-- Header / Welcome Section (Link / DESIGN.md Aesthetic) --}}
+    <div class="relative overflow-hidden bg-[#171717] rounded-[24px] p-8 lg:p-12 text-white border border-[#E5E5E5]/10 shadow-[0_4px_24px_rgba(23,23,23,0.06)]">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight">Selamat Datang, {{ explode(' ', auth()->user()->name)[0] }}! 👋</h1>
-                <p class="text-emerald-100/80 mt-2 text-lg max-w-xl">
-                    Sistem Manajemen Aset PLTS Aruna Hijau Power berjalan dengan optimal. Berikut ringkasan performa hari ini.
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-white/90 mb-4 border border-white/10">
+                    <span class="w-2 h-2 rounded-full bg-[#00C767] animate-pulse"></span>
+                    <span>Sistem Operasi PLTS Aktif</span>
+                </div>
+                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-white">Selamat Datang, {{ explode(' ', auth()->user()->name)[0] }}! 👋</h1>
+                <p class="text-gray-300 mt-2 text-base lg:text-lg max-w-xl font-normal leading-relaxed">
+                    Sistem Manajemen Aset PLTS Aruna Hijau Power berjalan dengan optimal. Berikut ringkasan performa operasional hari ini.
                 </p>
                 <div class="flex flex-wrap gap-3 mt-6">
-                    <a href="{{ route('work-orders.create') }}" class="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/20">
-                        + Buat Work Order
+                    <a href="{{ route('work-orders.create') }}" class="inline-flex items-center justify-center gap-2 bg-[#00C767] hover:bg-[#00B05B] text-[#011E0F] px-6 py-3 rounded-[10px] font-semibold text-sm transition-all shadow-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                        <span>Buat Work Order</span>
                     </a>
-                    <a href="{{ route('checksheet.index') }}" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all border border-white/10">
-                        Cek Jadwal
+                    <a href="{{ route('checksheet.index') }}" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white px-6 py-3 rounded-[10px] font-medium text-sm transition-all border border-white/15">
+                        <span>Cek Jadwal</span>
                     </a>
                 </div>
             </div>
             <div class="hidden lg:block">
-                <div class="w-32 h-32 rounded-3xl bg-white shadow-2xl flex items-center justify-center p-1">
-                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain rounded-2xl">
+                <div class="w-32 h-32 rounded-[20px] bg-white shadow-xl flex items-center justify-center p-2 border border-white/20">
+                    <img src="{{ asset('logo.jpeg') }}" alt="Logo" class="w-full h-full object-contain rounded-[14px]">
                 </div>
             </div>
         </div>
-        
-        {{-- Decorative Gradients --}}
-        <div class="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl"></div>
     </div>
 
     {{-- Stats Grid --}}
@@ -147,15 +148,15 @@
     {{-- Middle Section: Charts & Upcoming --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {{-- Performance Analytics --}}
-        <div class="xl:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+        <div class="xl:col-span-2 bg-white rounded-[18px] border border-[#E5E5E5] shadow-[0_2px_8px_rgba(23,23,23,0.03)] overflow-hidden">
+            <div class="px-6 py-5 border-b border-[#E5E5E5]/70 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900">Analisis Performa Pekerjaan</h2>
                     <p class="text-xs text-gray-500">Trend pembuatan vs penyelesaian WO (6 Bulan Terakhir)</p>
                 </div>
                 <div class="flex gap-2">
-                    <span class="flex items-center gap-1.5 text-xs text-gray-500"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Selesai</span>
-                    <span class="flex items-center gap-1.5 text-xs text-gray-500"><span class="w-2.5 h-2.5 rounded-full bg-emerald-200"></span> Open</span>
+                    <span class="flex items-center gap-1.5 text-xs text-gray-500"><span class="w-2.5 h-2.5 rounded-full bg-[#00C767]"></span> Selesai</span>
+                    <span class="flex items-center gap-1.5 text-xs text-gray-500"><span class="w-2.5 h-2.5 rounded-full bg-[#C7F7DE]"></span> Open</span>
                 </div>
             </div>
             <div class="p-6">
@@ -164,8 +165,8 @@
         </div>
 
         {{-- Upcoming Maintenance --}}
-        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-50">
+        <div class="bg-white rounded-[18px] border border-[#E5E5E5] shadow-[0_2px_8px_rgba(23,23,23,0.03)] overflow-hidden">
+            <div class="px-6 py-5 border-b border-[#E5E5E5]/70">
                 <h2 class="text-lg font-bold text-gray-900">Jadwal Terdekat</h2>
                 <p class="text-xs text-gray-500">7 Hari ke depan</p>
             </div>
@@ -207,10 +208,10 @@
     {{-- Bottom Section: Recent Activities & Spare Parts --}}
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {{-- Recent Work Orders --}}
-        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-[18px] border border-[#E5E5E5] shadow-[0_2px_8px_rgba(23,23,23,0.03)] overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
                 <h2 class="text-lg font-bold text-gray-900">Aktivitas Terakhir</h2>
-                <a href="{{ route('work-orders.index') }}" class="text-xs font-bold text-emerald-600 hover:underline">Semua WO</a>
+                <a href="{{ route('work-orders.index') }}" class="text-xs font-bold text-[#00C767] hover:underline">Semua WO</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -268,13 +269,13 @@
         </div>
 
         {{-- Inventory Alert --}}
-        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+        <div class="bg-white rounded-[18px] border border-[#E5E5E5] shadow-[0_2px_8px_rgba(23,23,23,0.03)] overflow-hidden">
+            <div class="px-6 py-5 border-b border-[#E5E5E5]/70 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900">Stok Suku Cadang</h2>
                     <p class="text-xs text-red-500 font-medium">Membutuhkan pengisian ulang segera</p>
                 </div>
-                <a href="{{ route('spare-parts.index') }}" class="text-xs font-bold text-emerald-600 hover:underline">Kelola Stok</a>
+                <a href="{{ route('spare-parts.index') }}" class="text-xs font-bold text-[#00C767] hover:underline">Kelola Stok</a>
             </div>
             <div class="p-6">
                 <div class="space-y-6">
@@ -318,7 +319,7 @@
         $allBlocks     = $pvMapData->keys()->values()->toArray();
         $blockLocNames = $blockLocations ?? [];
     @endphp
-    <div id="peta-pv" class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+    <div id="peta-pv" class="bg-white rounded-[20px] border border-[#E5E5E5] shadow-[0_2px_8px_rgba(23,23,23,0.03)] overflow-hidden"
          x-data="{
              activeBlock: '{{ $firstBlock }}',
              blocks: {{ json_encode($allBlocks) }},
@@ -1006,15 +1007,15 @@
                 {
                     label: 'Selesai',
                     data: closedData,
-                    backgroundColor: '#10b981',
-                    borderRadius: 6,
+                    backgroundColor: '#00C767',
+                    borderRadius: 8,
                     barThickness: 20,
                 },
                 {
                     label: 'Open',
                     data: openData,
-                    backgroundColor: '#d1fae5',
-                    borderRadius: 6,
+                    backgroundColor: '#C7F7DE',
+                    borderRadius: 8,
                     barThickness: 20,
                 }
             ]
@@ -1025,31 +1026,23 @@
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#064e3b',
-                    titleFont: { family: 'Outfit', size: 13 },
-                    bodyFont: { family: 'Outfit', size: 12 },
+                    backgroundColor: '#171717',
+                    titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 12 },
                     padding: 12,
-                    cornerRadius: 12,
+                    cornerRadius: 10,
                 }
             },
             scales: {
-                x: { 
+                x: {
                     stacked: true,
                     grid: { display: false },
-                    ticks: { font: { family: 'Outfit', size: 11, weight: 'bold' }, color: '#9ca3af' }
+                    ticks: { font: { family: 'Inter', size: 11, weight: 'bold' }, color: '#9ca3af' }
                 },
-                y: { 
+                y: {
                     stacked: true,
                     grid: { color: '#f3f4f6', drawBorder: false },
-                    ticks: { font: { family: 'Outfit', size: 11 }, color: '#9ca3af', stepSize: 5 }
-                }
-            }
-        }
-    });
-
-    // PV Drag & Drop — event delegation, visual only until Simpan
-    window.pvEditMode = false;
-    let pvDrag = null;
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af', stepSize: 5 }
     let pvLastOver = null;
     window.pvOriginalPositions = {};
 
