@@ -3,7 +3,7 @@
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('tools.index') }}" class="hover:text-gray-800">Tools</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">{{ $tool->name }}</span>@endsection
 @section('content')
 @php
-    $usageHistory = $tool->workOrderItems->map(fn($usage) => [
+    $woUsages = $tool->workOrderItems ? $tool->workOrderItems->map(fn($usage) => [
         'date' => $usage->used_at,
         'qty' => $usage->qty_used,
         'unit' => 'unit',
@@ -13,17 +13,26 @@
         'asset' => $usage->workOrder?->asset ? ($usage->workOrder->asset->name . ($usage->workOrder->asset->transformer_block ? ' (Blok ' . $usage->workOrder->asset->transformer_block . ')' : '')) : ($usage->workOrder?->client_name ?: '-'),
         'url' => $usage->workOrder ? route('work-orders.show', $usage->workOrder) : null,
         'user' => $usage->createdBy?->name,
-    ])->merge($tool->maintenanceRecordTools->map(fn($usage) => [
-        'date' => $usage->created_at,
-        'qty' => 1,
-        'unit' => 'unit',
-        'source' => 'Maintenance Record',
-        'reference' => $usage->maintenanceRecord?->record_number,
-        'title' => $usage->maintenanceRecord?->workOrder?->title,
-        'asset' => $usage->maintenanceRecord?->asset ? ($usage->maintenanceRecord->asset->name . ($usage->maintenanceRecord->asset->transformer_block ? ' (Blok ' . $usage->maintenanceRecord->asset->transformer_block . ')' : '')) : '-',
-        'url' => $usage->maintenanceRecord ? route('maintenance-records.show', $usage->maintenanceRecord) : null,
-        'user' => $usage->maintenanceRecord?->technician?->name,
-    ]))->sortByDesc('date');
+    ]) : collect();
+
+    $mrUsages = $tool->maintenanceRecordTools ? $tool->maintenanceRecordTools->map(function($usage) use ($tool) {
+        $mr = $usage->maintenanceRecord;
+        $wo = $mr?->workOrder;
+        $asset = $mr?->asset ?? $wo?->asset;
+        return [
+            'date' => $usage->created_at,
+            'qty' => 1,
+            'unit' => 'unit',
+            'source' => 'Maintenance Record',
+            'reference' => $mr?->record_number,
+            'title' => $wo?->title ?? $mr?->findings,
+            'asset' => $asset ? ($asset->name . ($asset->transformer_block ? ' (Blok ' . $asset->transformer_block . ')' : '')) : ($wo?->client_name ?: '-'),
+            'url' => $mr ? route('maintenance-records.show', $mr) : null,
+            'user' => $mr?->technician?->name,
+        ];
+    }) : collect();
+
+    $usageHistory = $woUsages->merge($mrUsages)->sortByDesc('date');
 @endphp
 
 <div class="max-w-7xl space-y-5">
