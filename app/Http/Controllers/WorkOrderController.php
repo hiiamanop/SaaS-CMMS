@@ -8,13 +8,6 @@ use App\Models\WorkOrderActivityLog;
 use App\Models\Asset;
 use App\Models\User;
 use App\Models\Notification;
-use App\Models\SparePart;
-use App\Models\Consumable;
-use App\Models\Tool;
-use App\Models\WorkOrderItem;
-use App\Services\StockService;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\OutOfStockException;
 use Illuminate\Http\Request;
 
 class WorkOrderController extends Controller
@@ -25,8 +18,6 @@ class WorkOrderController extends Controller
 
         if ($request->filter === 'overdue') {
             $query->whereNotIn('status', ['closed'])->where('due_date', '<', now());
-        } elseif ($request->status === 'active' || $request->filter === 'active') {
-            $query->whereIn('status', ['open', 'in_progress']);
         } elseif ($request->status) {
             $query->where('status', $request->status);
         }
@@ -104,10 +95,7 @@ class WorkOrderController extends Controller
         }
 
         $technicians = User::where('role', 'technician')->get();
-        $spareParts = SparePart::orderBy('name')->get();
-        $consumables = Consumable::orderBy('name')->get();
-        $tools = Tool::orderBy('name')->get();
-        return view('work-orders.create', compact('assets', 'technicians', 'selectedAsset', 'selectedAssetId', 'spareParts', 'consumables', 'tools'));
+        return view('work-orders.create', compact('assets', 'technicians', 'selectedAsset', 'selectedAssetId'));
     }
 
     public function store(Request $request)
@@ -124,10 +112,6 @@ class WorkOrderController extends Controller
             'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
             'shutdown_required' => 'nullable|boolean',
-            'items' => 'nullable|array',
-            'items.*.item_type' => 'required|in:spare_part,consumable,tool',
-            'items.*.item_id' => 'required|integer',
-            'items.*.qty_used' => 'required_if:items.*.item_type,spare_part,consumable|nullable|integer|min:1',
         ]);
 
         $validated['wo_number'] = WorkOrder::generateNumber();
@@ -148,40 +132,7 @@ class WorkOrderController extends Controller
             $validated['finding_id'] = $findingId;
         }
 
-        try {
-            $workOrder = DB::transaction(function () use ($validated) {
-                $workOrder = WorkOrder::create($validated);
-
-                foreach ($validated['items'] ?? [] as $item) {
-                    $itemModel = match ($item['item_type']) {
-                        'spare_part' => SparePart::findOrFail($item['item_id']),
-                        'consumable' => Consumable::findOrFail($item['item_id']),
-                        'tool' => Tool::findOrFail($item['item_id']),
-                    };
-                    $qty = (int) ($item['qty_used'] ?? 1);
-
-                    WorkOrderItem::create([
-                        'work_order_id' => $workOrder->id,
-                        'item_type' => $item['item_type'],
-                        'item_id' => $itemModel->id,
-                        'qty_used' => $qty,
-                        'unit_price' => $itemModel->unit_price ?? null,
-                        'created_by_user_id' => auth()->id(),
-                        'used_at' => now(),
-                    ]);
-
-                    if ($item['item_type'] === 'spare_part') {
-                        StockService::deduct($itemModel, $qty, 'work_order', auth()->id());
-                    } elseif ($item['item_type'] === 'consumable') {
-                        StockService::deductConsumable($itemModel, $qty, auth()->id());
-                    }
-                }
-
-                return $workOrder;
-            });
-        } catch (OutOfStockException $e) {
-            return back()->withInput()->with('error', $e->getMessage());
-        }
+        $workOrder = WorkOrder::create($validated);
 
         if (!empty($assigneeIds)) {
             $workOrder->assignees()->sync($assigneeIds);
@@ -216,10 +167,7 @@ class WorkOrderController extends Controller
 
     public function show(WorkOrder $workOrder)
     {
-        $workOrder->load([
-            'asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord',
-            'items.createdBy', 'items.sparePart', 'items.consumable', 'items.tool',
-        ]);
+        $workOrder->load(['asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord']);
         $technicians = User::where('role', 'technician')->get();
         return view('work-orders.show', compact('workOrder', 'technicians'));
     }

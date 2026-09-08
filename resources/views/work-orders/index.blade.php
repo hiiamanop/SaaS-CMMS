@@ -25,6 +25,13 @@ Records</span>@endsection
                         </svg>
                         New Work Order
                     </a>
+                    <a href="{{ route('maintenance-records.create') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Report
+                    </a>
                 @endif
             </div>
         </div>
@@ -59,9 +66,8 @@ Records</span>@endsection
                     <select name="status"
                         class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                         <option value="">All Statuses</option>
-                        <option value="active" {{ request('status') === 'active' || request('filter') === 'active' ? 'selected' : '' }}>Aktif (Open & In Progress)</option>
                         @foreach(['open' => 'Open', 'in_progress' => 'In Progress', 'pending_review' => 'Pending Review', 'closed' => 'Closed'] as $v => $l)
-                            <option value="{{ $v }}" {{ request('status') == $v && request('filter') !== 'active' ? 'selected' : '' }}>{{ $l }}</option>
+                            <option value="{{ $v }}" {{ request('status') == $v ? 'selected' : '' }}>{{ $l }}</option>
                         @endforeach
                     </select>
                     <select name="priority"

@@ -34,19 +34,7 @@
         <h1 class="text-2xl font-bold text-gray-900">New Work Order</h1>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{
-            isExternal: false,
-            items: [{ item_type: 'spare_part', item_id: '', qty_used: 1 }],
-            itemOptions: {
-                spare_part: @js($spareParts->map(fn($item) => ['id' => $item->id, 'code' => $item->part_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
-                consumable: @js($consumables->map(fn($item) => ['id' => $item->id, 'code' => $item->item_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
-                tool: @js($tools->map(fn($item) => ['id' => $item->id, 'code' => $item->tool_code, 'name' => $item->name, 'unit' => 'unit', 'stock' => $item->qty_available])->values())
-            },
-            addItem() { this.items.push({ item_type: 'spare_part', item_id: '', qty_used: 1 }); },
-            removeItem(index) { this.items.splice(index, 1); },
-            optionsFor(type) { return this.itemOptions[type] || []; },
-            resetItem(row) { row.item_id = ''; row.qty_used = row.item_type === 'tool' ? 1 : 1; }
-        }">
+        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{isExternal:false}">
             @csrf
             @if(request('from_finding'))
             <input type="hidden" name="from_finding" value="{{ request('from_finding') }}">
@@ -143,49 +131,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Client / Lokasi Luar <span class="text-red-500">*</span></label>
                             <input name="client_name" value="{{ old('client_name') }}" :required="isExternal" placeholder="Masukkan nama client..." class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                             @error('client_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div class="sm:col-span-2 border-t border-gray-100 pt-5" x-data>
-                            <div class="flex items-center justify-between mb-2">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Items Terpakai</label>
-                                    <p class="text-xs text-gray-500 mt-0.5">Spare part dan consumable akan mengurangi stok saat Work Order disimpan.</p>
-                                </div>
-                                <button type="button" @click="addItem()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand border border-brand/30 rounded-lg hover:bg-emerald-50">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                                    Tambah Item
-                                </button>
-                            </div>
-                            <div class="space-y-2">
-                                <template x-for="(row, index) in items" :key="index">
-                                    <div class="grid grid-cols-1 sm:grid-cols-[150px_1fr_100px_36px] gap-2 items-end p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                        <div>
-                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Jenis</label>
-                                            <select :name="`items[${index}][item_type]`" x-model="row.item_type" @change="resetItem(row)" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
-                                                <option value="spare_part">Spare Part</option>
-                                                <option value="consumable">Consumable</option>
-                                                <option value="tool">Tool</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Item</label>
-                                            <select :name="`items[${index}][item_id]`" x-model="row.item_id" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
-                                                <option value="">Pilih item...</option>
-                                                <template x-for="option in optionsFor(row.item_type)" :key="option.id">
-                                                    <option :value="option.id" x-text="`${option.code || '-'} — ${option.name} (stok: ${option.stock} ${option.unit})`"></option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Qty</label>
-                                            <input type="number" min="1" :name="`items[${index}][qty_used]`" x-model="row.qty_used" :readonly="row.item_type === 'tool'" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
-                                        </div>
-                                        <button type="button" @click="removeItem(index)" x-show="items.length > 1" class="w-9 h-9 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg" title="Hapus item">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
                         </div>
 
                         <div>

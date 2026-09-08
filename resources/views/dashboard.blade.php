@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-8 pb-10" x-data="{ showActiveTools: false }">
+<div class="space-y-8 pb-10">
     {{-- Header / Welcome Section --}}
     <div class="relative overflow-hidden bg-emerald-900 rounded-3xl p-8 lg:p-12 text-white shadow-2xl shadow-emerald-900/20">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -43,19 +43,18 @@
     </div>
 
     {{-- Stats Grid --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @php
             $stats = [
                 ['label' => 'Aset Terdaftar', 'value' => $totalAssets, 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'color' => 'emerald', 'route' => route('assets.index')],
-                ['label' => 'Work Order Aktif', 'value' => $openWorkOrders, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'color' => 'amber', 'route' => route('work-orders.index', ['status'=>'active'])],
+                ['label' => 'Work Order Aktif', 'value' => $openWorkOrders, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'color' => 'amber', 'route' => route('work-orders.index', ['status'=>'open'])],
                 ['label' => 'Tugas Terlambat', 'value' => $overdueWorkOrders, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'red', 'route' => route('work-orders.index', ['filter'=>'overdue'])],
                 ['label' => 'Suku Cadang Minim', 'value' => $lowStockCount, 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', 'color' => 'orange', 'route' => route('spare-parts.index', ['filter'=>'low_stock'])],
-                ['label' => 'Tools Terpakai', 'value' => $activeToolUsages->sum('qty'), 'icon' => 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.6-3.6a6 6 0 01-7.7 7.7L6.4 20.6a2 2 0 01-2.8-2.8l7.2-7.2a6 6 0 017.7-7.7l-3.8 3.4z', 'color' => 'blue', 'modal' => true],
             ];
         @endphp
 
         @foreach($stats as $stat)
-        <div @if(!empty($stat['modal'])) @click="showActiveTools = true" role="button" tabindex="0" @endif class="group bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-xl hover:border-emerald-100 transition-all duration-300 @if(!empty($stat['modal'])) cursor-pointer @endif">
+        <div class="group bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-2xl bg-{{ $stat['color'] }}-50 flex items-center justify-center text-{{ $stat['color'] }}-600 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="{{ $stat['icon'] }}"/></svg>
@@ -70,38 +69,11 @@
                 <h3 class="text-3xl font-black text-gray-900">{{ $stat['value'] }}</h3>
             </div>
             <p class="text-sm font-medium text-gray-500 mt-1">{{ $stat['label'] }}</p>
-            @if(!empty($stat['modal']))
-            <button type="button" @click.stop="showActiveTools = true" class="mt-4 flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-all">
-                Lihat Tools <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </button>
-            @else
             <a href="{{ $stat['route'] }}" class="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-all">
                 Detail Dashboard <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
-            @endif
         </div>
         @endforeach
-    </div>
-
-    {{-- Active tools modal --}}
-    <div x-show="showActiveTools" x-cloak @keydown.escape.window="showActiveTools = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm" style="display:none">
-        <div @click.outside="showActiveTools = false" class="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-3xl max-h-[80vh] overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-100 flex items-start justify-between">
-                <div><h2 class="text-lg font-bold text-gray-900">Tools Sedang Terpakai</h2><p class="text-xs text-gray-500 mt-1">Tools yang tercatat pada Work Order aktif.</p></div>
-                <button type="button" @click="showActiveTools = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <div class="p-4 overflow-y-auto max-h-[calc(80vh-90px)]">
-                @if($activeToolUsages->isEmpty())
-                <div class="py-12 text-center text-sm text-gray-400">Belum ada tool yang sedang terpakai.</div>
-                @else
-                <div class="overflow-x-auto border border-gray-100 rounded-xl"><table class="w-full text-sm"><thead><tr class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase"><th class="px-4 py-3 text-left">Tool</th><th class="px-4 py-3 text-left">Qty</th><th class="px-4 py-3 text-left">Work Order</th><th class="px-4 py-3 text-left">Status</th></tr></thead><tbody class="divide-y divide-gray-50">
-                @foreach($activeToolUsages as $usage)
-                <tr class="hover:bg-blue-50/40"><td class="px-4 py-3"><div class="font-semibold text-gray-900">{{ $usage['tool_name'] }}</div><div class="text-[10px] font-mono text-gray-400">{{ $usage['tool_code'] }}</div></td><td class="px-4 py-3 font-semibold text-gray-700">{{ $usage['qty'] }}</td><td class="px-4 py-3"><a href="{{ $usage['wo_url'] }}" class="font-semibold text-blue-700 hover:underline">{{ $usage['wo_number'] }}</a><span class="block text-xs text-gray-500 truncate max-w-[260px]">{{ $usage['wo_title'] }}</span></td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">{{ str_replace('_', ' ', $usage['wo_status']) }}</span></td></tr>
-                @endforeach
-                </tbody></table></div>
-                @endif
-            </div>
-        </div>
     </div>
 
     {{-- Middle Section: Charts & Upcoming --}}
