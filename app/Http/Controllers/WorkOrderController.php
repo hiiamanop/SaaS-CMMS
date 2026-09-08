@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOrder;
 use App\Models\WorkOrderActivityLog;
-
+use App\Models\WorkOrderItem;
+use App\Models\SparePart;
+use App\Models\Consumable;
+use App\Models\Tool;
 use App\Models\Asset;
 use App\Models\User;
 use App\Models\Notification;
+use App\Services\StockService;
+use App\Exceptions\OutOfStockException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class WorkOrderController extends Controller
@@ -39,24 +45,10 @@ class WorkOrderController extends Controller
 
         $workOrders = $query->latest()->paginate(15)->withQueryString();
 
-        // Maintenance Records Query for Records Tab
-        $queryRecord = \App\Models\MaintenanceRecord::with(['asset', 'technician', 'workOrder']);
-        if ($request->search) {
-            $queryRecord->where(function($q) use ($request) {
-                $q->where('record_number', 'like', '%'.$request->search.'%')
-                  ->orWhere('findings', 'like', '%'.$request->search.'%');
-            });
-        }
-        if ($request->asset_id) $queryRecord->where('asset_id', $request->asset_id);
-        if ($request->date_from) $queryRecord->where('maintenance_date', '>=', $request->date_from);
-        if ($request->date_to) $queryRecord->where('maintenance_date', '<=', $request->date_to);
-
-        $records = $queryRecord->latest('maintenance_date')->paginate(15, ['*'], 'records_page')->withQueryString();
-
         $assets = Asset::orderBy('name')->get();
         $technicians = User::where('role', 'technician')->get();
 
-        return view('work-orders.index', compact('workOrders', 'records', 'assets', 'technicians'));
+        return view('work-orders.index', compact('workOrders', 'assets', 'technicians'));
     }
 
     public function create(Request $request)
@@ -95,7 +87,10 @@ class WorkOrderController extends Controller
         }
 
         $technicians = User::where('role', 'technician')->get();
-        return view('work-orders.create', compact('assets', 'technicians', 'selectedAsset', 'selectedAssetId'));
+        $spareParts = SparePart::orderBy('name')->get();
+        $consumables = Consumable::orderBy('name')->get();
+        $tools = Tool::orderBy('name')->get();
+        return view('work-orders.create', compact('assets', 'technicians', 'selectedAsset', 'selectedAssetId', 'spareParts', 'consumables', 'tools'));
     }
 
     public function store(Request $request)
@@ -112,6 +107,10 @@ class WorkOrderController extends Controller
             'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
             'shutdown_required' => 'nullable|boolean',
+            'items' => 'nullable|array',
+            'items.*.item_type' => 'required|in:spare_part,consumable,tool',
+            'items.*.item_id' => 'required|integer',
+            'items.*.qty_used' => 'nullable|integer|min:1',
         ]);
 
         $validated['wo_number'] = WorkOrder::generateNumber();
@@ -122,7 +121,7 @@ class WorkOrderController extends Controller
             $validated['asset_id'] = null;
         }
         $validated['shutdown_required'] = $request->boolean('shutdown_required');
-        
+
         $assigneeIds = $validated['assigned_to'] ?? [];
         // Use first one as primary for compatibility
         $validated['assigned_to'] = !empty($assigneeIds) ? $assigneeIds[0] : null;
@@ -132,34 +131,78 @@ class WorkOrderController extends Controller
             $validated['finding_id'] = $findingId;
         }
 
-        $workOrder = WorkOrder::create($validated);
+        try {
+            $workOrder = DB::transaction(function () use ($validated, $assigneeIds, $findingId, $request) {
+                $workOrder = WorkOrder::create($validated);
 
-        if (!empty($assigneeIds)) {
-            $workOrder->assignees()->sync($assigneeIds);
-        }
+                if (!empty($assigneeIds)) {
+                    $workOrder->assignees()->sync($assigneeIds);
+                }
 
-        if ($findingId) {
-            \App\Models\Finding::where('id', $findingId)->update(['status' => 'in_progress']);
-        }
+                if ($findingId) {
+                    \App\Models\Finding::where('id', $findingId)->update(['status' => 'in_progress']);
+                }
 
-        WorkOrderActivityLog::create([
-            'work_order_id' => $workOrder->id,
-            'user_id' => auth()->id(),
-            'from_status' => null,
-            'to_status' => 'open',
-            'notes' => 'Work order created',
-        ]);
+                foreach ($request->input('items', []) as $item) {
+                    if (empty($item['item_id']) || empty($item['item_type'])) {
+                        continue;
+                    }
 
-        if (!empty($assigneeIds)) {
-            foreach ($assigneeIds as $userId) {
-                Notification::create([
-                    'user_id' => $userId,
-                    'type' => 'new_wo',
-                    'title' => 'New Work Order Assigned',
-                    'message' => "You have been assigned Work Order {$workOrder->wo_number}: {$workOrder->title}",
-                    'url' => '/work-orders/'.$workOrder->id,
+                    $itemModel = match ($item['item_type']) {
+                        'spare_part' => SparePart::find($item['item_id']),
+                        'consumable' => Consumable::find($item['item_id']),
+                        'tool'       => Tool::find($item['item_id']),
+                        default      => null,
+                    };
+
+                    if (!$itemModel) {
+                        continue;
+                    }
+
+                    $qty = (int) ($item['qty_used'] ?? 1);
+                    if ($qty < 1) $qty = 1;
+
+                    WorkOrderItem::create([
+                        'work_order_id'      => $workOrder->id,
+                        'item_type'          => $item['item_type'],
+                        'item_id'            => $itemModel->id,
+                        'qty_used'           => $qty,
+                        'unit_price'         => $itemModel->unit_price ?? null,
+                        'created_by_user_id' => auth()->id(),
+                        'used_at'            => now(),
+                    ]);
+
+                    if ($item['item_type'] === 'spare_part') {
+                        StockService::deduct($itemModel, $qty, 'work_order', auth()->id());
+                    } elseif ($item['item_type'] === 'consumable') {
+                        StockService::deductConsumable($itemModel, $qty, auth()->id());
+                    }
+                }
+
+                WorkOrderActivityLog::create([
+                    'work_order_id' => $workOrder->id,
+                    'user_id'       => auth()->id(),
+                    'from_status'   => null,
+                    'to_status'     => 'open',
+                    'notes'         => 'Work order created',
                 ]);
-            }
+
+                if (!empty($assigneeIds)) {
+                    foreach ($assigneeIds as $userId) {
+                        Notification::create([
+                            'user_id' => $userId,
+                            'type'    => 'new_wo',
+                            'title'   => 'New Work Order Assigned',
+                            'message' => "You have been assigned Work Order {$workOrder->wo_number}: {$workOrder->title}",
+                            'url'     => '/work-orders/'.$workOrder->id,
+                        ]);
+                    }
+                }
+
+                return $workOrder;
+            });
+        } catch (OutOfStockException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
         return redirect()->route('work-orders.show', $workOrder)->with('success', 'Work order created successfully.');
@@ -167,7 +210,10 @@ class WorkOrderController extends Controller
 
     public function show(WorkOrder $workOrder)
     {
-        $workOrder->load(['asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord']);
+        $workOrder->load([
+            'asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user',
+            'items.createdBy', 'items.sparePart', 'items.consumable', 'items.tool',
+        ]);
         $technicians = User::where('role', 'technician')->get();
         return view('work-orders.show', compact('workOrder', 'technicians'));
     }

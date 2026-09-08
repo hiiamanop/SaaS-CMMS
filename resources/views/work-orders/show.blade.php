@@ -38,8 +38,7 @@ $wo = $workOrder;
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="border-b border-gray-200 px-2">
             <div class="flex gap-1 -mb-px">
-                @foreach(['details'=>'Details', 'maintenance' => 'Maintenance Detail', 'activity'=>'Activity Log'] as $k=>$l)
-                    @if($k === 'maintenance' && !$wo->maintenanceRecord) @continue @endif
+                @foreach(['details'=>'Details', 'activity'=>'Activity Log'] as $k=>$l)
                     <button @click="tab='{{ $k }}'" :class="tab==='{{ $k }}'?'border-b-2 border-brand text-brand':'text-gray-500 hover:text-gray-700'" class="px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap">{{ $l }}</button>
                 @endforeach
             </div>
@@ -114,30 +113,59 @@ $wo = $workOrder;
                         <h3 class="text-sm font-bold text-gray-900">Items Terpakai</h3>
                         <p class="text-xs text-gray-500 mt-0.5">Barang yang dicatat dan dipakai pada Work Order ini.</p>
                     </div>
-                    <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">{{ $wo->items->count() }} item</span>
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">{{ $wo->items->count() }} item</span>
                 </div>
                 @if($wo->items->isEmpty())
-                <div class="rounded-lg border border-dashed border-gray-200 py-6 text-center text-xs text-gray-400">Belum ada item yang dicatat.</div>
+                <div class="rounded-xl border border-dashed border-gray-200 py-6 text-center text-xs text-gray-400 bg-gray-50/50">Belum ada item yang dicatat.</div>
                 @else
-                <div class="overflow-x-auto border border-gray-100 rounded-lg">
+                <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-xs">
                     <table class="w-full text-sm">
-                        <thead><tr class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase"><th class="px-3 py-2 text-left">Jenis</th><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Qty</th><th class="px-3 py-2 text-left">Dicatat</th></tr></thead>
-                        <tbody class="divide-y divide-gray-50">
+                        <thead>
+                            <tr class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                                <th class="px-4 py-3 text-left">Jenis</th>
+                                <th class="px-4 py-3 text-left">Item</th>
+                                <th class="px-4 py-3 text-left">Qty</th>
+                                <th class="px-4 py-3 text-left">Dicatat Oleh</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
                         @foreach($wo->items as $usedItem)
                         @php
                             $itemModel = $usedItem->item;
                             $itemUrl = match($usedItem->item_type) {
                                 'spare_part' => $itemModel ? route('spare-parts.show', $itemModel) : null,
-                                default => null,
+                                'consumable' => $itemModel ? route('consumables.show', $itemModel) : null,
+                                'tool'       => $itemModel ? route('tools.show', $itemModel) : null,
+                                default      => null,
+                            };
+                            $badgeColor = match($usedItem->item_type) {
+                                'spare_part' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                'consumable' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                'tool'       => 'bg-purple-50 text-purple-700 border-purple-200',
+                                default      => 'bg-gray-50 text-gray-700 border-gray-200',
                             };
                         @endphp
-                        <tr>
-                            <td class="px-3 py-2 text-xs text-gray-500">{{ $usedItem->item_type_label }}</td>
-                            <td class="px-3 py-2 font-medium text-gray-900">
-                                @if($itemUrl)<a href="{{ $itemUrl }}" class="text-brand hover:underline">{{ $itemModel?->name ?: 'Item dihapus' }}</a>@else{{ $itemModel?->name ?: 'Item dihapus' }}@endif
+                        <tr class="hover:bg-gray-50/70 transition-colors">
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $badgeColor }}">
+                                    {{ $usedItem->item_type_label }}
+                                </span>
                             </td>
-                            <td class="px-3 py-2 text-gray-600">{{ $usedItem->qty_used }} {{ $itemModel?->unit ?: 'unit' }}</td>
-                            <td class="px-3 py-2 text-xs text-gray-500">{{ $usedItem->used_at?->format('d M Y H:i') }}<br>{{ $usedItem->createdBy?->name ?: 'System' }}</td>
+                            <td class="px-4 py-3">
+                                @if($itemUrl)
+                                    <a href="{{ $itemUrl }}" class="font-semibold text-brand hover:underline">{{ $itemModel?->name ?: 'Item dihapus' }}</a>
+                                @else
+                                    <span class="font-semibold text-gray-900">{{ $itemModel?->name ?: 'Item dihapus' }}</span>
+                                @endif
+                                <div class="text-xs font-mono text-gray-400">
+                                    {{ $itemModel?->part_code ?: ($itemModel?->item_code ?: ($itemModel?->tool_code ?: '-')) }}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 font-semibold text-gray-800">{{ $usedItem->qty_used }} {{ $itemModel?->unit ?: 'unit' }}</td>
+                            <td class="px-4 py-3 text-xs text-gray-500">
+                                <div class="font-medium text-gray-700">{{ $usedItem->createdBy?->name ?: 'System' }}</div>
+                                <div class="text-[10px] text-gray-400">{{ $usedItem->used_at?->format('d M Y H:i') }}</div>
+                            </td>
                         </tr>
                         @endforeach
                         </tbody>
@@ -146,50 +174,6 @@ $wo = $workOrder;
                 @endif
             </div>
         </div>
-
-
-
-        {{-- Maintenance Details tab --}}
-        @if($mr = $wo->maintenanceRecord)
-        <div x-show="tab==='maintenance'" class="p-6 space-y-6">
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Completion Result</p>
-                    <div class="mt-1 flex items-center gap-2">
-                        @php $resColors=['solved'=>'bg-green-100 text-green-700','pending'=>'bg-yellow-100 text-yellow-700','failure'=>'bg-red-100 text-red-700']; @endphp
-                        <span class="px-3 py-1 rounded-lg text-sm font-bold uppercase {{ $resColors[$mr->status_after]??'bg-gray-100' }}">{{ $mr->status_after }}</span>
-                        <span class="text-gray-400 text-xs">— Registered on {{ $mr->maintenance_date->format('M d, Y') }}</span>
-                    </div>
-                </div>
-                <a href="{{ route('maintenance-records.show', $mr) }}" class="text-brand text-sm font-bold hover:underline">View Full Record →</a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Findings</h4>
-                    <p class="text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-100 min-h-[60px]">{{ $mr->findings ?: 'No findings reported.' }}</p>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Actions Taken</h4>
-                    <p class="text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border border-gray-100 min-h-[60px]">{{ $mr->actions_taken ?: 'No actions reported.' }}</p>
-                </div>
-            </div>
-
-            @if($mr->parts->isNotEmpty())
-            <div>
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Parts Replaced</h4>
-                <div class="divide-y divide-gray-100 border border-gray-100 rounded-lg overflow-hidden">
-                    @foreach($mr->parts as $part)
-                    <div class="flex items-center justify-between px-4 py-2.5 bg-white">
-                        <span class="text-sm text-gray-800">{{ $part->sparePart->name }}</span>
-                        <span class="text-sm font-bold text-gray-900">{{ $part->qty_used }} {{ $part->sparePart->unit }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-        </div>
-        @endif
 
         {{-- Activity log --}}
         <div x-show="tab==='activity'" class="p-6">

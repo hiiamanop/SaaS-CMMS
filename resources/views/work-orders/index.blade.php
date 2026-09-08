@@ -1,19 +1,17 @@
 @extends('layouts.app')
-@section('title', 'Work Orders & Report')
-@section('breadcrumb')<span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Work Orders &
-Records</span>@endsection
+@section('title', 'Work Orders')
+@section('breadcrumb')<span class="text-gray-400">/</span><span class="text-gray-700 font-medium">Work Orders</span>@endsection
 @section('content')
     @php
         $pColors = ['low' => 'bg-gray-100 text-gray-600', 'medium' => 'bg-emerald-100 text-emerald-700', 'high' => 'bg-orange-100 text-orange-700', 'critical' => 'bg-red-100 text-red-700'];
         $sColors = ['open' => 'bg-emerald-100 text-emerald-700', 'in_progress' => 'bg-yellow-100 text-yellow-700', 'pending_review' => 'bg-purple-100 text-purple-700', 'closed' => 'bg-green-100 text-green-700'];
     @endphp
 
-    <div class="space-y-5"
-        x-data="{ tab: '{{ (request('tab') === 'records' || request('records_page')) ? 'records' : 'work_orders' }}' }">
+    <div class="space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Work Orders & Report</h1>
-                <p class="text-sm text-gray-500 mt-0.5">Manage maintenance jobs and their historical records</p>
+                <h1 class="text-2xl font-bold text-gray-900">Work Orders</h1>
+                <p class="text-sm text-gray-500 mt-0.5">Daftar dan pengelolaan perintah kerja pemeliharaan</p>
             </div>
             <div class="flex gap-2">
                 @if(!auth()->user()->isTechnician())
@@ -29,35 +27,14 @@ Records</span>@endsection
             </div>
         </div>
 
-        {{-- Tabs --}}
-        <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
-                <button @click="tab = 'work_orders'"
-                    :class="tab === 'work_orders' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
-                    Work Orders
-                    <span
-                        class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-[10px]">{{ $workOrders->total() }}</span>
-                </button>
-                <button @click="tab = 'records'"
-                    :class="tab === 'records' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-all">
-                    Maintenance Records
-                    <span
-                        class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-[10px]">{{ $records->total() }}</span>
-                </button>
-            </nav>
-        </div>
-
         {{-- Filter bar --}}
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
             <form method="GET" class="flex flex-wrap gap-3">
                 <input name="search" value="{{ request('search') }}" placeholder="Search ID or title..."
                     class="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all">
 
-                <div x-show="tab === 'work_orders'" class="contents">
-                    <select name="status"
-                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
+                <select name="status"
+                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                         <option value="">All Statuses</option>
                         @foreach(['open' => 'Open', 'in_progress' => 'In Progress', 'pending_review' => 'Pending Review', 'closed' => 'Closed'] as $v => $l)
                             <option value="{{ $v }}" {{ request('status') == $v ? 'selected' : '' }}>{{ $l }}</option>
@@ -89,9 +66,8 @@ Records</span>@endsection
             </form>
         </div>
 
-        {{-- Tab Content: Work Orders --}}
-        <div x-show="tab === 'work_orders'" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
-            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1">
+        {{-- Work Orders Table --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             @if($workOrders->isEmpty())
                 <div class="py-16 text-center text-gray-400">No work orders found</div>
             @else
@@ -212,91 +188,6 @@ Records</span>@endsection
                 </div>
                 <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">{{ $workOrders->links() }}</div>
             @endif
-            </div>
-
-            {{-- Tab Conten
-                           t: Records --}}
-            <div x-show="tab === 'records'" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1">
-                @if($records->isEmpty())
-                    <div class="py-16 text-center text-gray-400">No maintenance records found</div>
-                @else
-                        <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                    <th class="px-5 py-4 text-left">Record #</th>
-                                    <th class="px-5 py-4 text-left">Asset</th>
-                                    <th class="px-5 py-4 text-left">Type</th>
-                                        <th class="px-5 py-4 text-left">Reference</th>
-                                        <th class="px-5 py-4 text-left">Date</th>
-                                        <th class="px-5 py-4 text-left">Technician</th>
-                                        <th class="px-5 py-4 text-left">Duration</th>
-
-                                                                       <th class="px-5 py-4 text-right">Actions</th>
-                                    </tr>
-                               </thead> 
-                        <tbody class    ="divide-y divide-gray-50">
-                              @foreach($records as $r)
-                                            <tr class="hover:
-                                b                           g-opacity-90 transition-colors">
-                                                    <td class="px-5 py-4 font-mono text-xs font-bold text-gray-700">
-                                                        <a href="{{ route('maintenance-records.show', $r) }}" class="text-brand hover:underline">{{ $r->record_number }}</a>
-                                                    </td>
-                                            <td         class
-                                                          = "px-5 py-4 text-gray-900 font-medium">
-                                                     @if($r->asset)
-                                                        {{ $r->asset->name }}
-                                                    @else
-                                                            <span class="text-brand font-bold">{{ $r->workOrder?->client_name ?: 'External Client' }}</span>
-                                                        @endif
-                                               </td>
-
-                                                                           <td class="p    x-5 py-4 font-semibold text-[10px] uppercase tracking-wider">
-
-
-
-                                                                                                                       <span class="{{ $r->type === 'preventive' ? 'text-brand bg-emerald-50 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded' }}">
-                                                        {{ $r->type }}
-                                                        </span>
-                                                </td>
-
-                                                                                <td    class="px-5 py-4">
-                                                        @if($r->workOrder)
-                                                            <a href="{{ route('work-orders.show', $r->workOrder) }}" class="inline-flex items-center gap-1 text-[10px] font-bold text-brand hover:underline uppercase">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                                                                {{ $r->workOrder->wo_number }}
-                                                            </a>
-                                                         @else
-                                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Manual Entry</span>
-                                                   @endif
-                                                 </td>
-                                                  <td      class="px-5 py-4 text-gray-600 text-xs">{{ $r->maintenance_date->format('d M Y') }}</td>
-                                                    <td class="px-5 py-4 text-gray-600 text-xs font-medium">{{ $r->technician->name }}</td>
-                                                    <td class="px-5 py-4 text-gray-500 text-xs">
-                                                        <div class="flex gap-2">
-
-                                                       <span>Dur: {{ $r->duration_minutes }}m</span>
-
-
-
-
-                                                                                             @if($r->shutdown_minutes > 0)
-                                                                                                <span class="text-orange-600 font-bold">Shut: {{ $r->shutdown_minutes }}m</span>
-                                                                                            @endif
-                                                        </div>
-                                                </td>
-                                                <td class="px-5 py-4 text-right">
-                                                <a href="{{ route('maintenance-records.show', $r) }}" class="p-1.5 text-gray-400 hover:text-brand hover:bg-emerald-50 rounded-lg transition-all">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                                                </a>
-                                            </td>
-                                        </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    </div>
-                    <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">{{ $records->links() }}</div>
-                @endif
         </div>
     </div>
 @endsection

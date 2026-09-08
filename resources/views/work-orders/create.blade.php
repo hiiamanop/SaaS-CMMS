@@ -34,7 +34,19 @@
         <h1 class="text-2xl font-bold text-gray-900">New Work Order</h1>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{isExternal:false}">
+        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{
+            isExternal: false,
+            items: [],
+            itemOptions: {
+                spare_part: @js($spareParts->map(fn($item) => ['id' => $item->id, 'code' => $item->part_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
+                consumable: @js($consumables->map(fn($item) => ['id' => $item->id, 'code' => $item->item_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
+                tool: @js($tools->map(fn($item) => ['id' => $item->id, 'code' => $item->tool_code, 'name' => $item->name, 'unit' => 'unit', 'stock' => $item->qty_available])->values())
+            },
+            addItem() { this.items.push({ item_type: 'spare_part', item_id: '', qty_used: 1 }); },
+            removeItem(index) { this.items.splice(index, 1); },
+            optionsFor(type) { return this.itemOptions[type] || []; },
+            resetItem(row) { row.item_id = ''; row.qty_used = 1; }
+        }">
             @csrf
             @if(request('from_finding'))
             <input type="hidden" name="from_finding" value="{{ request('from_finding') }}">
@@ -131,6 +143,57 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Client / Lokasi Luar <span class="text-red-500">*</span></label>
                             <input name="client_name" value="{{ old('client_name') }}" :required="isExternal" placeholder="Masukkan nama client..." class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                             @error('client_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Dynamic Items Selection --}}
+                        <div class="sm:col-span-2 border-t border-gray-100 pt-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-800">Items Terpakai</label>
+                                    <p class="text-xs text-gray-500 mt-0.5">Pilih spare part, consumable, atau tool yang digunakan dalam pekerjaan ini.</p>
+                                </div>
+                                <button type="button" @click="addItem()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors shadow-xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                                    Tambah Item
+                                </button>
+                            </div>
+
+                            <template x-if="items.length === 0">
+                                <div class="text-center py-4 bg-gray-50/60 rounded-xl border border-dashed border-gray-200 text-xs text-gray-400">
+                                    Belum ada item ditambahkan. Klik "Tambah Item" jika pekerjaan ini memerlukan spare part, consumable, atau tool.
+                                </div>
+                            </template>
+
+                            <div class="space-y-2.5">
+                                <template x-for="(row, index) in items" :key="index">
+                                    <div class="grid grid-cols-1 sm:grid-cols-[140px_1fr_110px_36px] gap-2.5 items-end p-3 bg-gray-50/80 rounded-xl border border-gray-200">
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Kategori</label>
+                                            <select :name="`items[${index}][item_type]`" x-model="row.item_type" @change="resetItem(row)" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-brand focus:outline-none">
+                                                <option value="spare_part">Spare Part</option>
+                                                <option value="consumable">Consumable</option>
+                                                <option value="tool">Tool</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Nama Item</label>
+                                            <select :name="`items[${index}][item_id]`" x-model="row.item_id" required class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-brand focus:outline-none">
+                                                <option value="">-- Pilih Item --</option>
+                                                <template x-for="option in optionsFor(row.item_type)" :key="option.id">
+                                                    <option :value="option.id" x-text="`${option.code || '-'} — ${option.name} (Stok: ${option.stock} ${option.unit})`"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">Jumlah</label>
+                                            <input type="number" min="1" :name="`items[${index}][qty_used]`" x-model="row.qty_used" required class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-brand focus:outline-none">
+                                        </div>
+                                        <button type="button" @click="removeItem(index)" class="w-9 h-9 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" title="Hapus item">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
 
                         <div>

@@ -190,8 +190,9 @@
                 </button>
                 <div class="flex gap-2">
                     <button @click="selectedItem = null" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-50">Tutup</button>
+                    <a :href="'/consumables/' + selectedItem?.id" class="px-3.5 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600 transition-all flex items-center gap-1">Detail & Usage</a>
                     @if(auth()->user()->isAdminOrSupervisor())
-                    <a :href="'/consumables/' + selectedItem?.id + '/edit'" class="px-4 py-2 bg-brand text-gray-900 rounded-lg text-xs font-bold hover:bg-brand-600">Edit Item</a>
+                    <a :href="'/consumables/' + selectedItem?.id + '/edit'" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100">Edit Item</a>
                     @endif
                 </div>
             </div>
