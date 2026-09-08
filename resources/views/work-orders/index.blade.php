@@ -25,13 +25,6 @@ Records</span>@endsection
                         </svg>
                         New Work Order
                     </a>
-                    <a href="{{ route('maintenance-records.create') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Report
-                    </a>
                 @endif
             </div>
         </div>

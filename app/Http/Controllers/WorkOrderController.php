@@ -286,8 +286,7 @@ class WorkOrderController extends Controller
                 \App\Models\Finding::where('id', $workOrder->finding_id)
                     ->update(['status' => 'resolved', 'resolved_date' => now()->toDateString(), 'close_time' => now()]);
             }
-            return redirect()->route('maintenance-records.create', ['work_order_id' => $workOrder->id])
-                ->with('success', 'Work order closed. Please create a maintenance record.');
+            return back()->with('success', 'Work order closed successfully.');
         }
 
         return back()->with('success', 'Status updated successfully.');
