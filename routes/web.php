@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Assets
+    Route::get('assets/{asset}/work-orders', [AssetController::class, 'workOrders'])->name('assets.work-orders');
     Route::post('assets/swap-position', [AssetController::class, 'swapPosition'])->name('assets.swap-position');
     Route::post('assets/update-position', [AssetController::class, 'updatePosition'])->name('assets.update-position');
     Route::get('assets/by-location', [AssetController::class, 'byLocation'])->name('assets.by-location');

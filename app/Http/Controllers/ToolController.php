@@ -89,6 +89,17 @@ class ToolController extends Controller
         return view('tools.create');
     }
 
+    public function show(Tool $tool)
+    {
+        $tool->load([
+            'workOrderItems.workOrder',
+            'workOrderItems.createdBy',
+            'maintenanceRecordTools.maintenanceRecord.workOrder',
+        ]);
+
+        return view('tools.show', compact('tool'));
+    }
+
     public function store(Request $request)
     {
         $this->authorizeManager();

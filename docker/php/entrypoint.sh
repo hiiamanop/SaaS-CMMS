@@ -45,8 +45,13 @@ if [ $COUNT -lt $MAX_TRIES ]; then
     echo "Running database migrations..."
     php artisan migrate --force
 
-    echo "Running initial database seeds (all PV modules T01-T07, inverters, users)..."
-    php artisan db:seed --force
+    USER_COUNT=$(php artisan tinker --execute="echo App\\Models\\User::count();" 2>/dev/null | tr -d '[:space:]')
+    if [ "$USER_COUNT" = "0" ]; then
+        echo "Running initial database seeds (all PV modules T01-T07, inverters, users)..."
+        php artisan db:seed --force
+    else
+        echo "Database already contains users; skipping initial database seeds."
+    fi
 fi
 
 echo "Running php artisan optimize..."

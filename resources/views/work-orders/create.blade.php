@@ -2,24 +2,90 @@
 @section('title','New Work Order')
 @section('breadcrumb')<span class="text-gray-400">/</span><a href="{{ route('work-orders.index') }}" class="hover:text-gray-800">Work Orders</a><span class="text-gray-400">/</span><span class="text-gray-700 font-medium">New</span>@endsection
 @section('content')
+@php
+    $rawAssetId = $selectedAssetId ?: (request('asset_id') ?: request('from_asset'));
+    if (!$rawAssetId) {
+        foreach (request()->query() as $k => $v) {
+            if (str_starts_with($k, 'from_asset=')) {
+                $rawAssetId = substr($k, strlen('from_asset='));
+                break;
+            } elseif (str_starts_with($k, 'asset_id=')) {
+                $rawAssetId = substr($k, strlen('asset_id='));
+                break;
+            }
+        }
+    }
+    if (!$rawAssetId && ($qs = request()->getQueryString())) {
+        $decoded = urldecode($qs);
+        if (preg_match('/(?:from_asset|asset_id)=(\d+)/', $decoded, $m)) {
+            $rawAssetId = $m[1];
+        }
+    }
+
+    $targetAsset = $selectedAsset ?? ($rawAssetId ? \App\Models\Asset::find($rawAssetId) : null);
+    $targetAssetId = $targetAsset?->id ?? $rawAssetId;
+    $defaultTitle = request('title') ?: ($targetAsset ? "Perbaikan {$targetAsset->category} " . ($targetAsset->hierarchy_code ?: $targetAsset->asset_code) : '');
+    $defaultDesc = request('description') ?: ($targetAsset ? "Perbaikan kendala pada {$targetAsset->category} {$targetAsset->asset_code}" . ($targetAsset->transformer_block ? " (Blok {$targetAsset->transformer_block})" : "") . ". Lokasi fisik: {$targetAsset->location}." : '');
+@endphp
+
 <div class="max-w-none mx-auto pb-10">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('work-orders.index') }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a>
         <h1 class="text-2xl font-bold text-gray-900">New Work Order</h1>
     </div>
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{isExternal:false}">
+        <form action="{{ route('work-orders.store') }}" method="POST" class="space-y-6" x-data="{
+            isExternal: false,
+            items: [{ item_type: 'spare_part', item_id: '', qty_used: 1 }],
+            itemOptions: {
+                spare_part: @js($spareParts->map(fn($item) => ['id' => $item->id, 'code' => $item->part_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
+                consumable: @js($consumables->map(fn($item) => ['id' => $item->id, 'code' => $item->item_code, 'name' => $item->name, 'unit' => $item->unit, 'stock' => $item->qty_actual])->values()),
+                tool: @js($tools->map(fn($item) => ['id' => $item->id, 'code' => $item->tool_code, 'name' => $item->name, 'unit' => 'unit', 'stock' => $item->qty_available])->values())
+            },
+            addItem() { this.items.push({ item_type: 'spare_part', item_id: '', qty_used: 1 }); },
+            removeItem(index) { this.items.splice(index, 1); },
+            optionsFor(type) { return this.itemOptions[type] || []; },
+            resetItem(row) { row.item_id = ''; row.qty_used = row.item_type === 'tool' ? 1 : 1; }
+        }">
             @csrf
             @if(request('from_finding'))
             <input type="hidden" name="from_finding" value="{{ request('from_finding') }}">
             @endif
-            
+
+            {{-- Selected PV Module / Asset Banner --}}
+            @if($targetAsset)
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start justify-between gap-3 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-md">
+                        {{ $targetAsset->category === 'PV Module' ? 'PV' : substr($targetAsset->category, 0, 3) }}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded uppercase tracking-wider">Aset Terpilih dari Peta</span>
+                            @if($targetAsset->transformer_block)
+                            <span class="text-xs font-bold text-gray-800 bg-white px-2 py-0.5 rounded border border-emerald-200">Blok {{ $targetAsset->transformer_block }}</span>
+                            @endif
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-900">{{ $targetAsset->name }}</h3>
+                        <p class="text-xs text-gray-600 font-mono mt-0.5">
+                            Kode: <strong class="text-emerald-800 font-bold">{{ $targetAsset->hierarchy_code ?: $targetAsset->asset_code }}</strong>
+                            @if($targetAsset->string_number && $targetAsset->module_slot)
+                            · Inverter: INV{{ str_pad($targetAsset->string_number, 2, '0', STR_PAD_LEFT) }} · String: S{{ str_pad($targetAsset->module_slot, 2, '0', STR_PAD_LEFT) }}
+                            @endif
+                            · Lokasi: {{ $targetAsset->location }}
+                        </p>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm shrink-0">Otomatis Terpilih</span>
+            </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {{-- Left Column: Main Details --}}
                 <div class="lg:col-span-2 space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Task Title <span class="text-red-500">*</span></label>
-                        <input name="title" value="{{ old('title', request('title')) }}" required placeholder="e.g. Inverter Repair" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('title') border-red-400 @enderror">
+                        <input name="title" value="{{ old('title', $defaultTitle) }}" required placeholder="e.g. Inverter Repair" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('title') border-red-400 @enderror">
                         @error('title')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                     </div>
 
@@ -32,10 +98,43 @@
                         </div>
 
                         <div x-show="!isExternal" x-transition:enter="transition ease-out duration-200" class="sm:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Asset Internal <span class="text-red-500">*</span></label>
-                            <select name="asset_id" :required="!isExternal" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_id') border-red-400 @enderror">
-                                <option value="">Select asset...</option>
-                                @foreach($assets as $a)<option value="{{ $a->id }}" {{ old('asset_id')==$a->id?'selected':'' }}>{{ $a->name }} ({{ $a->asset_code }})</option>@endforeach
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-sm font-medium text-gray-700">Asset Internal <span class="text-red-500">*</span></label>
+                                @if($targetAsset)
+                                <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                                    Terpilih otomatis dari Peta PV
+                                </span>
+                                @endif
+                            </div>
+                            <select name="asset_id" id="assetSelect" :required="!isExternal" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand @error('asset_id') border-red-400 @enderror">
+                                <option value="">Pilih Aset...</option>
+                                @php
+                                    $currentSelected = old('asset_id', $targetAssetId);
+                                @endphp
+                                @if($targetAsset)
+                                <optgroup label="Aset Terpilih dari Peta PV">
+                                    <option value="{{ $targetAsset->id }}" selected>
+                                        ★ [TERPILIH] {{ $targetAsset->name }} ({{ $targetAsset->hierarchy_code ?: $targetAsset->asset_code }}){{ $targetAsset->transformer_block ? " — Blok {$targetAsset->transformer_block}" : '' }}
+                                    </option>
+                                </optgroup>
+                                <optgroup label="Semua Aset Lainnya">
+                                @endif
+                                @foreach($assets as $a)
+                                @if($targetAsset && $a->id === $targetAsset->id)
+                                    @continue
+                                @endif
+                                <option value="{{ $a->id }}" {{ (string)$currentSelected === (string)$a->id ? 'selected' : '' }}>
+                                    @if($a->category === 'PV Module')
+                                        [PV {{ $a->transformer_block ? "Blok {$a->transformer_block}" : '' }}] {{ $a->hierarchy_code ?: $a->asset_code }} — {{ $a->name }}
+                                    @else
+                                        [{{ $a->category }}{{ $a->transformer_block ? " Blok {$a->transformer_block}" : '' }}] {{ $a->asset_code }} — {{ $a->name }}
+                                    @endif
+                                </option>
+                                @endforeach
+                                @if($targetAsset)
+                                </optgroup>
+                                @endif
                             </select>
                             @error('asset_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                         </div>
@@ -44,6 +143,49 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Client / Lokasi Luar <span class="text-red-500">*</span></label>
                             <input name="client_name" value="{{ old('client_name') }}" :required="isExternal" placeholder="Masukkan nama client..." class="w-full px-3 py-2 border border-blue-300 bg-blue-50/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                             @error('client_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div class="sm:col-span-2 border-t border-gray-100 pt-5" x-data>
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Items Terpakai</label>
+                                    <p class="text-xs text-gray-500 mt-0.5">Spare part dan consumable akan mengurangi stok saat Work Order disimpan.</p>
+                                </div>
+                                <button type="button" @click="addItem()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-brand border border-brand/30 rounded-lg hover:bg-emerald-50">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                                    Tambah Item
+                                </button>
+                            </div>
+                            <div class="space-y-2">
+                                <template x-for="(row, index) in items" :key="index">
+                                    <div class="grid grid-cols-1 sm:grid-cols-[150px_1fr_100px_36px] gap-2 items-end p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Jenis</label>
+                                            <select :name="`items[${index}][item_type]`" x-model="row.item_type" @change="resetItem(row)" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
+                                                <option value="spare_part">Spare Part</option>
+                                                <option value="consumable">Consumable</option>
+                                                <option value="tool">Tool</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Item</label>
+                                            <select :name="`items[${index}][item_id]`" x-model="row.item_id" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
+                                                <option value="">Pilih item...</option>
+                                                <template x-for="option in optionsFor(row.item_type)" :key="option.id">
+                                                    <option :value="option.id" x-text="`${option.code || '-'} — ${option.name} (stok: ${option.stock} ${option.unit})`"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Qty</label>
+                                            <input type="number" min="1" :name="`items[${index}][qty_used]`" x-model="row.qty_used" :readonly="row.item_type === 'tool'" class="w-full px-2.5 py-2 border border-gray-300 rounded-lg text-xs bg-white">
+                                        </div>
+                                        <button type="button" @click="removeItem(index)" x-show="items.length > 1" class="w-9 h-9 flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg" title="Hapus item">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
 
                         <div>
@@ -71,7 +213,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description', request('description')) }}</textarea>
+                        <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none">{{ old('description', request('description', $defaultDesc)) }}</textarea>
                     </div>
                 </div>
 

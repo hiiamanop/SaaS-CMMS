@@ -33,6 +33,7 @@ class WorkOrder extends Model
     }
 
     public function asset() { return $this->belongsTo(Asset::class); }
+    public function items() { return $this->hasMany(WorkOrderItem::class); }
     public function finding() { return $this->belongsTo(\App\Models\Finding::class); }
     public function assignedTo() { return $this->belongsTo(User::class, 'assigned_to'); }
     public function assignees() { return $this->belongsToMany(User::class, 'work_order_assignees'); }

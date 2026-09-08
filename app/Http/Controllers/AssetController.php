@@ -218,4 +218,35 @@ class AssetController extends Controller
         $asset->update(['visual_row' => null, 'visual_col' => null, 'transformer_block' => null]);
         return response()->json(['ok' => true]);
     }
+
+    public function workOrders(Asset $asset)
+    {
+        $workOrders = $asset->workOrders()
+            ->with(['assignees:id,name', 'assignedTo:id,name'])
+            ->latest('order_date')
+            ->latest('created_at')
+            ->take(15)
+            ->get()
+            ->map(function ($wo) {
+                return [
+                    'id' => $wo->id,
+                    'wo_number' => $wo->wo_number,
+                    'title' => $wo->title,
+                    'type' => ucfirst($wo->type),
+                    'priority' => $wo->priority,
+                    'status' => $wo->status,
+                    'status_label' => $wo->status_label,
+                    'due_date' => $wo->due_date ? $wo->due_date->format('d M Y') : '-',
+                    'assignees' => $wo->assignees->isNotEmpty() ? $wo->assignees->pluck('name')->implode(', ') : ($wo->assignedTo?->name ?: 'Unassigned'),
+                    'url' => route('work-orders.show', $wo),
+                ];
+            });
+
+        return response()->json([
+            'ok' => true,
+            'count' => $workOrders->count(),
+            'open_count' => $workOrders->whereIn('status', ['open', 'in_progress', 'pending_review'])->count(),
+            'work_orders' => $workOrders,
+        ]);
+    }
 }

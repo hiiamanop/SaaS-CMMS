@@ -115,6 +115,11 @@ class SparePartController extends Controller
 
     public function show(SparePart $sparePart)
     {
+        $sparePart->load([
+            'workOrderItems.workOrder',
+            'workOrderItems.createdBy',
+            'maintenanceRecordParts.maintenanceRecord.workOrder',
+        ]);
         return view('spare-parts.show', compact('sparePart'));
     }
 

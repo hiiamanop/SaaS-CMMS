@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\ChecksheetSession;
 use App\Models\SparePart;
+use App\Models\WorkOrderItem;
 use App\Models\WorkOrder;
 use App\Models\MaintenanceSchedule;
 use Illuminate\Http\Request;
@@ -80,9 +81,45 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('transformer_block');
 
+        $activeWorkOrders = WorkOrder::whereIn('status', ['open', 'in_progress', 'pending_review'])
+            ->whereNotNull('asset_id')
+            ->select(['id', 'wo_number', 'title', 'asset_id', 'status', 'priority'])
+            ->get()
+            ->groupBy('asset_id');
+
+        $assetWoMap = $activeWorkOrders->map(function ($wos) {
+            $latest = $wos->first();
+            return [
+                'count' => $wos->count(),
+                'latest_wo' => $latest->wo_number,
+                'latest_title' => $latest->title,
+                'status' => $latest->status,
+                'priority' => $latest->priority,
+            ];
+        })->toArray();
+
+        $activeToolUsages = WorkOrderItem::with(['tool:id,name,tool_code', 'workOrder:id,wo_number,title,status'])
+            ->where('item_type', 'tool')
+            ->whereHas('workOrder', function ($query) {
+                $query->whereIn('status', ['open', 'in_progress', 'pending_review']);
+            })
+            ->latest('used_at')
+            ->get()
+            ->map(fn ($usage) => [
+                'tool_id' => $usage->item_id,
+                'tool_name' => $usage->tool?->name ?? 'Tool dihapus',
+                'tool_code' => $usage->tool?->tool_code ?? '-',
+                'qty' => $usage->qty_used,
+                'wo_number' => $usage->workOrder?->wo_number ?? '-',
+                'wo_title' => $usage->workOrder?->title ?? '-',
+                'wo_status' => $usage->workOrder?->status ?? '-',
+                'wo_url' => $usage->workOrder ? route('work-orders.show', $usage->workOrder) : '#',
+            ])
+            ->values();
+
         return view('dashboard', compact(
             'totalAssets', 'openWorkOrders', 'overdueWorkOrders', 'lowStockCount', 'pendingChecksheets',
-            'recentWorkOrders', 'upcomingSchedules', 'lowStockParts', 'chartData', 'pvMapData', 'supportingAssets', 'blockLocations', 'blockLocationIds'
+            'recentWorkOrders', 'upcomingSchedules', 'lowStockParts', 'chartData', 'pvMapData', 'supportingAssets', 'blockLocations', 'blockLocationIds', 'assetWoMap', 'activeToolUsages'
         ));
     }
 }

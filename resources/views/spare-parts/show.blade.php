@@ -59,6 +59,42 @@
         </div>
         @endif
     </div>
+
+    {{-- Usage history --}}
+    @php
+        $usageHistory = $sparePart->workOrderItems->map(fn($usage) => [
+            'date' => $usage->used_at,
+            'qty' => $usage->qty_used,
+            'source' => 'Work Order',
+            'reference' => $usage->workOrder?->wo_number,
+            'title' => $usage->workOrder?->title,
+            'url' => $usage->workOrder ? route('work-orders.show', $usage->workOrder) : null,
+            'user' => $usage->createdBy?->name,
+        ])->merge($sparePart->maintenanceRecordParts->map(fn($usage) => [
+            'date' => $usage->created_at,
+            'qty' => $usage->qty_used,
+            'source' => 'Maintenance Record',
+            'reference' => $usage->maintenanceRecord?->record_number,
+            'title' => $usage->maintenanceRecord?->workOrder?->title,
+            'url' => $usage->maintenanceRecord ? route('maintenance-records.show', $usage->maintenanceRecord) : null,
+            'user' => $usage->maintenanceRecord?->technician?->name,
+        ]))->sortByDesc('date');
+    @endphp
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div><h2 class="font-semibold text-gray-900">Usage History</h2><p class="text-xs text-gray-500 mt-0.5">Riwayat pemakaian pada Work Order dan Maintenance Record.</p></div>
+            <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">{{ $usageHistory->sum('qty') }} {{ $sparePart->unit }}</span>
+        </div>
+        @if($usageHistory->isEmpty())
+        <p class="py-10 text-center text-sm text-gray-400">Belum ada histori pemakaian.</p>
+        @else
+        <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase"><th class="px-5 py-3 text-left">Tanggal</th><th class="px-5 py-3 text-left">Sumber</th><th class="px-5 py-3 text-left">Referensi</th><th class="px-5 py-3 text-left">Qty</th><th class="px-5 py-3 text-left">Oleh</th></tr></thead><tbody class="divide-y divide-gray-50">
+        @foreach($usageHistory as $usage)
+        <tr><td class="px-5 py-3 text-gray-600">{{ $usage['date']?->format('d M Y H:i') }}</td><td class="px-5 py-3 text-gray-600">{{ $usage['source'] }}</td><td class="px-5 py-3 font-medium">@if($usage['url'])<a href="{{ $usage['url'] }}" class="text-brand hover:underline">{{ $usage['reference'] }}</a>@else{{ $usage['reference'] ?: '—' }}@endif @if($usage['title'])<span class="block text-xs text-gray-400">{{ $usage['title'] }}</span>@endif</td><td class="px-5 py-3 font-semibold text-gray-800">{{ $usage['qty'] }} {{ $sparePart->unit }}</td><td class="px-5 py-3 text-gray-500">{{ $usage['user'] ?: 'System' }}</td></tr>
+        @endforeach
+        </tbody></table></div>
+        @endif
+    </div>
 </div>
 @endsection
 

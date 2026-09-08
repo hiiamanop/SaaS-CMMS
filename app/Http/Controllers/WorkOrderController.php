@@ -8,6 +8,13 @@ use App\Models\WorkOrderActivityLog;
 use App\Models\Asset;
 use App\Models\User;
 use App\Models\Notification;
+use App\Models\SparePart;
+use App\Models\Consumable;
+use App\Models\Tool;
+use App\Models\WorkOrderItem;
+use App\Services\StockService;
+use Illuminate\Support\Facades\DB;
+use App\Exceptions\OutOfStockException;
 use Illuminate\Http\Request;
 
 class WorkOrderController extends Controller
@@ -18,6 +25,8 @@ class WorkOrderController extends Controller
 
         if ($request->filter === 'overdue') {
             $query->whereNotIn('status', ['closed'])->where('due_date', '<', now());
+        } elseif ($request->status === 'active' || $request->filter === 'active') {
+            $query->whereIn('status', ['open', 'in_progress']);
         } elseif ($request->status) {
             $query->where('status', $request->status);
         }
@@ -61,9 +70,44 @@ class WorkOrderController extends Controller
 
     public function create(Request $request)
     {
-        $assets = Asset::where('status', 'active')->orderBy('name')->get();
+        $selectedAssetId = $request->get('asset_id') ?: $request->get('from_asset');
+        if (!$selectedAssetId) {
+            foreach ($request->query() as $key => $val) {
+                if (str_starts_with($key, 'from_asset=')) {
+                    $selectedAssetId = substr($key, strlen('from_asset='));
+                    break;
+                } elseif (str_starts_with($key, 'asset_id=')) {
+                    $selectedAssetId = substr($key, strlen('asset_id='));
+                    break;
+                }
+            }
+        }
+        if (!$selectedAssetId && ($qs = $request->getQueryString())) {
+            $decoded = urldecode($qs);
+            if (preg_match('/(?:from_asset|asset_id)=(\d+)/', $decoded, $m)) {
+                $selectedAssetId = $m[1];
+            }
+        }
+
+        $selectedAsset = $selectedAssetId ? Asset::find($selectedAssetId) : null;
+
+        $assets = Asset::where('status', 'active')
+            ->orderByRaw("CASE category WHEN 'PV Module' THEN 1 WHEN 'Inverter' THEN 2 WHEN 'Transformer' THEN 3 WHEN 'Metering' THEN 4 ELSE 5 END")
+            ->orderBy('transformer_block')
+            ->orderBy('string_number')
+            ->orderBy('module_slot')
+            ->orderBy('name')
+            ->get();
+
+        if ($selectedAsset && !$assets->contains('id', $selectedAsset->id)) {
+            $assets->prepend($selectedAsset);
+        }
+
         $technicians = User::where('role', 'technician')->get();
-        return view('work-orders.create', compact('assets', 'technicians'));
+        $spareParts = SparePart::orderBy('name')->get();
+        $consumables = Consumable::orderBy('name')->get();
+        $tools = Tool::orderBy('name')->get();
+        return view('work-orders.create', compact('assets', 'technicians', 'selectedAsset', 'selectedAssetId', 'spareParts', 'consumables', 'tools'));
     }
 
     public function store(Request $request)
@@ -80,6 +124,10 @@ class WorkOrderController extends Controller
             'client_name' => 'required_if:is_external_client,1|nullable|string|max:255',
             'description' => 'nullable|string',
             'shutdown_required' => 'nullable|boolean',
+            'items' => 'nullable|array',
+            'items.*.item_type' => 'required|in:spare_part,consumable,tool',
+            'items.*.item_id' => 'required|integer',
+            'items.*.qty_used' => 'required_if:items.*.item_type,spare_part,consumable|nullable|integer|min:1',
         ]);
 
         $validated['wo_number'] = WorkOrder::generateNumber();
@@ -100,7 +148,40 @@ class WorkOrderController extends Controller
             $validated['finding_id'] = $findingId;
         }
 
-        $workOrder = WorkOrder::create($validated);
+        try {
+            $workOrder = DB::transaction(function () use ($validated) {
+                $workOrder = WorkOrder::create($validated);
+
+                foreach ($validated['items'] ?? [] as $item) {
+                    $itemModel = match ($item['item_type']) {
+                        'spare_part' => SparePart::findOrFail($item['item_id']),
+                        'consumable' => Consumable::findOrFail($item['item_id']),
+                        'tool' => Tool::findOrFail($item['item_id']),
+                    };
+                    $qty = (int) ($item['qty_used'] ?? 1);
+
+                    WorkOrderItem::create([
+                        'work_order_id' => $workOrder->id,
+                        'item_type' => $item['item_type'],
+                        'item_id' => $itemModel->id,
+                        'qty_used' => $qty,
+                        'unit_price' => $itemModel->unit_price ?? null,
+                        'created_by_user_id' => auth()->id(),
+                        'used_at' => now(),
+                    ]);
+
+                    if ($item['item_type'] === 'spare_part') {
+                        StockService::deduct($itemModel, $qty, 'work_order', auth()->id());
+                    } elseif ($item['item_type'] === 'consumable') {
+                        StockService::deductConsumable($itemModel, $qty, auth()->id());
+                    }
+                }
+
+                return $workOrder;
+            });
+        } catch (OutOfStockException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         if (!empty($assigneeIds)) {
             $workOrder->assignees()->sync($assigneeIds);
@@ -135,7 +216,10 @@ class WorkOrderController extends Controller
 
     public function show(WorkOrder $workOrder)
     {
-        $workOrder->load(['asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord']);
+        $workOrder->load([
+            'asset', 'assignees', 'createdBy', 'checklistItems.checkedBy', 'activityLogs.user', 'maintenanceRecord',
+            'items.createdBy', 'items.sparePart', 'items.consumable', 'items.tool',
+        ]);
         $technicians = User::where('role', 'technician')->get();
         return view('work-orders.show', compact('workOrder', 'technicians'));
     }

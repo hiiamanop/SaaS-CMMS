@@ -21,6 +21,7 @@ class SparePart extends Model
     }
 
     public function maintenanceRecordParts() { return $this->hasMany(MaintenanceRecordPart::class); }
+    public function workOrderItems() { return $this->hasMany(WorkOrderItem::class, 'item_id')->where('item_type', 'spare_part'); }
 
     public function isLowStock(): bool { return $this->qty_actual <= $this->qty_minimum; }
 

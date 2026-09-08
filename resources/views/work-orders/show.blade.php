@@ -31,9 +31,6 @@ $wo = $workOrder;
             @if(!auth()->user()->isTechnician())
             <a href="{{ route('work-orders.edit',$wo) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
             @endif
-            @if($wo->status==='closed' && !$wo->maintenanceRecord)
-            <a href="{{ route('maintenance-records.create', ['work_order_id'=>$wo->id]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-gray-900 rounded-lg text-sm font-medium hover:bg-green-700">Add Report</a>
-            @endif
         </div>
     </div>
 
@@ -64,7 +61,90 @@ $wo = $workOrder;
                 <div><dt class="text-xs font-medium text-gray-500 uppercase">{{ $l }}</dt><dd class="mt-1 text-sm text-gray-900">{{ $v }}</dd></div>
                 @endforeach
             </div>
+
+            @if($wo->asset && ($wo->asset->category === 'PV Module' || $wo->asset->transformer_block))
+            <div class="mt-5 p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-600/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Posisi Aset di Peta PV Module</span>
+                            @if($wo->asset->transformer_block)
+                            <span class="text-xs font-bold text-gray-800 bg-white px-2 py-0.5 rounded border border-emerald-200">Blok {{ $wo->asset->transformer_block }}</span>
+                            @endif
+                        </div>
+                        <p class="text-sm font-bold text-gray-900 mt-0.5">
+                            {{ $wo->asset->name }}
+                            <span class="font-mono text-xs text-emerald-800 font-bold">({{ $wo->asset->hierarchy_code ?: $wo->asset->asset_code }})</span>
+                        </p>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mt-1 font-mono">
+                            @if($wo->asset->string_number)
+                            <span>Inverter: <strong class="text-gray-900">INV{{ str_pad($wo->asset->string_number, 2, '0', STR_PAD_LEFT) }}</strong></span>
+                            @endif
+                            @if($wo->asset->module_slot)
+                            <span>String: <strong class="text-gray-900">S{{ str_pad($wo->asset->module_slot, 2, '0', STR_PAD_LEFT) }}</strong></span>
+                            @endif
+                            @if($wo->asset->visual_row && $wo->asset->visual_col)
+                            <span>Grid: <strong class="text-gray-900">Baris {{ $wo->asset->visual_row }}, Kolom {{ $wo->asset->visual_col }}</strong></span>
+                            @endif
+                            @if($wo->asset->location)
+                            <span class="font-sans text-gray-500">Lokasi: {{ $wo->asset->location }}</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('dashboard') }}#peta-pv"
+                   class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-all shadow-sm shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    Buka Peta PV
+                </a>
+            </div>
+            @endif
+
             @if($wo->description)<div class="mt-5 pt-5 border-t border-gray-100"><p class="text-xs font-medium text-gray-500 uppercase mb-2">Description</p><p class="text-sm text-gray-700">{{ $wo->description }}</p></div>@endif
+        </div>
+
+        {{-- Items used --}}
+        <div x-show="tab==='details'" class="px-6 pb-6">
+            <div class="pt-5 border-t border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900">Items Terpakai</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Barang yang dicatat dan dipakai pada Work Order ini.</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold">{{ $wo->items->count() }} item</span>
+                </div>
+                @if($wo->items->isEmpty())
+                <div class="rounded-lg border border-dashed border-gray-200 py-6 text-center text-xs text-gray-400">Belum ada item yang dicatat.</div>
+                @else
+                <div class="overflow-x-auto border border-gray-100 rounded-lg">
+                    <table class="w-full text-sm">
+                        <thead><tr class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase"><th class="px-3 py-2 text-left">Jenis</th><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Qty</th><th class="px-3 py-2 text-left">Dicatat</th></tr></thead>
+                        <tbody class="divide-y divide-gray-50">
+                        @foreach($wo->items as $usedItem)
+                        @php
+                            $itemModel = $usedItem->item;
+                            $itemUrl = match($usedItem->item_type) {
+                                'spare_part' => $itemModel ? route('spare-parts.show', $itemModel) : null,
+                                default => null,
+                            };
+                        @endphp
+                        <tr>
+                            <td class="px-3 py-2 text-xs text-gray-500">{{ $usedItem->item_type_label }}</td>
+                            <td class="px-3 py-2 font-medium text-gray-900">
+                                @if($itemUrl)<a href="{{ $itemUrl }}" class="text-brand hover:underline">{{ $itemModel?->name ?: 'Item dihapus' }}</a>@else{{ $itemModel?->name ?: 'Item dihapus' }}@endif
+                            </td>
+                            <td class="px-3 py-2 text-gray-600">{{ $usedItem->qty_used }} {{ $itemModel?->unit ?: 'unit' }}</td>
+                            <td class="px-3 py-2 text-xs text-gray-500">{{ $usedItem->used_at?->format('d M Y H:i') }}<br>{{ $usedItem->createdBy?->name ?: 'System' }}</td>
+                        </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+            </div>
         </div>
 
 

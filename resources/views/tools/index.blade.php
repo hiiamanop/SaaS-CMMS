@@ -87,9 +87,9 @@
             <tr class="hover:bg-opacity-90 transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $tool->tool_code }}</td>
                 <td class="px-5 py-3 font-medium text-gray-900">
-                    <button type="button" @click="selectedTool = {{ json_encode($tool) }}" class="text-left font-medium text-gray-900 hover:text-brand transition-colors">
+                    <a href="{{ route('tools.show', $tool) }}" class="text-left font-medium text-gray-900 hover:text-brand transition-colors">
                         {{ $tool->name }}
-                    </button>
+                    </a>
                 </td>
                 <td class="px-5 py-3 text-gray-500">{{ $tool->brand ?: '—' }}</td>
                 <td class="px-5 py-3">

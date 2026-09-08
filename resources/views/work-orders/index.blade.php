@@ -25,13 +25,6 @@ Records</span>@endsection
                         </svg>
                         New Work Order
                     </a>
-                    <a href="{{ route('maintenance-records.create') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Report
-                    </a>
                 @endif
             </div>
         </div>
@@ -66,8 +59,9 @@ Records</span>@endsection
                     <select name="status"
                         class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                         <option value="">All Statuses</option>
+                        <option value="active" {{ request('status') === 'active' || request('filter') === 'active' ? 'selected' : '' }}>Aktif (Open & In Progress)</option>
                         @foreach(['open' => 'Open', 'in_progress' => 'In Progress', 'pending_review' => 'Pending Review', 'closed' => 'Closed'] as $v => $l)
-                            <option value="{{ $v }}" {{ request('status') == $v ? 'selected' : '' }}>{{ $l }}</option>
+                            <option value="{{ $v }}" {{ request('status') == $v && request('filter') !== 'active' ? 'selected' : '' }}>{{ $l }}</option>
                         @endforeach
                     </select>
                     <select name="priority"
@@ -129,9 +123,27 @@ Records</span>@endsection
                                                 <a href="{{ route('work-orders.show', $wo) }}"
                                                     class="font-semibold {{ $isFollowUp ? 'text-red-600' : 'text-gray-900' }} hover:text-brand max-w-[200px] truncate block">{{ $wo->title }}</a>
                                             </td>
-                                            <td class="px-5 py-4 text-gray-600 text-xs">
+                                            <td class="px-5 py-4 text-gray-700 text-xs">
                                                 @if($wo->asset)
-                                                    {{ $wo->asset->name }}
+                                                    @if($wo->asset->category === 'PV Module')
+                                                        <div class="flex flex-col gap-0.5">
+                                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                                <span class="px-1.5 py-0.2 bg-blue-100 text-blue-700 font-bold text-[10px] rounded">PV Module</span>
+                                                                @if($wo->asset->transformer_block)
+                                                                <span class="text-[10px] font-bold text-gray-600">Blok {{ $wo->asset->transformer_block }}</span>
+                                                                @endif
+                                                            </div>
+                                                            <a href="{{ route('assets.show', $wo->asset) }}" class="font-mono text-xs text-blue-700 hover:underline font-bold">
+                                                                {{ $wo->asset->hierarchy_code ?: $wo->asset->asset_code }}
+                                                            </a>
+                                                            <span class="text-[11px] text-gray-500 truncate max-w-[170px]">{{ $wo->asset->name }}</span>
+                                                        </div>
+                                                    @else
+                                                        <a href="{{ route('assets.show', $wo->asset) }}" class="font-bold text-gray-900 hover:text-brand">
+                                                            {{ $wo->asset->name }}
+                                                        </a>
+                                                        <span class="text-[10px] font-mono text-gray-500 block">{{ $wo->asset->asset_code }}</span>
+                                                    @endif
                                                 @else
                                                     <span class="text-brand font-semibold">{{ $wo->client_name ?: 'External Client' }}</span>
                                                 @endif

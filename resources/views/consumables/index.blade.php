@@ -92,9 +92,9 @@
                 <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $item->item_code }}</td>
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-2">
-                        <button type="button" @click="selectedItem = {{ json_encode($item) }}" class="text-left font-medium text-gray-900 hover:text-brand transition-colors">
+                        <a href="{{ route('consumables.show', $item) }}" class="text-left font-medium text-gray-900 hover:text-brand transition-colors">
                             {{ $item->name }}
-                        </button>
+                        </a>
                         @if($item->qty_actual <= $item->qty_minimum)
                             <span class="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs rounded-full font-medium">Low Stock</span>
                         @endif

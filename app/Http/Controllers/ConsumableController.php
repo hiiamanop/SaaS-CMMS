@@ -88,6 +88,17 @@ class ConsumableController extends Controller
         return view('consumables.create');
     }
 
+    public function show(Consumable $consumable)
+    {
+        $consumable->load([
+            'workOrderItems.workOrder',
+            'workOrderItems.createdBy',
+            'maintenanceRecordConsumables.maintenanceRecord.workOrder',
+        ]);
+
+        return view('consumables.show', compact('consumable'));
+    }
+
     public function store(Request $request)
     {
         $this->authorizeManager();
