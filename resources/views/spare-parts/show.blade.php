@@ -92,6 +92,7 @@
                     </button>
                 </div>
 
+                @if(!auth()->user()->isTechnician())
                 <div class="flex gap-3 pt-4 border-t border-gray-100">
                     <a href="{{ route('spare-parts.edit', $sparePart) }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-opacity-90">Edit</a>
                     <button @click="$dispatch('open-delete',{action:'{{ route('spare-parts.destroy',$sparePart) }}',message:'Delete part {{ addslashes($sparePart->name) }}?'})" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium">Delete</button>

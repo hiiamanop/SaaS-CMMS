@@ -3,10 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --background: 0 0% 100%;          /* #FFFFFF */
+        --foreground: 0 0% 9%;            /* #171717 */
+        --card: 0 0% 100%;                /* #FFFFFF */
+        --card-foreground: 0 0% 9%;       /* #171717 */
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 9%;
+        --primary: 151 100% 39%;          /* #00C767 */
+        --primary-foreground: 150 93% 6%; /* #011E0F */
+        --secondary: 0 0% 97%;            /* #F7F7F7 */
+        --secondary-foreground: 0 0% 9%;  /* #171717 */
+        --muted: 0 0% 97%;                /* #F7F7F7 */
+        --muted-foreground: 0 0% 32%;     /* #525252 */
+        --accent: 0 0% 97%;               /* #F7F7F7 */
+        --accent-foreground: 0 0% 9%;     /* #171717 */
+        --destructive: 4 77% 49%;         /* #D92D20 */
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 90%;               /* #E5E5E5 */
+        --input: 0 0% 90%;                /* #E5E5E5 */
+        --ring: 151 100% 39%;             /* #00C767 */
+        --radius: 10px;
+    }
+
+    body {
+        background-color: #FAFAFA;
+        color: #171717;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
     input:disabled, select:disabled, textarea:disabled {
-        background-color: #f3f4f6 !important; /* bg-gray-100 */
-        color: #6b7280 !important; /* text-gray-500 */
+        background-color: #F7F7F7 !important;
+        color: #525252 !important;
         cursor: not-allowed !important;
-        border-color: #e5e7eb !important; /* border-gray-200 */
+        border-color: #E5E5E5 !important;
     }
 }

@@ -7,18 +7,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'CMMS') }} — @yield('title', 'Dashboard')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <style>
-        body { font-family: 'Outfit', sans-serif; }
+        body { font-family: 'Inter', 'Outfit', sans-serif; }
         [x-cloak] { display: none !important; }
     </style>
     @stack('styles')
 </head>
 
-<body class="h-full bg-gray-50 font-sans antialiased" x-data="{ sidebarOpen: true, mobileOpen: false }">
+<body class="h-full bg-[#FAFAFA] font-sans antialiased text-[#171717]" x-data="{ sidebarOpen: true, mobileOpen: false }">
     <div class="flex h-full">
 
         {{-- Desktop Sidebar --}}
