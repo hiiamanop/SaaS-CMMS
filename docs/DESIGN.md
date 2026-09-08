@@ -1,16 +1,16 @@
 ---
 version: alpha
 name: Link
-description: A clean, high-trust payments system with spacious editorial hierarchy and a vivid green accent.
+description: A clean, high-trust system with spacious editorial hierarchy and a refined slate blue accent.
 colors:
-  primary: "#00C767"
+  primary: "#697FAE"
   secondary: "#171717"
   tertiary: "#525252"
   neutral: "#E5E5E5"
   surface: "#FFFFFF"
   on-surface: "#171717"
   background: "#FFFFFF"
-  accent-strong: "#011E0F"
+  accent-strong: "#FFFFFF"
   border: "#E5E5E5"
   muted-surface: "#F7F7F7"
   shadow: "#17171714"
@@ -130,16 +130,16 @@ components:
 # Link
 
 ## Overview
-Link feels modern, trustworthy, and deliberately spacious, with a strong editorial voice balanced by a friendly green accent. The page is optimized for a broad consumer/prosumer audience that wants fast, secure checkout without feeling technical or cluttered. Overall tone is calm and premium rather than playful, with clear hierarchy and minimal visual noise.
+Link feels modern, trustworthy, and deliberately spacious, with a strong editorial voice balanced by a refined slate blue accent. The page is optimized for a broad audience that wants fast, clear operations without feeling technical or cluttered. Overall tone is calm and premium rather than playful, with clear hierarchy and minimal visual noise.
 
 ## Colors
-- **Primary (#00C767):** A bright, energetic green used for the brand mark, the main call-to-action, and key emphasis moments. It signals action and success without feeling overly loud.
+- **Primary (#697FAE):** A refined, trustworthy slate blue used for the brand mark, the main call-to-action, and key emphasis moments. It signals precision and reliability.
 - **Secondary (#171717):** A near-black ink used for headlines, primary text, and dark icon treatments. It provides the high contrast that gives the interface its crisp, editorial feel.
 - **Tertiary (#525252):** A softer graphite used for secondary links, subtle copy, and lower-emphasis text.
 - **Neutral (#E5E5E5):** A light border gray used for outlines, separators, and quiet container edges.
 - **Surface (#FFFFFF):** The dominant background color, reinforcing the clean, airy composition.
 - **Muted-surface (#F7F7F7):** A faint warm gray for recessed or secondary panels when a little separation is needed without adding shadow.
-- **Accent-strong (#011E0F):** A deep green-black used for text on the primary green button to preserve contrast while staying on-brand.
+- **Accent-strong (#FFFFFF):** Crisp white used for text on the primary slate blue button to preserve high contrast and readability.
 - **Shadow (#17171714):** A subtle translucent ink tint that supports depth without heavy visual weight.
 - **Error (#D92D20):** A reserved alert red for validation and destructive states; it is not prominent in the current composition but should remain restrained.
 

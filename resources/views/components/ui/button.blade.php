@@ -6,15 +6,15 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C767] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none';
+    $baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#697FAE] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none';
 
     $variants = [
-        'default'     => 'bg-[#00C767] text-[#011E0F] hover:bg-[#00B05B] font-semibold shadow-xs',
+        'default'     => 'bg-[#697FAE] text-white hover:bg-[#586D9B] font-semibold shadow-xs',
         'secondary'   => 'bg-[#F7F7F7] text-[#171717] hover:bg-[#EAEAEA] border border-[#E5E5E5]',
         'outline'     => 'border border-[#E5E5E5] bg-white text-[#171717] hover:bg-[#F7F7F7]',
         'ghost'       => 'text-[#171717] hover:bg-[#F7F7F7]',
         'destructive' => 'bg-[#D92D20] text-white hover:bg-[#B91C1C] font-semibold shadow-xs',
-        'link'        => 'text-[#00C767] underline-offset-4 hover:underline font-medium p-0 h-auto',
+        'link'        => 'text-[#697FAE] underline-offset-4 hover:underline font-medium p-0 h-auto',
     ];
 
     $sizes = [

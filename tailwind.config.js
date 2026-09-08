@@ -14,8 +14,8 @@ export default {
             colors: {
                 // Link / DESIGN.md official tokens
                 primary: {
-                    DEFAULT: '#00C767',
-                    foreground: '#011E0F',
+                    DEFAULT: '#697FAE',
+                    foreground: '#FFFFFF',
                 },
                 secondary: {
                     DEFAULT: '#171717',
@@ -25,20 +25,20 @@ export default {
                 neutral: '#E5E5E5',
                 surface: '#FFFFFF',
                 'on-surface': '#171717',
-                'accent-strong': '#011E0F',
+                'accent-strong': '#FFFFFF',
                 'muted-surface': '#F7F7F7',
                 error: '#D92D20',
 
-                // Backward-compatible brand mappings updated to #00C767
+                // Backward-compatible brand mappings updated to #697FAE
                 brand: {
-                    DEFAULT: '#00C767',
-                    50: '#E6FBF0',
-                    100: '#C7F7DE',
-                    200: '#94F0C0',
-                    500: '#00C767',
-                    600: '#00B05B',
-                    700: '#008E49',
-                    dark: '#011E0F',
+                    DEFAULT: '#697FAE',
+                    50: '#F2F5FA',
+                    100: '#E5EAF4',
+                    200: '#C7D4E8',
+                    500: '#697FAE',
+                    600: '#586D9B',
+                    700: '#475980',
+                    dark: '#1E293B',
                 },
             },
             borderRadius: {

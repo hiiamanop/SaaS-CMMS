@@ -18,7 +18,7 @@
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-white/90 mb-4 border border-white/10">
-                    <span class="w-2 h-2 rounded-full bg-[#00C767] animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full bg-[#697FAE] animate-pulse"></span>
                     <span>Sistem Operasi PLTS Aktif</span>
                 </div>
                 <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-white">Selamat Datang, {{ explode(' ', auth()->user()->name)[0] }}! 👋</h1>
@@ -26,7 +26,7 @@
                     Sistem Manajemen Aset PLTS Aruna Hijau Power berjalan dengan optimal. Berikut ringkasan performa operasional hari ini.
                 </p>
                 <div class="flex flex-wrap gap-3 mt-6">
-                    <a href="{{ route('work-orders.create') }}" class="inline-flex items-center justify-center gap-2 bg-[#00C767] hover:bg-[#00B05B] text-[#011E0F] px-6 py-3 rounded-[10px] font-semibold text-sm transition-all shadow-xs">
+                    <a href="{{ route('work-orders.create') }}" class="inline-flex items-center justify-center gap-2 bg-[#697FAE] hover:bg-[#586D9B] text-white px-6 py-3 rounded-[10px] font-semibold text-sm transition-all shadow-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         <span>Buat Work Order</span>
                     </a>
@@ -1007,14 +1007,14 @@
                 {
                     label: 'Selesai',
                     data: closedData,
-                    backgroundColor: '#00C767',
+                    backgroundColor: '#697FAE',
                     borderRadius: 8,
                     barThickness: 20,
                 },
                 {
                     label: 'Open',
                     data: openData,
-                    backgroundColor: '#C7F7DE',
+                    backgroundColor: '#D6DFEE',
                     borderRadius: 8,
                     barThickness: 20,
                 }
