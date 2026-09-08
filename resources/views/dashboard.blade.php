@@ -1043,6 +1043,14 @@
                     stacked: true,
                     grid: { color: '#f3f4f6', drawBorder: false },
                     ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af', stepSize: 5 }
+                }
+            }
+        }
+    });
+
+    // PV Drag & Drop — event delegation, visual only until Simpan
+    window.pvEditMode = false;
+    let pvDrag = null;
     let pvLastOver = null;
     window.pvOriginalPositions = {};
 
@@ -1249,6 +1257,22 @@
         pvApplyTransform(block);
     }
 
+    window.pvZoomBy = pvZoomBy;
+    window.pvZoomAt = pvZoomAt;
+    window.pvResetView = pvResetView;
+    window.pvFitView = pvFitView;
+
+    // Mouse wheel zoom
+    document.addEventListener('wheel', e => {
+        const viewport = e.target.closest('[data-pv-viewport]');
+        if (!viewport) return;
+        e.preventDefault();
+        const block = viewport.dataset.pvViewport;
+        const rect = viewport.getBoundingClientRect();
+        const factor = e.deltaY < 0 ? PV_ZOOM_STEP : 1 / PV_ZOOM_STEP;
+        pvZoomAt(block, factor, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
+
     // Apply auto-fit transform to every rendered block's canvas on load.
     document.querySelectorAll('[data-pv-canvas]').forEach(el => {
         pvFitView(el.dataset.pvCanvas);
@@ -1269,6 +1293,7 @@
     document.addEventListener('mousedown', e => {
         const viewport = e.target.closest('[data-pv-viewport]');
         if (!viewport) return;
+        if (e.target.closest('button')) return;
         // Only skip panning here in Atur Posisi mode, where mousedown on a
         // module must be left free for native drag-to-reposition. Outside
         // that mode, native drag is already suppressed elsewhere (see the
